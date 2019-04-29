@@ -1,0 +1,12 @@
+future
+emoji
+requests
+sqlalchemy
+python-telegram-bot>=10.1.0
+psycopg2-binary
+feedparser
+pyowm
+googletrans
+wikipedia
+kbbi
+Pillow
