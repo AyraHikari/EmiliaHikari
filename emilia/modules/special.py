@@ -359,16 +359,18 @@ def terjemah(bot: Bot, update: Update):
 			if target2 == None:
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+				return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				#if tekstr.pronunciation == None:
+				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				#else:
+				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+				message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				#if tekstr.pronunciation == None:
+				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				#else:
+				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 				
 	except IndexError:
 		update.effective_message.reply_text("Balas pesan atau tulis pesan dari bahasa lain untuk "
