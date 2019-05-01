@@ -158,9 +158,9 @@ def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
     check = bot.getChatMember(chat_id, bot.id)
     if check.status == 'member' or check['can_restrict_members'] == False:
         if conn:
-            text = "Saya tidak bisa membatasi orang di {}! Pastikan saya admin dan dapat menunjuk admin baru.".format(chat_name)
+            text = "Saya tidak bisa membatasi orang di {}! Pastikan saya sudah menjadi admin.".format(chat_name)
         else:
-            text = "Saya tidak bisa membatasi orang di sini! Pastikan saya admin dan dapat menunjuk admin baru."
+            text = "Saya tidak bisa membatasi orang di sini! Pastikan saya sudah menjadi admin."
         message.reply_text(text, parse_mode="markdown")
         return ""
 
@@ -209,9 +209,9 @@ def reset_warns(bot: Bot, update: Update, args: List[str]) -> str:
     check = bot.getChatMember(chat_id, bot.id)
     if check.status == 'member' or check['can_restrict_members'] == False:
         if conn:
-            text = "Saya tidak bisa membatasi orang di {}! Pastikan saya admin dan dapat menunjuk admin baru.".format(chat_name)
+            text = "Saya tidak bisa membatasi orang di {}! Pastikan saya sudah menjadi admin.".format(chat_name)
         else:
-            text = "Saya tidak bisa membatasi orang di sini! Pastikan saya admin dan dapat menunjuk admin baru."
+            text = "Saya tidak bisa membatasi orang di sini! Pastikan saya sudah menjadi admin."
         message.reply_text(text, parse_mode="markdown")
         return ""
     

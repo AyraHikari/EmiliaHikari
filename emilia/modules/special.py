@@ -411,8 +411,8 @@ def wiki(bot: Bot, update: Update):
 
 	except wikipedia.exceptions.PageError:
 		update.effective_message.reply_text("Hasil tidak ditemukan")
-	except wikipedia.exceptions.DisambiguationError:
-		update.effective_message.reply_text("Hasil terlalu banyak, silahkan masukan teks dengan lengkap")
+	except wikipedia.exceptions.DisambiguationError as refer:
+		update.effective_message.reply_text("{}".format(str(refer).replace('may refer to', 'dapat merujuk ke')))
 	except IndexError:
 		update.effective_message.reply_text("Tulis pesan untuk mencari dari sumber wikipedia")
 	else:
