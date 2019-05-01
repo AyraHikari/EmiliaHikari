@@ -430,7 +430,11 @@ def kamusbesarbahasaindonesia(bot: Bot, update: Update):
 		args = update.effective_message.text.split(None, 1)
 		teks = args[1]
 		message = update.effective_message
-		api = requests.get('http://kateglo.com/api.php?format=json&phrase='+teks).json()
+		try:
+			api = requests.get('http://kateglo.com/api.php?format=json&phrase='+teks).json()
+		except json.decoder.JSONDecodeError:
+			message.reply_text("Hasil tidak ditemukan!", parse_mode=ParseMode.MARKDOWN)
+			return
 		#kamusid = KBBI(teks)
 		parsing = "***Hasil dari kata {} ({}) di {}***\n\n".format(api['kateglo']['phrase'], api['kateglo']['lex_class_name'], api['kateglo']['ref_source_name'])
 		if len(api['kateglo']['definition']) >= 6:
