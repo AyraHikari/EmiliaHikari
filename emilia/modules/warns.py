@@ -26,7 +26,7 @@ CURRENT_WARNING_FILTER_STRING = "<b>Filter peringatan saat ini dalam obrolan ini
 
 
 # Not async
-def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = None) -> str:
+def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = None, conn=False) -> str:
     if is_user_admin(chat, user.id):
         message.reply_text("Sayangnya admin tidak bisa di warn 😔")
         return ""
@@ -83,12 +83,18 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
                                                                   user.id, reason, num_warns, limit)
 
     try:
-        message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+        if conn:
+            message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+        else:
+            message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         #message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
+            if conn:
+                message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            else:
+                message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
             #message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
         else:
             raise
@@ -166,7 +172,7 @@ def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
 
     if user_id:
         if conn:
-            warning = warn(chat.get_member(user_id).user, chat, reason, message, warner)
+            warning = warn(chat.get_member(user_id).user, chat, reason, message, warner, conn=True)
             update.effective_message.reply_text("Saya sudah memperingatinya pada grup *{}*".format(chat_name), parse_mode="markdown")
             return warning
         else:
