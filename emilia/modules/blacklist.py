@@ -80,7 +80,7 @@ def add_blacklist(bot: Bot, update: Update):
     else:
         chat_id = update.effective_chat.id
         if chat.type == "private":
-            exit(1)
+            return
         else:
             chat_name = chat.title
 
