@@ -271,6 +271,7 @@ def list_notes(bot: Bot, update: Update):
         update.effective_message.reply_text("Tidak ada catatan di obrolan ini!")
 
     elif len(msg) != 0:
+        msg += "\nAnda dapat mengambil catatan ini dengan menggunakan `/get notename`, atau `#notename`"
         update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 
