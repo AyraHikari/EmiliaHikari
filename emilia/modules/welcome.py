@@ -34,44 +34,56 @@ ENUM_FUNC_MAP = {
 # do not async
 def send(update, message, keyboard, backup_message):
     try:
-        msg = update.effective_message.reply_text(message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, disable_web_page_preview=True)
+        if 'tg://user?id=' in message:
+            splitter = message.split("'>")
+            usermention = []
+            userorimention = []
+            for x in range(len(splitter)):
+                if x == 0:
+                    pass
+                else:
+                    usermention.append(html.escape(splitter[x].split('</a>')[0]))
+                    userorimention.append(splitter[x].split('</a>')[0])
+            for x in range(len(usermention)):
+                message = message.replace(userorimention[x], usermention[x])
+        msg = update.effective_message.reply_text(message, parse_mode=ParseMode.HTML, reply_markup=keyboard, disable_web_page_preview=True)
     except IndexError:
-        msg = update.effective_message.reply_text(markdown_parser(backup_message +
+        msg = update.effective_message.reply_text(html.escape(backup_message +
                                                                   "\nCatatan: pesan saat ini tidak valid "
-                                                                  "karena masalah markdown. Bisa jadi "
+                                                                  "karena masalah html. Bisa jadi "
                                                                   "karena nama pengguna."),
-                                                  parse_mode=ParseMode.MARKDOWN)
+                                                  parse_mode=ParseMode.HTML)
     except KeyError:
-        msg = update.effective_message.reply_text(markdown_parser(backup_message +
+        msg = update.effective_message.reply_text(html.escape(backup_message +
                                                                   "\nCatatan: pesan saat ini tidak valid "
                                                                   "karena ada masalah dengan beberapa salah tempat. "
                                                                   "Harap perbarui"),
-                                                  parse_mode=ParseMode.MARKDOWN)
+                                                  parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Button_url_invalid":
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = update.effective_message.reply_text(html.escape(backup_message +
                                                                       "\nCatatan: pesan saat ini memiliki url yang tidak "
                                                                       "valid di salah satu tombolnya. Harap perbarui."),
-                                                      parse_mode=ParseMode.MARKDOWN)
+                                                      parse_mode=ParseMode.HTML)
         elif excp.message == "Unsupported url protocol":
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = update.effective_message.reply_text(html.escape(backup_message +
                                                                       "\nCatatan: pesan saat ini memiliki tombol yang "
                                                                       "menggunakan protokol url yang tidak didukung "
                                                                       "oleh telegram. Harap perbarui."),
-                                                      parse_mode=ParseMode.MARKDOWN)
+                                                      parse_mode=ParseMode.HTML)
         elif excp.message == "Wrong url host":
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = update.effective_message.reply_text(html.escape(backup_message +
                                                                       "\nCatatan: pesan saat ini memiliki beberapa url "
                                                                       "yang buruk. Harap perbarui."),
-                                                      parse_mode=ParseMode.MARKDOWN)
+                                                      parse_mode=ParseMode.HTML)
             LOGGER.warning(message)
             LOGGER.warning(keyboard)
             LOGGER.exception("Could not parse! got invalid url host errors")
         else:
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = update.effective_message.reply_text(html.escape(backup_message +
                                                                       "\nCatatan: Terjadi kesalahan saat mengirim pesan "
                                                                       "kustom. Harap perbarui."),
-                                                      parse_mode=ParseMode.MARKDOWN)
+                                                      parse_mode=ParseMode.HTML)
             LOGGER.exception()
 
     return msg
@@ -109,17 +121,18 @@ def new_member(bot: Bot, update: Update):
                     else:
                         fullname = first_name
                     count = chat.get_members_count()
-                    mention = mention_markdown(new_mem.id, first_name)
+                    # mention = mention_markdown(new_mem.id, first_name)
+                    mention = "<a href='tg://user?id={}'>{}</a>".format(new_mem.id, first_name)
                     if new_mem.username:
-                        username = "@" + escape_markdown(new_mem.username)
+                        username = "@" + html.escape(new_mem.username)
                     else:
                         username = mention
 
                     valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
-                    res = valid_format.format(first=escape_markdown(first_name),
-                                              last=escape_markdown(new_mem.last_name or first_name),
-                                              fullname=escape_markdown(fullname), username=username, mention=mention,
-                                              count=count, chatname=escape_markdown(chat.title), id=new_mem.id)
+                    res = valid_format.format(first=html.escape(first_name),
+                                              last=html.escape(new_mem.last_name or first_name),
+                                              fullname=html.escape(fullname), username=username, mention=mention,
+                                              count=count, chatname=html.escape(chat.title), id=new_mem.id)
                     buttons = sql.get_welc_buttons(chat.id)
                     keyb = build_keyboard(buttons)
                 else:
@@ -215,17 +228,18 @@ def left_member(bot: Bot, update: Update):
                 else:
                     fullname = first_name
                 count = chat.get_members_count()
-                mention = mention_markdown(left_mem.id, first_name)
+                # mention = mention_markdown(left_mem.id, first_name)
+                mention = "<a href='tg://user?id={}'>{}</a>".format(left_mem.id, first_name)
                 if left_mem.username:
-                    username = "@" + escape_markdown(left_mem.username)
+                    username = "@" + html.escape(left_mem.username)
                 else:
                     username = mention
 
                 valid_format = escape_invalid_curly_brackets(cust_goodbye, VALID_WELCOME_FORMATTERS)
-                res = valid_format.format(first=escape_markdown(first_name),
-                                          last=escape_markdown(left_mem.last_name or first_name),
-                                          fullname=escape_markdown(fullname), username=username, mention=mention,
-                                          count=count, chatname=escape_markdown(chat.title), id=left_mem.id)
+                res = valid_format.format(first=html.escape(first_name),
+                                          last=html.escape(left_mem.last_name or first_name),
+                                          fullname=html.escape(fullname), username=username, mention=mention,
+                                          count=count, chatname=html.escape(chat.title), id=left_mem.id)
                 buttons = sql.get_gdbye_buttons(chat.id)
                 keyb = build_keyboard(buttons)
 
@@ -320,7 +334,7 @@ def welcome(bot: Bot, update: Update, args: List[str]):
                 ENUM_FUNC_MAP[welcome_type](chat.id, welcome_m)
 
             else:
-                ENUM_FUNC_MAP[welcome_type](chat.id, welcome_m, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+                ENUM_FUNC_MAP[welcome_type](chat.id, welcome_m, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
 
     elif len(args) >= 1:
         if args[0].lower() in ("on", "yes"):
@@ -366,7 +380,7 @@ def goodbye(bot: Bot, update: Update, args: List[str]):
                 ENUM_FUNC_MAP[goodbye_type](chat.id, goodbye_m)
                 
             else:
-                ENUM_FUNC_MAP[goodbye_type](chat.id, goodbye_m, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+                ENUM_FUNC_MAP[goodbye_type](chat.id, goodbye_m, parse_mode=ParseMode.HTML, disable_web_page_preview=True)
 
     elif len(args) >= 1:
         if args[0].lower() in ("on", "yes"):
