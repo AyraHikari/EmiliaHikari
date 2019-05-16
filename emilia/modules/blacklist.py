@@ -34,7 +34,7 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if chat.type == "private":
-            exit(1)
+            return
         else:
             chat_id = update.effective_chat.id
             chat_name = chat.title
@@ -121,7 +121,7 @@ def unblacklist(bot: Bot, update: Update):
     else:
         chat_id = update.effective_chat.id
         if chat.type == "private":
-            exit(1)
+            return
         else:
             chat_name = chat.title
 
