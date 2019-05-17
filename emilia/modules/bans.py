@@ -268,6 +268,10 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
 
     user_id, reason = extract_user_and_text(message, args)
 
+    if not user_id:
+        message.reply_text("Anda sepertinya tidak mengacu pada pengguna.")
+        return ""
+
     conn = connected(bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)

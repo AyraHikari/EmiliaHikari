@@ -29,7 +29,7 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
     
     conn = connected(bot, update, chat, user.id, need_admin=False)
-    if not conn == False:
+    if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
@@ -41,7 +41,7 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
     
     filter_list = "<b>Kata daftar hitam saat ini di {}:</b>\n".format(chat_name)
 
-    all_blacklisted = sql.get_chat_blacklist(chat.id)
+    all_blacklisted = sql.get_chat_blacklist(chat_id)
 
     if len(args) > 0 and args[0].lower() == 'copy':
         for trigger in all_blacklisted:
@@ -74,7 +74,7 @@ def add_blacklist(bot: Bot, update: Update):
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
     conn = connected(bot, update, chat, user.id)
-    if not conn == False:
+    if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
@@ -115,7 +115,7 @@ def unblacklist(bot: Bot, update: Update):
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
     conn = connected(bot, update, chat, user.id)
-    if not conn == False:
+    if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
