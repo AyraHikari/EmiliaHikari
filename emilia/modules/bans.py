@@ -81,8 +81,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
         message.reply_text("Saya tidak bisa banned orang ini karena dia adalah admin 😒")
         return ""
 
-    check = bot.getChatMember(chat_id, user.id)
-    if check['can_restrict_members'] == False:
+    if member['can_restrict_members'] == False:
         if conn:
             text = "Anda tidak punya hak untuk membatasi seseorang pada *{}*.".format(chat_name)
         else:
@@ -194,8 +193,7 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
         message.reply_text("Saya tidak bisa banned orang ini karena dia adalah admin 😒")
         return ""
 
-    check = bot.getChatMember(chat.id, user.id)
-    if check['can_restrict_members'] == False:
+    if member['can_restrict_members'] == False:
         message.reply_text("Anda tidak punya hak untuk membatasi seseorang.")
         return ""
 
