@@ -16,6 +16,7 @@ from emilia.modules.helper_funcs.msg_types import get_note_type
 from emilia.modules.rules import get_rules
 import emilia.modules.sql.rules_sql as rulessql
 from emilia.modules.sql import warns_sql as warnssql
+import emilia.modules.sql.blacklist_sql as blacklistsql
 from emilia.modules.connection import connected
 
 @run_async
@@ -92,7 +93,7 @@ def import_data(bot: Bot, update):
 			for mod in DATA_IMPORT:
 				mod.__import_data__(str(chat.id), data)
 		except Exception:
-			msg.reply_text("Pengecualian terjadi saat memulihkan data Anda. Prosesnya mungkin tidak lengkap. Jika "
+			msg.reply_text("Kesalahan terjadi saat memulihkan data Anda. Prosesnya mungkin tidak lengkap. Jika "
 						   "Anda mengalami masalah dengan ini, pesan @AyraHikari dengan file cadangan Anda, jadi "
 						   "masalah bisa di-debug. Pemilik saya akan dengan senang hati membantu, dan setiap bug "
 						   "dilaporkan membuat saya lebih baik! Terima kasih! 🙂")
@@ -143,9 +144,11 @@ def export_data(bot: Bot, update: Update, chat_data):
 			update.effective_message.reply_text("Anda dapat mencadangan data sekali dalam sehari!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
 			return
 		else:
-			put_chat(chat_id, new_jam, chat_data)
+			if user.id != 388576209:
+				put_chat(chat_id, new_jam, chat_data)
 	else:
-		put_chat(chat_id, new_jam, chat_data)
+		if user.id != 388576209:
+			put_chat(chat_id, new_jam, chat_data)
 
 	note_list = sql.get_all_chat_notes(chat_id)
 	backup = {}
@@ -192,8 +195,11 @@ def export_data(bot: Bot, update: Update, chat_data):
 	# Rules
 	rules = rulessql.get_rules(chat_id)
 	# Warns
-	#warns = warnssql.get_warns(chat_id)
-	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes}}
+	# warns = warnssql.get_warns(chat_id)
+	# Blacklist
+	bl = list(blacklistsql.get_chat_blacklist(chat_id))
+	# Backing up
+	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes, 'blacklist': bl}}
 	catatan = json.dumps(backup, indent=4)
 	f=open("cadangan{}.backup".format(chat_id), "w")
 	f.write(str(catatan))

@@ -184,6 +184,13 @@ def del_blacklist(bot: Bot, update: Update):
             break
 
 
+def __import_data__(chat_id, data):
+    # set chat blacklist
+    blacklist = data.get('blacklist', {})
+    for trigger in blacklist:
+        sql.add_to_blacklist(chat_id, trigger)
+
+
 def __migrate__(old_chat_id, new_chat_id):
     sql.migrate_chat(old_chat_id, new_chat_id)
 
