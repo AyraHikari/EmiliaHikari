@@ -17,6 +17,7 @@ from emilia.modules.rules import get_rules
 import emilia.modules.sql.rules_sql as rulessql
 from emilia.modules.sql import warns_sql as warnssql
 import emilia.modules.sql.blacklist_sql as blacklistsql
+from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.connection import connected
 
 @run_async
@@ -198,8 +199,10 @@ def export_data(bot: Bot, update: Update, chat_data):
 	# warns = warnssql.get_warns(chat_id)
 	# Blacklist
 	bl = list(blacklistsql.get_chat_blacklist(chat_id))
+	# Disabled command
+	disabledcmd = list(disabledsql.get_all_disabled(chat_id))
 	# Backing up
-	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes, 'blacklist': bl}}
+	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes, 'blacklist': bl, 'disabled': disabledcmd}}
 	catatan = json.dumps(backup, indent=4)
 	f=open("cadangan{}.backup".format(chat_id), "w")
 	f.write(str(catatan))

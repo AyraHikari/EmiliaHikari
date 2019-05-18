@@ -206,6 +206,12 @@ if is_module_loaded(FILENAME):
         return "{} item yang dinonaktifkan, pada {} obrolan.".format(sql.num_disabled(), sql.num_chats())
 
 
+    def __import_data__(chat_id, data):
+        disabled = data.get('disabled', {})
+        for disable_cmd in disabled:
+            sql.disable_command(chat_id, disable_cmd)
+
+
     def __migrate__(old_chat_id, new_chat_id):
         sql.migrate_chat(old_chat_id, new_chat_id)
 
