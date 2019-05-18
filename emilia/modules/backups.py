@@ -19,6 +19,8 @@ from emilia.modules.sql import warns_sql as warnssql
 import emilia.modules.sql.blacklist_sql as blacklistsql
 from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.sql import cust_filters_sql as filtersql
+import emilia.modules.sql.welcome_sql as welcsql
+import emilia.modules.sql.locks_sql as locksql
 from emilia.modules.connection import connected
 
 @run_async
@@ -235,8 +237,48 @@ def export_data(bot: Bot, update: Update, chat_data):
 		export_filters[filters] = content
 	print(export_filters)
 	"""
+	# Welcome (TODO)
+	# welc = welcsql.get_welc_pref(chat_id)
+	# Locked
+	locks = locksql.get_locks(chat_id)
+	locked = []
+	if locks.sticker:
+		locked.append('sticker')
+	if locks.document:
+		locked.append('document')
+	if locks.contact:
+		locked.append('contact')
+	if locks.audio:
+		locked.append('audio')
+	if locks.game:
+		locked.append('game')
+	if locks.bots:
+		locked.append('bots')
+	if locks.gif:
+		locked.append('gif')
+	if locks.photo:
+		locked.append('photo')
+	if locks.video:
+		locked.append('video')
+	if locks.voice:
+		locked.append('voice')
+	if locks.location:
+		locked.append('location')
+	if locks.forward:
+		locked.append('forward')
+	if locks.url:
+		locked.append('url')
+	restr = locksql.get_restr(chat_id)
+	if restr.other:
+		locked.append('other')
+	if restr.messages:
+		locked.append('messages')
+	if restr.preview:
+		locked.append('preview')
+	if restr.media:
+		locked.append('media')
 	# Backing up
-	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes, 'blacklist': bl, 'disabled': disabledcmd}}
+	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes, 'blacklist': bl, 'disabled': disabledcmd, 'locks': locked}}
 	catatan = json.dumps(backup, indent=4)
 	f=open("cadangan{}.backup".format(chat_id), "w")
 	f.write(str(catatan))

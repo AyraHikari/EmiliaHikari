@@ -369,6 +369,18 @@ def list_locks(bot: Bot, update: Update):
     update.effective_message.reply_text(res, parse_mode=ParseMode.MARKDOWN)
 
 
+def __import_data__(chat_id, data):
+    # set chat locks
+    locks = data.get('locks', {})
+    for itemlock in locks:
+        if itemlock in LOCK_TYPES:
+          sql.update_lock(chat_id, itemlock, locked=True)
+        elif itemlock in RESTRICTION_TYPES:
+          sql.update_restriction(chat_id, itemlock, locked=True)
+        else:
+          pass
+
+
 def __migrate__(old_chat_id, new_chat_id):
     sql.migrate_chat(old_chat_id, new_chat_id)
 
