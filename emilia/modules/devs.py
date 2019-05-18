@@ -35,7 +35,7 @@ def executor(bot: Bot, update: Update):
 		try:
 			exec(code)
 		except Exception as error:
-			bot.send_message(chat, "*Gagal:* {}".format(error), parse_mode=ParseMode.MARKDOWN, reply_to_message_id=msg.message_id)
+			bot.send_message(chat, "<b>Gagal:</b> {}".format(error), parse_mode=ParseMode.HTML, reply_to_message_id=msg.message_id)
 
 
 REBOOT_HANDLER = DisableAbleCommandHandler("emreboot", reboot, filters=Filters.user(OWNER_ID))
