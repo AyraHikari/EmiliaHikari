@@ -198,8 +198,6 @@ def export_data(bot: Bot, update: Update, chat_data):
 		notes['#{}'.format(namacat.split("<###splitter###>")[x])] = '{}'.format(isicat.split("<###splitter###>")[x])
 	# Rules
 	rules = rulessql.get_rules(chat_id)
-	# Warns
-	# warns = warnssql.get_warns(chat_id)
 	# Blacklist
 	bl = list(blacklistsql.get_chat_blacklist(chat_id))
 	# Disabled command
@@ -277,6 +275,8 @@ def export_data(bot: Bot, update: Update, chat_data):
 		locked.append('preview')
 	if restr.media:
 		locked.append('media')
+	# Warns (TODO)
+	# warns = warnssql.get_warns(chat_id)
 	# Backing up
 	backup[chat_id] = {'bot': bot.id, 'hashes': {'info': {'rules': rules}, 'extra': notes, 'blacklist': bl, 'disabled': disabledcmd, 'locks': locked}}
 	catatan = json.dumps(backup, indent=4)
