@@ -78,7 +78,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     if is_user_ban_protected(chat, user_id, member):
-        message.reply_text("Saya benar-benar berharap bisa banned orang ini... 😞")
+        message.reply_text("Saya tidak bisa banned orang ini karena dia adalah admin 😒")
         return ""
 
     check = bot.getChatMember(chat_id, user.id)
@@ -191,7 +191,7 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     if is_user_ban_protected(chat, user_id, member):
-        message.reply_text("Saya benar-benar berharap bisa banned orang ini... 😞")
+        message.reply_text("Saya tidak bisa banned orang ini karena dia adalah admin 😒")
         return ""
 
     check = bot.getChatMember(chat.id, user.id)
@@ -322,7 +322,7 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     if is_user_ban_protected(chat, user_id):
-        message.reply_text("Saya benar-benar berharap bisa banned orang ini... 😞")
+        message.reply_text("Saya tidak bisa banned orang ini karena dia adalah admin 😒")
         return ""
 
     if user_id == bot.id:
