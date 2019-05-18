@@ -268,6 +268,13 @@ def __stats__():
     return "{} filter, pada {} obrolan.".format(sql.num_filters(), sql.num_chats())
 
 
+def __import_data__(chat_id, data):
+    # set chat filters
+    filters = data.get('filters', {})
+    for trigger in filters:
+        sql.add_to_blacklist(chat_id, trigger)
+
+
 def __migrate__(old_chat_id, new_chat_id):
     sql.migrate_chat(old_chat_id, new_chat_id)
 

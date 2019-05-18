@@ -38,6 +38,7 @@ def send(update, message, keyboard, backup_message):
             splitter = message.split("'>")
             usermention = []
             userorimention = []
+            message = html.escape(message)
             for x in range(len(splitter)):
                 if x == 0:
                     pass
@@ -45,7 +46,8 @@ def send(update, message, keyboard, backup_message):
                     usermention.append(html.escape(splitter[x].split('</a>')[0]))
                     userorimention.append(splitter[x].split('</a>')[0])
             for x in range(len(usermention)):
-                message = message.replace(userorimention[x], usermention[x])
+                #message = message.replace(userorimention[x], usermention[x])
+                message = message.replace('&lt;a href=&#x27;tg://user?id=', "<a href='tg://user?id=").replace("&#x27;&gt;{}&lt;/a&gt;".format(usermention[x]), "'>{}</a>".format(userorimention[x])).replace(userorimention[x], usermention[x])
         msg = update.effective_message.reply_text(message, parse_mode=ParseMode.HTML, reply_markup=keyboard, disable_web_page_preview=True)
     except IndexError:
         msg = update.effective_message.reply_text(html.escape(backup_message +
