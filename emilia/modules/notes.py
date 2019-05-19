@@ -104,6 +104,9 @@ def get(bot, update, notename, show_none=True, no_format=False):
                                          parse_mode=parseMode, disable_web_page_preview=True,
                                          reply_markup=keyboard)
                     except BadRequest as excp:
+                        if excp.message == "Wrong http url":
+                            message.reply_text("Kesalahan: URL pada tombol tidak valid! Harap perbaruhi catatan ini.")
+                            pass
                         print("Gagal mengirim catatan: " + excp.message)
                         pass
                 else:
