@@ -13,12 +13,13 @@ from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import bot_admin, can_promote, user_admin, can_pin
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
+from emilia.modules.connection import connected
 
 
 @run_async
-@bot_admin
-@can_promote
-@user_admin
+#@bot_admin
+#@can_promote
+#@user_admin
 @loggable
 def promote(bot: Bot, update: Update, args: List[str]) -> str:
     chat_id = update.effective_chat.id
@@ -29,6 +30,19 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
 
     user_id = extract_user(message, args)
     if not user_id:
@@ -69,9 +83,9 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-@bot_admin
-@can_promote
-@user_admin
+#@bot_admin
+#@can_promote
+#@user_admin
 @loggable
 def demote(bot: Bot, update: Update, args: List[str]) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
@@ -81,6 +95,19 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
 
     user_id = extract_user(message, args)
     if not user_id:
@@ -125,9 +152,9 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-@bot_admin
-@can_pin
-@user_admin
+#@bot_admin
+#@can_pin
+#@user_admin
 @loggable
 def pin(bot: Bot, update: Update, args: List[str]) -> str:
     user = update.effective_user  # type: Optional[User]
@@ -137,9 +164,27 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
-    is_group = chat.type != "private" and chat.type != "channel"
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+        if len(args)  <= 1:
+            update.effective_message.reply_text("Gunakan /pin <notify/loud/silent/violent> <link pesan>")
+            return ""
+        prev_message = args[1]
+        if "/" in prev_message:
+            prev_message = prev_message.split("/")[-1]
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+        prev_message = update.effective_message.reply_to_message.message_id
 
-    prev_message = update.effective_message.reply_to_message
+    is_group = chat.type != "private" and chat.type != "channel"
 
     is_silent = True
     if len(args) >= 1:
@@ -147,7 +192,9 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
 
     if prev_message and is_group:
         try:
-            bot.pinChatMessage(chat.id, prev_message.message_id, disable_notification=is_silent)
+            bot.pinChatMessage(chat.id, prev_message, disable_notification=is_silent)
+            if conn:
+                update.effective_message.reply_text("Saya sudah pin pesan dalam grup {}".format(chat_name))
         except BadRequest as excp:
             if excp.message == "Chat_not_modified":
                 pass
@@ -161,9 +208,9 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-@bot_admin
-@can_pin
-@user_admin
+#@bot_admin
+#@can_pin
+#@user_admin
 @loggable
 def unpin(bot: Bot, update: Update) -> str:
     chat = update.effective_chat
@@ -173,8 +220,23 @@ def unpin(bot: Bot, update: Update) -> str:
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
     try:
         bot.unpinChatMessage(chat.id)
+        if conn:
+            update.effective_message.reply_text("Saya sudah unpin pesan dalam grup {}".format(chat_name))
     except BadRequest as excp:
         if excp.message == "Chat_not_modified":
             pass
@@ -188,14 +250,28 @@ def unpin(bot: Bot, update: Update) -> str:
 
 
 @run_async
-@bot_admin
-@user_admin
+#@bot_admin
+#@user_admin
 def invite(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
 
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
 
     if chat.username:
         update.effective_message.reply_text(chat.username)
@@ -212,11 +288,27 @@ def invite(bot: Bot, update: Update):
 
 @run_async
 def adminlist(bot: Bot, update: Update):
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
-    administrators = update.effective_chat.get_administrators()
+    conn = connected(bot, update, chat, user.id, need_admin=False)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
+    administrators = bot.getChatAdministrators(chat_id)
     text = "Admin di *{}*:".format(update.effective_chat.title or "chat ini")
     for admin in administrators:
         user = admin.user
@@ -263,15 +355,15 @@ __help__ = """
 
 __mod_name__ = "Admin"
 
-PIN_HANDLER = CommandHandler("pin", pin, pass_args=True, filters=Filters.group)
-UNPIN_HANDLER = CommandHandler("unpin", unpin, filters=Filters.group)
+PIN_HANDLER = CommandHandler("pin", pin, pass_args=True)
+UNPIN_HANDLER = CommandHandler("unpin", unpin)
 
-INVITE_HANDLER = CommandHandler("invitelink", invite, filters=Filters.group)
+INVITE_HANDLER = CommandHandler("invitelink", invite)
 
-PROMOTE_HANDLER = CommandHandler("promote", promote, pass_args=True, filters=Filters.group)
-DEMOTE_HANDLER = CommandHandler("demote", demote, pass_args=True, filters=Filters.group)
+PROMOTE_HANDLER = CommandHandler("promote", promote, pass_args=True)
+DEMOTE_HANDLER = CommandHandler("demote", demote, pass_args=True)
 
-ADMINLIST_HANDLER = DisableAbleCommandHandler(["adminlist", "admins"], adminlist, filters=Filters.group)
+ADMINLIST_HANDLER = DisableAbleCommandHandler(["adminlist", "admins"], adminlist)
 
 dispatcher.add_handler(PIN_HANDLER)
 dispatcher.add_handler(UNPIN_HANDLER)
