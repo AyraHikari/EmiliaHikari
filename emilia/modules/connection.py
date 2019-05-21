@@ -147,10 +147,17 @@ def connect_chat(bot, update, args):
         if len(args) >= 1:
             try:
                 connect_chat = int(args[0])
+                getstatusadmin = bot.get_chat_member(connect_chat, update.effective_message.from_user.id)
             except ValueError:
-                update.effective_message.reply_text(chat.id, "ID Obrolan tidak valid!")
-            isadmin = bot.get_chat_member(connect_chat, update.effective_message.from_user.id).status in ('administrator', 'creator')
-            ismember = bot.get_chat_member(connect_chat, update.effective_message.from_user.id).status in ('member')
+                try:
+                    connect_chat = str(args[0])
+                    get_chat = bot.getChat(connect_chat)
+                    connect_chat = get_chat.id
+                    getstatusadmin = bot.get_chat_member(connect_chat, update.effective_message.from_user.id)
+                except:
+                    update.effective_message.reply_text(chat.id, "ID Obrolan tidak valid!")
+            isadmin = getstatusadmin.status in ('administrator', 'creator')
+            ismember = getstatusadmin.status in ('member')
             isallow = sql.allow_connect_to_chat(connect_chat)
             if (isadmin) or (isallow and ismember) or (user.id in SUDO_USERS):
                 connection_status = sql.connect(update.effective_message.from_user.id, connect_chat)
@@ -198,12 +205,13 @@ def connected(bot, update, chat, user_id, need_admin=True):
         
     if chat.type == chat.PRIVATE and sql.get_connected_chat(user_id):
         conn_id = sql.get_connected_chat(user_id).chat_id
-        isadmin = bot.get_chat_member(conn_id, update.effective_message.from_user.id).status in ('administrator', 'creator')
-        ismember = bot.get_chat_member(conn_id, update.effective_message.from_user.id).status in ('member')
+        getstatusadmin = bot.get_chat_member(conn_id, update.effective_message.from_user.id)
+        isadmin = getstatusadmin.status in ('administrator', 'creator')
+        ismember = getstatusadmin.status in ('member')
         isallow = sql.allow_connect_to_chat(conn_id)
         if (isadmin) or (isallow and ismember) or (user.id in SUDO_USERS):
             if need_admin == True:
-                if bot.get_chat_member(conn_id, update.effective_message.from_user.id).status in ('administrator', 'creator') or user_id in SUDO_USERS:
+                if getstatusadmin.status in ('administrator', 'creator') or user_id in SUDO_USERS:
                     return conn_id
                 else:
                     update.effective_message.reply_text("Anda harus menjadi admin dalam grup yang terhubung!")
