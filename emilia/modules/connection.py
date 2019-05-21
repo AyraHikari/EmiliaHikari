@@ -17,6 +17,9 @@ supportcmd = """
 *Command yang support saat ini*
 
 *「 Untuk Member Biasa 」*
+*Admin*
+-> `/adminlist` | `/admins`
+
 *Anti Flood*
 -> `/flood`
 
@@ -38,6 +41,13 @@ supportcmd = """
 -> `/warnlist` | `/warnfilters`
 
 *「 Hanya Untuk Admin 」*
+*Admin*
+-> `/pin <loud/silent> <message link>`
+-> `/unpin`
+-> `/adminlist`
+-> `/promote @user`
+-> `/demote @user`
+
 *Anti Flood*
 -> `/setflood`
 -> `/flood`
