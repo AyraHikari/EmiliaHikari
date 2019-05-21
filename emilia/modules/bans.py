@@ -320,7 +320,7 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
         return ""
 
     if is_user_ban_protected(chat, user_id):
-        message.reply_text("Saya tidak bisa banned orang ini karena dia adalah admin 😒")
+        message.reply_text("Saya tidak bisa menendang orang ini karena dia adalah admin 😒")
         return ""
 
     if user_id == bot.id:
