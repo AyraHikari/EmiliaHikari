@@ -44,7 +44,7 @@ def get(bot, update, notename, show_none=True, no_format=False):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     conn = connected(bot, update, chat, user.id, need_admin=False)
-    if not conn == False:
+    if conn:
         chat_id = conn
         send_id = user.id
     else:
@@ -168,7 +168,7 @@ def save(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     conn = connected(bot, update, chat, user.id)
-    if not conn == False:
+    if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
@@ -215,7 +215,7 @@ def clear(bot: Bot, update: Update, args: List[str]):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     conn = connected(bot, update, chat, user.id)
-    if not conn == False:
+    if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
     else:
@@ -249,7 +249,7 @@ def list_notes(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     conn = connected(bot, update, chat, user.id, need_admin=False)
-    if not conn == False:
+    if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
         msg = "*Catatan di {}:*\n".format(chat_name)
@@ -272,7 +272,10 @@ def list_notes(bot: Bot, update: Update):
         msg += note_name
 
     if msg == "*Catatan di {}:*\n".format(chat_name) or msg == "*Catatan Lokal:*\n":
-        update.effective_message.reply_text("Tidak ada catatan di obrolan ini!")
+        if conn:
+            update.effective_message.reply_text("Tidak ada catatan di obrolan *{}*!".format(chat_name), parse_mode="markdown")
+        else:
+            update.effective_message.reply_text("Tidak ada catatan di obrolan ini!")
 
     elif len(msg) != 0:
         msg += "\nAnda dapat mengambil catatan ini dengan menggunakan `/get notename`, atau `#notename`"

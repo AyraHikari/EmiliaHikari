@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from telegram import ParseMode
-from telegram import Message, Chat, Update, Bot, User
+from telegram import Message, Chat, Update, Bot, User, error
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, Filters
 from telegram.ext.dispatcher import run_async
@@ -154,8 +154,9 @@ def connect_chat(bot, update, args):
                     get_chat = bot.getChat(connect_chat)
                     connect_chat = get_chat.id
                     getstatusadmin = bot.get_chat_member(connect_chat, update.effective_message.from_user.id)
-                except:
-                    update.effective_message.reply_text(chat.id, "ID Obrolan tidak valid!")
+                except error.BadRequest:
+                    update.effective_message.reply_text("ID Obrolan tidak valid!")
+                    return
             isadmin = getstatusadmin.status in ('administrator', 'creator')
             ismember = getstatusadmin.status in ('member')
             isallow = sql.allow_connect_to_chat(connect_chat)
