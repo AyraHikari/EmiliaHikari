@@ -123,7 +123,7 @@ def allow_connections(bot: Bot, update: Update, args: List[str]) -> str:
                 sql.set_allow_connect_to_chat(chat.id, True)
                 update.effective_message.reply_text("Koneksi di aktifkan untuk obrolan ini")
             else:
-                update.effective_message.reply_text("Silakan masukkan ya atau tidak!", parse_mode=ParseMode.MARKDOWN)
+                update.effective_message.reply_text("Silakan masukkan `ya`/`yes` atau `tidak`/`no`!", parse_mode=ParseMode.MARKDOWN)
         else:
             get_settings = sql.allow_connect_to_chat(chat.id)
             if get_settings:
