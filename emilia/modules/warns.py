@@ -692,6 +692,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
     if qdata == "+":
         button = []
         limit, soft_warn = sql.get_warn_setting(chat_id)
@@ -712,6 +713,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
     if qdata == "exec":
         button = []
         limit, soft_warn = sql.get_warn_setting(chat_id)
@@ -735,6 +737,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
 
 
 

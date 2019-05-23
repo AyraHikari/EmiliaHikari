@@ -311,6 +311,7 @@ def GBAN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
 
 
 __help__ = """
