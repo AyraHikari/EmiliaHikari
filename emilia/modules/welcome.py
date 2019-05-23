@@ -563,8 +563,102 @@ def __migrate__(old_chat_id, new_chat_id):
 def __chat_settings__(chat_id, user_id):
     welcome_pref, _, _ = sql.get_welc_pref(chat_id)
     goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
-    return "Obrolan ini memiliki preferensi sambutan yang disetel untuk `{}`.\n" \
-           "Ini adalah preferensi selamat tinggal `{}`.".format(welcome_pref, goodbye_pref)
+    if welcome_pref:
+        welc = "✅ Aktif"
+    else:
+        welc = "❎ Tidak Aktif"
+    if goodbye_pref:
+        gdby = "✅ Aktif"
+    else:
+        gdby = "❎ Tidak Aktif"
+    return "Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\n" \
+           "Untuk preferensi pesan selamat tinggal `{}`.".format(welc, gdby)
+
+def __chat_settings_btn__(chat_id, user_id):
+    welcome_pref, _, _ = sql.get_welc_pref(chat_id)
+    goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+    if welcome_pref:
+        welc = "✅ Aktif"
+    else:
+        welc = "❎ Tidak Aktif"
+    if goodbye_pref:
+        gdby = "✅ Aktif"
+    else:
+        gdby = "❎ Tidak Aktif"
+    button = []
+    button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
+        InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
+    button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
+        InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+    button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
+    return button
+
+def WELC_EDITBTN(bot: Bot, update: Update):
+    query = update.callback_query
+    user = update.effective_user
+    print("User {} clicked button WELC EDIT".format(user.id))
+    chat_id = query.data.split("|")[1]
+    data = query.data.split("=")[1].split("|")[0]
+    goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+    if data == "w?":
+        bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member baru masuk jika di aktifkan.", show_alert=True)
+    if data == "g?":
+        bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member yang keluar jika di aktifkan. Akan aktif hanya untuk grup dibawah 100 member.", show_alert=True)
+    if data == "w":
+        welcome_pref, _, _ = sql.get_welc_pref(chat_id)
+        goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        if welcome_pref:
+            welc = "❎ Tidak Aktif"
+            sql.set_welc_preference(str(chat_id), False)
+        else:
+            welc = "✅ Aktif"
+            sql.set_welc_preference(str(chat_id), True)
+        if goodbye_pref:
+            gdby = "✅ Aktif"
+        else:
+            gdby = "❎ Tidak Aktif"
+        chat = bot.get_chat(chat_id)
+        text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
+        text += "Obrolan ini preferensi pesan sambutannya telah diganti menjadi `{}`.\n".format(welc)
+        text += "Untuk preferensi pesan selamat tinggal `{}`.".format(gdby)
+        button = []
+        button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
+            InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
+            InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
+        query.message.edit_text(text=text,
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
+    if data == "g":
+        welcome_pref, _, _ = sql.get_welc_pref(chat_id)
+        goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        if welcome_pref:
+            welc = "✅ Aktif"
+        else:
+            welc = "❎ Tidak Aktif"
+        if goodbye_pref:
+            gdby = "❎ Tidak Aktif"
+            sql.set_gdbye_preference(str(chat_id), False)
+        else:
+            gdby = "✅ Aktif"
+            sql.set_gdbye_preference(str(chat_id), True)
+        chat = bot.get_chat(chat_id)
+        text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
+        text += "Obrolan ini preferensi pesan selamat tinggal telah diganti menjadi `{}`.\n".format(gdby)
+        text += "Untuk preferensi pesan sambutan `{}`.".format(welc)
+        button = []
+        button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
+            InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
+            InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
+        query.message.edit_text(text=text,
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
+
 
 
 __help__ = """
@@ -602,6 +696,7 @@ SECURITY_HANDLER = CommandHandler("welcomesecurity", security, pass_args=True, f
 CLEAN_SERVICE_HANDLER = CommandHandler("cleanservice", cleanservice, pass_args=True, filters=Filters.group)
 
 help_callback_handler = CallbackQueryHandler(check_bot_button, pattern=r"check_bot_")
+WELC_BTNSET_HANDLER = CallbackQueryHandler(WELC_EDITBTN, pattern=r"set_welc")
 
 dispatcher.add_handler(NEW_MEM_HANDLER)
 dispatcher.add_handler(LEFT_MEM_HANDLER)
@@ -615,5 +710,6 @@ dispatcher.add_handler(CLEAN_WELCOME)
 dispatcher.add_handler(WELCOME_HELP)
 dispatcher.add_handler(SECURITY_HANDLER)
 dispatcher.add_handler(CLEAN_SERVICE_HANDLER)
+dispatcher.add_handler(WELC_BTNSET_HANDLER)
 
 dispatcher.add_handler(help_callback_handler)
