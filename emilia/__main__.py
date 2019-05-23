@@ -312,15 +312,24 @@ def settings_button(bot: Bot, update: Update):
             chat_id = mod_match.group(1)
             module = mod_match.group(2)
             chat = bot.get_chat(chat_id)
-            text = "*{}* memiliki pengaturan berikut untuk *{}* modul:\n\n".format(escape_markdown(chat.title),
+            getstatusadmin = bot.get_chat_member(chat_id, user.id)
+            isadmin = getstatusadmin.status in ('administrator', 'creator')
+            if isadmin == False:
+                query.message.edit_text("Status admin anda telah berubah")
+                return
+            text = "*{}* memiliki pengaturan berikut untuk modul *{}*:\n\n".format(escape_markdown(chat.title),
                                                                                      CHAT_SETTINGS[
                                                                                         module].__mod_name__) + \
                    CHAT_SETTINGS[module].__chat_settings__(chat_id, user.id)
+            try:
+                set_button = CHAT_SETTINGS[module].__chat_settings_btn__(chat_id, user.id)
+            except AttributeError:
+                set_button = []
+            set_button.append([InlineKeyboardButton(text="Kembali",
+                                                               callback_data="stngs_back({})".format(chat_id))])
             query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=InlineKeyboardMarkup(
-                                        [[InlineKeyboardButton(text="Kembali",
-                                                               callback_data="stngs_back({})".format(chat_id))]]))
+                                  reply_markup=InlineKeyboardMarkup(set_button))
 
         elif prev_match:
             chat_id = prev_match.group(1)
