@@ -4,14 +4,13 @@ from typing import Optional, List
 from telegram import Message, Chat, Update, Bot, User, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
 from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, CommandHandler, run_async, CallbackQueryHandler
-from telegram.utils.helpers import mention_html
+from telegram.utils.helpers import mention_html, escape_markdown
 
 from emilia import dispatcher, spamfilters
 from emilia.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import antiflood_sql as sql
 from emilia.modules.connection import connected
-from telegram.utils.helpers import escape_markdown
 
 FLOOD_GROUP = 3
 

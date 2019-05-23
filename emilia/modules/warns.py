@@ -7,7 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, User
 from telegram import Message, Chat, Update, Bot
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, DispatcherHandlerStop, MessageHandler, Filters, CallbackQueryHandler
-from telegram.utils.helpers import mention_html
+from telegram.utils.helpers import mention_html, escape_markdown
 
 from emilia import dispatcher, BAN_STICKER, spamfilters
 from emilia.modules.disable import DisableAbleCommandHandler
@@ -20,7 +20,6 @@ from emilia.modules.helper_funcs.string_handling import split_quotes
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import warns_sql as sql
 from emilia.modules.connection import connected
-from telegram.utils.helpers import escape_markdown
 
 WARN_HANDLER_GROUP = 9
 CURRENT_WARNING_FILTER_STRING = "<b>Filter peringatan saat ini dalam obrolan ini:</b>\n"
