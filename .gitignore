@@ -17,3 +17,5 @@ emilia/modules/sql/__pycache__
 .profile
 .pgpass
 .python_history
+backupdb
+
