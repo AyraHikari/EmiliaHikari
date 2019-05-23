@@ -671,7 +671,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
     qdata = query.data.split("=")[1].split("|")[0]
     chat_id = query.data.split("|")[1]
     if qdata == "?":
-        bot.answerCallbackQuery(query.id, "Batas dari peringatan. Jika peringatan melewati batas maka akan di eksekusi", show_alert=True)
+        bot.answerCallbackQuery(query.id, "Batas dari peringatan. Jika peringatan melewati batas maka akan di eksekusi.", show_alert=True)
     if qdata == "-":
         button = []
         limit, soft_warn = sql.get_warn_setting(chat_id)
