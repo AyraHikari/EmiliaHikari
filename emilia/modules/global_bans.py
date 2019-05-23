@@ -2,9 +2,9 @@ import html
 from io import BytesIO
 from typing import Optional, List
 
-from telegram import Message, Update, Bot, User, Chat, ParseMode
+from telegram import Message, Update, Bot, User, Chat, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import BadRequest, TelegramError
-from telegram.ext import run_async, CommandHandler, MessageHandler, Filters
+from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram.utils.helpers import mention_html
 
 import emilia.modules.sql.global_bans_sql as sql
@@ -281,6 +281,37 @@ def __migrate__(old_chat_id, new_chat_id):
 def __chat_settings__(chat_id, user_id):
     return "Obrolan ini memberlakukan *larangan global*: `{}`.".format(sql.does_chat_gban(chat_id))
 
+def __chat_settings_btn__(chat_id, user_id):
+    getstatus = sql.does_chat_gban(chat_id)
+    if getstatus:
+        status = "✅ Aktif"
+    else:
+        status = "❎ Tidak Aktif"
+    button = []
+    button.append([InlineKeyboardButton(text=status, callback_data="set_gstats={}".format(chat_id))])
+    return button
+
+def GBAN_EDITBTN(bot: Bot, update: Update):
+    query = update.callback_query
+    user = update.effective_user
+    print("User {} clicked button GBAN EDIT".format(user.id))
+    chat_id = query.data.split("=")[1]
+    isgban = sql.does_chat_gban(chat_id)
+    if chat_id:
+        button = []
+        if isgban:
+            sql.disable_gbans(chat_id)
+            status = "❎ Tidak Aktif"
+        else:
+            sql.enable_gbans(chat_id)
+            status = "✅ Aktif"
+        text = "Obrolan ini memberlakukan *larangan global*: `{}`.".format(status)
+        button.append([InlineKeyboardButton(text=status, callback_data="set_gstats={}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
+        query.message.edit_text(text=text,
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=InlineKeyboardMarkup(button))
+
 
 __help__ = """
 *Hanya admin:*
@@ -303,11 +334,13 @@ GBAN_LIST = CommandHandler("gbanlist", gbanlist,
 GBAN_STATUS = CommandHandler("gbanstat", gbanstat, pass_args=True, filters=Filters.group)
 
 GBAN_ENFORCER = MessageHandler(Filters.all & Filters.group, enforce_gban)
+GBAN_BTNSET_HANDLER = CallbackQueryHandler(GBAN_EDITBTN, pattern=r"set_gstats")
 
 dispatcher.add_handler(GBAN_HANDLER)
 dispatcher.add_handler(UNGBAN_HANDLER)
 dispatcher.add_handler(GBAN_LIST)
 dispatcher.add_handler(GBAN_STATUS)
+dispatcher.add_handler(GBAN_BTNSET_HANDLER)
 
 if STRICT_GBAN:  # enforce GBANS if this is set
     dispatcher.add_handler(GBAN_ENFORCER, GBAN_ENFORCE_GROUP)
