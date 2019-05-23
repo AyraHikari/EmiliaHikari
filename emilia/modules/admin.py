@@ -338,8 +338,34 @@ def adminlist(bot: Bot, update: Update):
 
 
 def __chat_settings__(chat_id, user_id):
-    return "Kamu adalah *admin*: `{}`".format(
-        dispatcher.bot.get_chat_member(chat_id, user_id).status in ("administrator", "creator"))
+    administrators = dispatcher.bot.getChatAdministrators(chat_id)
+    chat = dispatcher.bot.getChat(chat_id)
+    text = "Admin di *{}*:".format(chat.title or "chat ini")
+    for admin in administrators:
+        user = admin.user
+        status = admin.status
+        if user.first_name == '':
+            name = "[☠ Akun Terhapus](tg://user?id={})".format(user.id)
+        else:
+            name = "[{}](tg://user?id={})".format(user.first_name + " " + (user.last_name or ""), user.id)
+        #if user.username:
+        #    name = escape_markdown("@" + user.username)
+        if status == "creator":
+            text += "\n 👑 Creator:"
+            text += "\n` • `{} \n\n 🔱 Admin:".format(name)
+    for admin in administrators:
+        user = admin.user
+        status = admin.status
+        if user.first_name == '':
+            name = "[☠️ Akun Terhapus](tg://user?id={})".format(user.id)
+        else:
+            name = "[{}](tg://user?id={})".format(user.first_name + " " + (user.last_name or ""), user.id)
+        #if user.username:
+        #    name = escape_markdown("@" + user.username)
+        if status == "administrator":
+            text += "\n` • `{}".format(name)
+    text += "\n\nKamu adalah *{}*".format(dispatcher.bot.get_chat_member(chat_id, user_id).status)
+    return text
 
 
 __help__ = """
