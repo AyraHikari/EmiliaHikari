@@ -5,7 +5,7 @@ from typing import Optional, List
 from telegram import Message, Update, Bot, User, Chat, ParseMode, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import BadRequest, TelegramError
 from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
-from telegram.utils.helpers import mention_html
+from telegram.utils.helpers import mention_html, escape_markdown
 
 import emilia.modules.sql.global_bans_sql as sql
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN, spamfilters
@@ -305,7 +305,9 @@ def GBAN_EDITBTN(bot: Bot, update: Update):
         else:
             sql.enable_gbans(chat_id)
             status = "✅ Aktif"
-        text = "Obrolan ini memberlakukan *larangan global*: `{}`.".format(status)
+        chat = bot.get_chat(chat_id)
+        text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
+        text += "Obrolan ini memberlakukan *larangan global*: `{}`.".format(status)
         button.append([InlineKeyboardButton(text=status, callback_data="set_gstats={}".format(chat_id))])
         button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
         query.message.edit_text(text=text,
