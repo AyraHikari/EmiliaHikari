@@ -26,6 +26,9 @@ supportcmd = """
 *Blacklist*
 -> `/blacklist`
 
+*Blacklist Sticker*
+-> `/blsticker`
+
 *Filter*
 -> `/filters`
 
@@ -62,6 +65,11 @@ supportcmd = """
 -> `/blacklist`
 -> `/addblacklist`
 -> `/unblacklist` | `/rmblacklist`
+
+*Blacklist Sticker*
+-> `/blsticker`
+-> `/addblsticker`
+-> `/unblsticker` | `/rmblsticker`
 
 *Bisukan Pengguna*
 -> `/mute`
