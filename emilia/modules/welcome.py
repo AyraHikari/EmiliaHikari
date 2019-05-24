@@ -590,7 +590,6 @@ def __chat_settings_btn__(chat_id, user_id):
         InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
     button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
         InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
-    button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
     return button
 
 def WELC_EDITBTN(bot: Bot, update: Update):
