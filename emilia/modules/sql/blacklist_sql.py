@@ -36,7 +36,11 @@ def add_to_blacklist(chat_id, trigger):
 
         SESSION.merge(blacklist_filt)  # merge to avoid duplicate key issues
         SESSION.commit()
-        CHAT_BLACKLISTS.get(str(chat_id), set()).add(trigger)
+        global CHAT_BLACKLISTS
+        if CHAT_BLACKLISTS.get(str(chat_id), set()) == set():
+            CHAT_BLACKLISTS[str(chat_id)] = {trigger}
+        else:
+            CHAT_BLACKLISTS.get(str(chat_id), set()).add(trigger)
 
 
 def rm_from_blacklist(chat_id, trigger):
