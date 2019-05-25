@@ -76,7 +76,7 @@ def send(update, message, keyboard, backup_message):
                 LOGGER.exception()
             except BadRequest:
                 print("Cannot send welcome msg, bot is muted!")
-
+                return ""
     return msg
 
 
