@@ -1,6 +1,6 @@
 import threading
 
-from sqlalchemy import String, Column, Integer
+from sqlalchemy import String, Column, Integer, UnicodeText
 
 from emilia.modules.sql import SESSION, BASE
 
@@ -21,16 +21,32 @@ class FloodControl(BASE):
     def __repr__(self):
         return "<flood control for %s>" % self.chat_id
 
+class FloodSettings(BASE):
+    __tablename__ = "antiflood_settings"
+    chat_id = Column(String(14), primary_key=True)
+    flood_type = Column(Integer, default=1)
+    value = Column(UnicodeText, default="0")
+
+    def __init__(self, chat_id, flood_type=1, value="0"):
+        self.chat_id = str(chat_id)
+        self.flood_type = flood_type
+        self.value = value
+
+    def __repr__(self):
+        return "<{} will executing {} for flood.>".format(self.chat_id, self.flood_type)
+
 
 FloodControl.__table__.create(checkfirst=True)
+FloodSettings.__table__.create(checkfirst=True)
 
-INSERTION_LOCK = threading.RLock()
+INSERTION_FLOOD_LOCK = threading.RLock()
+INSERTION_FLOOD_SETTINGS_LOCK = threading.RLock()
 
 CHAT_FLOOD = {}
 
 
 def set_flood(chat_id, amount):
-    with INSERTION_LOCK:
+    with INSERTION_FLOOD_LOCK:
         flood = SESSION.query(FloodControl).get(str(chat_id))
         if not flood:
             flood = FloodControl(str(chat_id))
@@ -69,8 +85,38 @@ def get_flood_limit(chat_id):
     return CHAT_FLOOD.get(str(chat_id), DEF_OBJ)[2]
 
 
+def set_flood_strength(chat_id, flood_type, value):
+    # for flood_type
+    # 1 = ban
+    # 2 = kick
+    # 3 = mute
+    # 4 = tban
+    # 5 = tmute
+    with INSERTION_FLOOD_SETTINGS_LOCK:
+        curr_setting = SESSION.query(FloodSettings).get(str(chat_id))
+        if not curr_setting:
+            curr_setting = FloodSettings(chat_id, flood_type=int(flood_type), value=value)
+
+        curr_setting.flood_type = int(flood_type)
+
+        SESSION.add(curr_setting)
+        SESSION.commit()
+
+
+def get_flood_setting(chat_id):
+    try:
+        setting = SESSION.query(FloodSettings).get(str(chat_id))
+        if setting:
+            return setting.flood_type, setting.value
+        else:
+            return 1, "0"
+
+    finally:
+        SESSION.close()
+
+
 def migrate_chat(old_chat_id, new_chat_id):
-    with INSERTION_LOCK:
+    with INSERTION_FLOOD_LOCK:
         flood = SESSION.query(FloodControl).get(str(old_chat_id))
         if flood:
             CHAT_FLOOD[str(new_chat_id)] = CHAT_FLOOD.get(str(old_chat_id), DEF_OBJ)

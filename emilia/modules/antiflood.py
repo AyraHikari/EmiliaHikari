@@ -8,6 +8,7 @@ from telegram.utils.helpers import mention_html, escape_markdown
 
 from emilia import dispatcher, spamfilters
 from emilia.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict
+from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import antiflood_sql as sql
 from emilia.modules.connection import connected
@@ -35,14 +36,37 @@ def check_flood(bot: Bot, update: Update) -> str:
         return ""
 
     try:
-        chat.kick_member(user.id)
+        getmode, getvalue = sql.get_flood_setting(chat.id)
+        if getmode == 1:
+            chat.kick_member(user.id)
+            execstrings = "Keluar!"
+            tag = "BANNED"
+        elif getmode == 2:
+            chat.kick_member(user.id)
+            chat.unban_member(user.id)
+            execstrings = "Keluar!"
+            tag = "KICKED"
+        elif getmode == 3:
+            bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
+            execstrings = "Sekarang kamu diam!"
+            tag = "MUTED"
+        elif getmode == 4:
+            bantime = extract_time(msg, getvalue)
+            chat.kick_member(user.id, until_date=bantime)
+            execstrings = "Keluar!"
+            tag = "TBAN"
+        elif getmode == 5:
+            mutetime = extract_time(msg, getvalue)
+            bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
+            execstrings = "Sekarang kamu diam!"
+            tag = "TMUTE"
         msg.reply_text("Saya tidak suka orang yang mengirim pesan beruntun. Tapi kamu hanya membuat "
-                       "saya kecewa. Keluar!")
+                       "saya kecewa. {}".format(execstrings))
 
         return "<b>{}:</b>" \
-               "\n#BANNED" \
+               "\n#{}" \
                "\n<b>Pengguna:</b> {}" \
-               "\nMembanjiri grup.".format(html.escape(chat.title),
+               "\nMembanjiri grup.".format(tag, html.escape(chat.title),
                                              mention_html(user.id, user.first_name))
 
     except BadRequest:
@@ -154,6 +178,89 @@ def flood(bot: Bot, update: Update):
         else:
             text = "Saat ini saya melarang pengguna jika mereka mengirim lebih dari *{}* pesan berturut-turut.".format(limit)
         update.effective_message.reply_text(text, parse_mode="markdown")
+
+
+@run_async
+@user_admin
+def set_flood_mode(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    msg = update.effective_message  # type: Optional[Message]
+
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
+    if args:
+        if args[0].lower() == 'ban':
+            settypeflood = 'blokir'
+            sql.set_flood_strength(chat_id, 1)
+        elif args[0].lower() == 'kick':
+            settypeflood = 'tendang'
+            sql.set_flood_strength(chat_id, 2)
+        elif args[0].lower() == 'mute':
+            settypeflood = 'bisukan'
+            sql.set_flood_strength(chat_id, 3)
+        elif args[0].lower() == 'tban':
+            if len(args) == 1:
+                teks = """Sepertinya Anda mencoba menetapkan nilai sementara untuk anti-banjir, tetapi belum menentukan waktu; gunakan `/setfloodmode tban <timevalue>`.
+
+Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
+                msg.reply_text(teks, parse_mode="markdown")
+                return
+            settypeflood = 'blokir sementara'
+            sql.set_flood_strength(chat_id, 4, str(args[1]))
+        elif args[0].lower() == 'tmute':
+            if len(args) == 1:
+                teks = """Sepertinya Anda mencoba menetapkan nilai sementara untuk anti-banjir, tetapi belum menentukan waktu; gunakan `/setfloodmode tmute <timevalue>`.
+
+Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
+                msg.reply_text(teks, parse_mode="markdown")
+                return
+            settypeflood = 'bisukan sementara'
+            sql.set_flood_strength(chat_id, 5, str(args[1]))
+        else:
+            msg.reply_text("Saya hanya mengerti ban/kick/mute/tban/tmute!")
+            return
+        if conn:
+            text = "Terlalu banyak mengirim pesan sekarang akan menghasilkan {} pada *{}*!".format(settypeflood, chat_name)
+        else:
+            text = "Terlalu banyak mengirim pesan sekarang akan menghasilkan {}!".format(settypeflood)
+        msg.reply_text(text, parse_mode="markdown")
+        return "<b>{}:</b>\n" \
+                "<b>Admin:</b> {}\n" \
+                "Telah mengubah mode antiflood. Pengguna akan di{}.".format(settypeflood, html.escape(chat.title),
+                                                                            mention_html(user.id, user.first_name))
+    else:
+        getmode, getvalue = sql.get_flood_setting(chat.id)
+        if getmode == 1:
+            settypeflood = 'blokir'
+        elif getmode == 2:
+            settypeflood = 'tendang'
+        elif getmode == 3:
+            settypeflood = 'bisukan'
+        elif getmode == 4:
+            settypeflood = 'blokir sementara selama'.format(getvalue)
+        elif getmode == 5:
+            settypeflood = 'bisukan sementara selama {}'.format(getvalue)
+        if conn:
+            text = "Mode antiflood saat ini disetel ke *{}* pengguna saat melampaui batas pada *{}*.".format(settypeflood, chat_name)
+        else:
+            text = "Mode antiflood saat ini disetel ke *{}* pengguna saat melampaui batas.".format(settypeflood)
+        msg.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    return ""
 
 
 def __migrate__(old_chat_id, new_chat_id):
@@ -272,10 +379,12 @@ __mod_name__ = "Anti Pesan Beruntun"
 
 FLOOD_BAN_HANDLER = MessageHandler(Filters.all & ~Filters.status_update & Filters.group, check_flood)
 SET_FLOOD_HANDLER = CommandHandler("setflood", set_flood, pass_args=True)#, filters=Filters.group)
+SET_FLOOD_MODE_HANDLER = CommandHandler("setfloodmode", set_flood_mode, pass_args=True)#, filters=Filters.group)
 FLOOD_HANDLER = CommandHandler("flood", flood)#, filters=Filters.group)
 FLOOD_BTNSET_HANDLER = CallbackQueryHandler(FLOOD_EDITBTN, pattern=r"set_flim")
 
 dispatcher.add_handler(FLOOD_BAN_HANDLER, FLOOD_GROUP)
 dispatcher.add_handler(SET_FLOOD_HANDLER)
+dispatcher.add_handler(SET_FLOOD_MODE_HANDLER)
 dispatcher.add_handler(FLOOD_HANDLER)
 dispatcher.add_handler(FLOOD_BTNSET_HANDLER)
