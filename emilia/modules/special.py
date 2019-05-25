@@ -390,33 +390,33 @@ def wiki(bot: Bot, update: Update):
 		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
+	args = update.effective_message.text.split(None, 1)
+	teks = args[1]
+	message = update.effective_message
+	wikipedia.set_lang("id")
 	try:
-		args = update.effective_message.text.split(None, 1)
-		teks = args[1]
-		message = update.effective_message
-		wikipedia.set_lang("id")
 		pagewiki = wikipedia.page(teks)
-		judul = pagewiki.title
-		summary = pagewiki.summary
-		if update.effective_message.chat.type == "private":
-			message.reply_text("Hasil dari {} adalah:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML)
-		else:
-			if len(summary) >= 200:
-				judul = pagewiki.title
-				summary = summary[:200]+"..."
-				button = InlineKeyboardMarkup([[InlineKeyboardButton(text="Baca Lebih Lengkap", url="t.me/{}?start=wiki-{}".format(bot.username, teks.replace(' ', '_')))]])
-			else:
-				button = None
-			message.reply_text("Hasil dari {} adalah:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
-
 	except wikipedia.exceptions.PageError:
 		update.effective_message.reply_text("Hasil tidak ditemukan")
+		return
 	except wikipedia.exceptions.DisambiguationError as refer:
 		update.effective_message.reply_text("{}".format(str(refer).replace('may refer to', 'dapat merujuk ke')))
+		return
 	except IndexError:
 		update.effective_message.reply_text("Tulis pesan untuk mencari dari sumber wikipedia")
-	else:
 		return
+	judul = pagewiki.title
+	summary = pagewiki.summary
+	if update.effective_message.chat.type == "private":
+		message.reply_text("Hasil dari {} adalah:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML)
+	else:
+		if len(summary) >= 200:
+			judul = pagewiki.title
+			summary = summary[:200]+"..."
+			button = InlineKeyboardMarkup([[InlineKeyboardButton(text="Baca Lebih Lengkap", url="t.me/{}?start=wiki-{}".format(bot.username, teks.replace(' ', '_')))]])
+		else:
+			button = None
+		message.reply_text("Hasil dari {} adalah:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
 
 
 @run_async
