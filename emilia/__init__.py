@@ -70,6 +70,7 @@ if ENV:
     ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
     API_WEATHER = os.environ.get('API_OPENWEATHER', None)
     API_ACCUWEATHER = os.environ.get('API_ACCUWEATHER', None)
+    MAPS_API = os.environ.get('MAPS_API', None)
 
 else:
     from emilia.config import Development as Config
@@ -118,6 +119,7 @@ else:
     ALLOW_EXCL = Config.ALLOW_EXCL
     API_WEATHER = Config.API_OPENWEATHER
     API_ACCUWEATHER = Config.API_ACCUWEATHER
+    MAPS_API = Config.MAPS_API
 
 
 SUDO_USERS.add(OWNER_ID)

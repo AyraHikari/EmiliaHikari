@@ -4,6 +4,7 @@ import random
 from datetime import datetime
 from typing import Optional, List
 import time
+import locale
 
 import requests
 from telegram.error import BadRequest, Unauthorized
@@ -12,11 +13,16 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamfilters
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamfilters, MAPS_API
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
+
+# Change language locale to Indonesia
+# Install language:
+# - sudo apt-get install language-pack-id language-pack-id-base manpages
+locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
 
 RUN_STRINGS = (
     "Kemana Anda pikir Anda akan pergi?",
@@ -301,7 +307,8 @@ def get_time(bot: Bot, update: Update, args: List[str]):
         bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
-    res = requests.get(GMAPS_LOC, params=dict(address=location))
+    res = requests.get(GMAPS_LOC, params=dict(address=location, key=MAPS_API))
+    print(res.text)
 
     if res.status_code == 200:
         loc = json.loads(res.text)
@@ -334,6 +341,30 @@ def get_time(bot: Bot, update: Update, args: List[str]):
                 timestamp = json.loads(res.text)['rawOffset']
                 time_there = datetime.fromtimestamp(timenow + timestamp + offset).strftime("%H:%M:%S hari %A %d %B")
                 update.message.reply_text("Sekarang pukul {} di {}".format(time_there, location))
+
+
+@run_async
+def get_time_alt(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+    location = " ".join(args)
+    if location.lower() == bot.first_name.lower():
+        update.effective_message.reply_text("Selalu ada waktu banned untukku!")
+        bot.send_sticker(update.effective_chat.id, BAN_STICKER)
+        return
+
+    res = requests.get('https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}'.format(location, MAPS_API))
+
+    if res.status_code == 200:
+        loc = res.json()
+        if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
+            update.message.reply_text("Lokasi tidak di temukan!")
+            return
+        placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
+        localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
+        time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
+        update.message.reply_text("Sekarang pukul `{}` di `{}`".format(time, placename), parse_mode="markdown")
 
 
 @run_async
@@ -412,7 +443,7 @@ __mod_name__ = "Lainnya"
 ID_HANDLER = DisableAbleCommandHandler("id", get_id, pass_args=True)
 IP_HANDLER = CommandHandler("ip", get_bot_ip, filters=Filters.chat(OWNER_ID))
 
-TIME_HANDLER = CommandHandler("time", get_time, pass_args=True)
+TIME_HANDLER = CommandHandler("time", get_time_alt, pass_args=True)
 
 RUNS_HANDLER = DisableAbleCommandHandler("runs", runs)
 LARI_HANDLER = DisableAbleCommandHandler("lari", runs)
