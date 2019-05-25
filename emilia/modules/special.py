@@ -403,8 +403,33 @@ def wiki(bot: Bot, update: Update):
 		except wikipedia.exceptions.PageError:
 			update.effective_message.reply_text("Hasil tidak ditemukan")
 			return
+		except wikipedia.exceptions.DisambiguationError as refer:
+			rujuk = str(refer).split("\n")
+			if len(rujuk) >= 6:
+				batas = 6
+			else:
+				batas = len(rujuk)
+			teks = ""
+			for x in range(batas):
+				if x == 0:
+					teks += rujuk[x].replace('may refer to', 'dapat merujuk ke')+"\n"
+				else:
+					teks += "- `"+rujuk[x]+"`\n"
+			update.effective_message.reply_text(teks, parse_mode="markdown")
+			return
 	except wikipedia.exceptions.DisambiguationError as refer:
-		update.effective_message.reply_text("{}".format(str(refer).replace('may refer to', 'dapat merujuk ke')))
+		rujuk = str(refer).split("\n")
+		if len(rujuk) >= 6:
+			batas = 6
+		else:
+			batas = len(rujuk)
+		teks = ""
+		for x in range(batas):
+			if x == 0:
+				teks += rujuk[x].replace('may refer to', 'dapat merujuk ke')+"\n"
+			else:
+				teks += "- `"+rujuk[x]+"`\n"
+		update.effective_message.reply_text(teks, parse_mode="markdown")
 		return
 	except IndexError:
 		update.effective_message.reply_text("Tulis pesan untuk mencari dari sumber wikipedia")
