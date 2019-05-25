@@ -13,6 +13,10 @@ class Config(object):
     API_KEY = "YOUR KEY HERE"
     OWNER_ID = "YOUR ID HERE"  # If you dont know, run the bot and do /id in your private chat with it
     OWNER_USERNAME = "YOUR USERNAME HERE"
+    # Some API is required for more features
+    API_OPENWEATHER = ""
+    API_ACCUWEATHER = ""
+    MAPS_API = ""
 
     # RECOMMENDED
     SQLALCHEMY_DATABASE_URI = 'sqldbtype://username:pw@hostname:port/db_name'  # needed for any database modules
@@ -34,6 +38,7 @@ class Config(object):
     WORKERS = 8  # Number of subthreads to use. This is the recommended amount - see for yourself what works best!
     BAN_STICKER = 'CAADAgADOwADPPEcAXkko5EB3YGYAg'  # banhammer marie sticker
     ALLOW_EXCL = False  # Allow ! commands as well as /
+    SPAMMERS = "" # Will not allow to interact with bot
 
 
 class Production(Config):
