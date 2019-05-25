@@ -220,7 +220,7 @@ def set_flood_mode(bot: Bot, update: Update, args: List[str]):
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
                 msg.reply_text(teks, parse_mode="markdown")
                 return
-            settypeflood = 'blokir sementara'
+            settypeflood = 'blokir sementara selama {}'.format(args[1])
             sql.set_flood_strength(chat_id, 4, str(args[1]))
         elif args[0].lower() == 'tmute':
             if len(args) == 1:
@@ -229,15 +229,15 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
                 msg.reply_text(teks, parse_mode="markdown")
                 return
-            settypeflood = 'bisukan sementara'
+            settypeflood = 'bisukan sementara selama {}'.format(args[1])
             sql.set_flood_strength(chat_id, 5, str(args[1]))
         else:
             msg.reply_text("Saya hanya mengerti ban/kick/mute/tban/tmute!")
             return
         if conn:
-            text = "Terlalu banyak mengirim pesan sekarang akan menghasilkan {} pada *{}*!".format(settypeflood, chat_name)
+            text = "Terlalu banyak mengirim pesan sekarang akan menghasilkan `{}` pada *{}*!".format(settypeflood, chat_name)
         else:
-            text = "Terlalu banyak mengirim pesan sekarang akan menghasilkan {}!".format(settypeflood)
+            text = "Terlalu banyak mengirim pesan sekarang akan menghasilkan `{}`!".format(settypeflood)
         msg.reply_text(text, parse_mode="markdown")
         return "<b>{}:</b>\n" \
                 "<b>Admin:</b> {}\n" \
