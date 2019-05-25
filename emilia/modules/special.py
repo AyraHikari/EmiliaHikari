@@ -397,8 +397,12 @@ def wiki(bot: Bot, update: Update):
 	try:
 		pagewiki = wikipedia.page(teks)
 	except wikipedia.exceptions.PageError:
-		update.effective_message.reply_text("Hasil tidak ditemukan")
-		return
+		wikipedia.set_lang("en")
+		try:
+			pagewiki = wikipedia.page(teks)
+		except wikipedia.exceptions.PageError:
+			update.effective_message.reply_text("Hasil tidak ditemukan")
+			return
 	except wikipedia.exceptions.DisambiguationError as refer:
 		update.effective_message.reply_text("{}".format(str(refer).replace('may refer to', 'dapat merujuk ke')))
 		return

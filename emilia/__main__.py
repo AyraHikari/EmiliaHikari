@@ -147,7 +147,11 @@ def start(bot: Bot, update: Update, args: List[str]):
                 wiki = args[0].split("-")[1].replace('_', ' ')
                 message = update.effective_message
                 wikipedia.set_lang("id")
-                pagewiki = wikipedia.page(wiki)
+                try:
+                    pagewiki = wikipedia.page(wiki)
+                except wikipedia.exceptions.PageError:
+                    wikipedia.set_lang("en")
+                    pagewiki = wikipedia.page(wiki)
                 judul = pagewiki.title
                 summary = pagewiki.summary
                 if len(summary) >= 4096:
