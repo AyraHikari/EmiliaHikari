@@ -320,7 +320,7 @@ def settings_button(bot: Bot, update: Update):
             chat = bot.get_chat(chat_id)
             getstatusadmin = bot.get_chat_member(chat_id, user.id)
             isadmin = getstatusadmin.status in ('administrator', 'creator')
-            if isadmin == False:
+            if isadmin == False or user.id != OWNER_ID:
                 query.message.edit_text("Status admin anda telah berubah")
                 return
             text = "*{}* memiliki pengaturan berikut untuk modul *{}*:\n\n".format(escape_markdown(chat.title),
