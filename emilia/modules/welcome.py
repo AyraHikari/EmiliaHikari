@@ -33,45 +33,58 @@ ENUM_FUNC_MAP = {
 
 # do not async
 def send(update, message, keyboard, backup_message):
+    chat = update.effective_chat
+    cleanserv = sql.clean_service(chat.id)
+    reply = update.message.message_id
+    # Clean service welcome
+    if cleanserv:
+        dispatcher.bot.delete_message(chat.id, update.message.message_id)
+        reply = False
     try:
-        msg = update.effective_message.reply_text(message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, disable_web_page_preview=True)
+        msg = dispatcher.bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, reply_to_message_id=reply, disable_web_page_preview=True)
     except IndexError:
-        msg = update.effective_message.reply_text(markdown_parser(backup_message +
+        msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
                                                                   "\nCatatan: pesan saat ini tidak valid "
                                                                   "karena masalah markdown. Bisa jadi "
                                                                   "karena nama pengguna."),
+                                                  reply_to_message_id=reply, 
                                                   parse_mode=ParseMode.MARKDOWN)
     except KeyError:
-        msg = update.effective_message.reply_text(markdown_parser(backup_message +
+        msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
                                                                   "\nCatatan: pesan saat ini tidak valid "
                                                                   "karena ada masalah dengan beberapa salah tempat. "
                                                                   "Harap perbarui"),
+                                                  reply_to_message_id=reply, 
                                                   parse_mode=ParseMode.MARKDOWN)
     except BadRequest as excp:
         if excp.message == "Button_url_invalid":
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
                                                                       "\nCatatan: pesan saat ini memiliki url yang tidak "
                                                                       "valid di salah satu tombolnya. Harap perbarui."),
+                                                      reply_to_message_id=reply, 
                                                       parse_mode=ParseMode.MARKDOWN)
         elif excp.message == "Unsupported url protocol":
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
                                                                       "\nCatatan: pesan saat ini memiliki tombol yang "
                                                                       "menggunakan protokol url yang tidak didukung "
                                                                       "oleh telegram. Harap perbarui."),
+                                                      reply_to_message_id=reply, 
                                                       parse_mode=ParseMode.MARKDOWN)
         elif excp.message == "Wrong url host":
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
                                                                       "\nCatatan: pesan saat ini memiliki beberapa url "
                                                                       "yang buruk. Harap perbarui."),
+                                                      reply_to_message_id=reply, 
                                                       parse_mode=ParseMode.MARKDOWN)
             LOGGER.warning(message)
             LOGGER.warning(keyboard)
             LOGGER.exception("Could not parse! got invalid url host errors")
         else:
             try:
-                msg = update.effective_message.reply_text(markdown_parser(backup_message +
+                msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
                                                                       "\nCatatan: Terjadi kesalahan saat mengirim pesan "
                                                                       "kustom. Harap perbarui."),
+                                                      reply_to_message_id=reply, 
                                                       parse_mode=ParseMode.MARKDOWN)
                 LOGGER.exception()
             except BadRequest:
@@ -91,7 +104,12 @@ def new_member(bot: Bot, update: Update):
         for new_mem in new_members:
             # Give the owner a special welcome
             if new_mem.id == OWNER_ID:
-                update.effective_message.reply_text("Master telah pulang! Mari kita mulai pesta ini! 😆")
+                cleanserv = sql.clean_service(chat.id)
+                if cleanserv:
+                    bot.delete_message(chat.id, update.message.message_id)
+                    bot.send_message(chat.id, "Master telah pulang! Mari kita mulai pesta ini! 😆")
+                else:
+                    update.effective_message.reply_text("Master telah pulang! Mari kita mulai pesta ini! 😆")
                 continue
 
             # Don't welcome yourself
@@ -134,22 +152,18 @@ def new_member(bot: Bot, update: Update):
                 sent = send(update, res, keyboard,
                             sql.DEFAULT_WELCOME.format(first=first_name))  # type: Optional[Message]
 
-                #Clean service welcome
-                if sql.clean_service(chat.id) == True:
-                    bot.delete_message(chat.id, update.message.message_id)
-
-                #If user ban protected don't apply security on him
+                # If user ban protected don't apply security on him
                 if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
                     continue
 
-                #Security soft mode
+                # Security soft mode
                 if sql.welcome_security(chat.id) == "soft":
                     try:
                         bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=True, can_send_media_messages=False, can_send_other_messages=False, can_add_web_page_previews=False, until_date=(int(time.time() + 24 * 60 * 60)))
                     except:
                         pass
 
-                #Add "I'm not bot button if enabled hard security"
+                # Add "I'm not bot button if enabled hard security"
                 if sql.welcome_security(chat.id) == "hard":
                     try:
                         update.effective_message.reply_text("Hai {}, klik tombol di bawah ini untuk disuarakan.".format(new_mem.first_name), 
@@ -277,7 +291,6 @@ def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
     if chat.type != chat.PRIVATE:
         if len(args) >= 1:
             var = args[0]
-            print(var)
             if (var == "no" or var == "off" or var == "tidak"):
                 sql.set_clean_service(chat.id, False)
                 update.effective_message.reply_text("Saya meninggalkan pesan layanan")
