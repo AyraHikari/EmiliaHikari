@@ -1,7 +1,7 @@
 import html
 from typing import Optional, List
 
-from telegram import Message, Chat, Update, Bot, User
+from telegram import Message, Chat, Update, Bot, User, InlineKeyboardMarkup
 from telegram import ParseMode
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, Filters
@@ -12,8 +12,21 @@ from emilia import dispatcher, updater, spamfilters
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import bot_admin, can_promote, user_admin, can_pin
 from emilia.modules.helper_funcs.extraction import extract_user
+from emilia.modules.helper_funcs.msg_types import get_message_type
+from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 from emilia.modules.log_channel import loggable
 from emilia.modules.connection import connected
+
+ENUM_FUNC_MAP = {
+    'Types.TEXT': dispatcher.bot.send_message,
+    'Types.BUTTON_TEXT': dispatcher.bot.send_message,
+    'Types.STICKER': dispatcher.bot.send_sticker,
+    'Types.DOCUMENT': dispatcher.bot.send_document,
+    'Types.PHOTO': dispatcher.bot.send_photo,
+    'Types.AUDIO': dispatcher.bot.send_audio,
+    'Types.VOICE': dispatcher.bot.send_voice,
+    'Types.VIDEO': dispatcher.bot.send_video
+}
 
 
 @run_async
@@ -337,6 +350,50 @@ def adminlist(bot: Bot, update: Update):
     update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
 
+@run_async
+def permapin(bot: Bot, update: Update):
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    message = update.effective_message  # type: Optional[Message]
+
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    conn = connected(bot, update, chat, user.id, need_admin=False)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
+    text, data_type, content, buttons = get_message_type(message)
+    tombol = build_keyboard_alternate(buttons)
+    if True:
+        try:
+            message.delete()
+        except:
+            update.effective_message.reply_text("Saya bukan admin!")
+            return
+        if str(data_type) in ('Types.BUTTON_TEXT', 'Types.TEXT'):
+            try:
+                sendingmsg = bot.send_message(chat_id, text, parse_mode="markdown",
+                                 disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
+            except BadRequest:
+                bot.send_message(chat_id, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.", parse_mode="markdown")
+                return
+        else:
+            sendingmsg = ENUM_FUNC_MAP[str(data_type)](chat_id, content, caption=text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
+        bot.pinChatMessage(chat_id, sendingmsg.message_id)
+
+
+
 def __chat_settings__(chat_id, user_id):
     administrators = dispatcher.bot.getChatAdministrators(chat_id)
     chat = dispatcher.bot.getChat(chat_id)
@@ -383,6 +440,7 @@ __mod_name__ = "Admin"
 
 PIN_HANDLER = CommandHandler("pin", pin, pass_args=True)
 UNPIN_HANDLER = CommandHandler("unpin", unpin)
+PERMAPIN_HANDLER = CommandHandler("permapin", permapin)
 
 INVITE_HANDLER = CommandHandler("invitelink", invite)
 
@@ -393,6 +451,7 @@ ADMINLIST_HANDLER = DisableAbleCommandHandler(["adminlist", "admins"], adminlist
 
 dispatcher.add_handler(PIN_HANDLER)
 dispatcher.add_handler(UNPIN_HANDLER)
+dispatcher.add_handler(PERMAPIN_HANDLER)
 dispatcher.add_handler(INVITE_HANDLER)
 dispatcher.add_handler(PROMOTE_HANDLER)
 dispatcher.add_handler(DEMOTE_HANDLER)
