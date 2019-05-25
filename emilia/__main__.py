@@ -152,7 +152,9 @@ def start(bot: Bot, update: Update, args: List[str]):
                 summary = pagewiki.summary
                 if len(summary) >= 4096:
                     summary = summary[:4000]+"..."
-                message.reply_text("<b>{}</b>\n{}".format(judul, summary), parse_mode=ParseMode.HTML)
+                message.reply_text("<b>{}</b>\n{}".format(judul, summary), parse_mode=ParseMode.HTML,
+                    reply_markup=InlineKeyboardMarkup(
+                            [[InlineKeyboardButton(text="Baca di Wikipedia", url=pagewiki.url)]]))
 
         else:
             first_name = update.effective_user.first_name
