@@ -579,6 +579,7 @@ def __migrate__(old_chat_id, new_chat_id):
 def __chat_settings__(chat_id, user_id):
     welcome_pref, _, _ = sql.get_welc_pref(chat_id)
     goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+    cleanserv = sql.clean_service(chat_id)
     if welcome_pref:
         welc = "✅ Aktif"
     else:
@@ -587,12 +588,18 @@ def __chat_settings__(chat_id, user_id):
         gdby = "✅ Aktif"
     else:
         gdby = "❎ Tidak Aktif"
+    if cleanserv:
+        clserv = "✅ Aktif"
+    else:
+        clserv = "❎ Tidak Aktif"
     return "Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\n" \
-           "Untuk preferensi pesan selamat tinggal `{}`.".format(welc, gdby)
+           "Untuk preferensi pesan selamat tinggal `{}`." \
+           "Bot `{}` menghapus notifikasi member masuk/keluar secara otomatis".format(welc, gdby, clserv)
 
 def __chat_settings_btn__(chat_id, user_id):
     welcome_pref, _, _ = sql.get_welc_pref(chat_id)
     goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+    cleanserv = sql.clean_service(chat_id)
     if welcome_pref:
         welc = "✅ Aktif"
     else:
@@ -601,11 +608,17 @@ def __chat_settings_btn__(chat_id, user_id):
         gdby = "✅ Aktif"
     else:
         gdby = "❎ Tidak Aktif"
+    if cleanserv:
+        clserv = "✅ Aktif"
+    else:
+        clserv = "❎ Tidak Aktif"
     button = []
     button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
         InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
     button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
         InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+    button.append([InlineKeyboardButton(text="Clean Service", callback_data="set_welc=s?|{}".format(chat_id)),
+        InlineKeyboardButton(text=clserv, callback_data="set_welc=s|{}".format(chat_id))])
     return button
 
 def WELC_EDITBTN(bot: Bot, update: Update):
@@ -614,14 +627,16 @@ def WELC_EDITBTN(bot: Bot, update: Update):
     print("User {} clicked button WELC EDIT".format(user.id))
     chat_id = query.data.split("|")[1]
     data = query.data.split("=")[1].split("|")[0]
-    goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
     if data == "w?":
         bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member baru masuk jika di aktifkan.", show_alert=True)
     if data == "g?":
         bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member yang keluar jika di aktifkan. Akan aktif hanya untuk grup dibawah 100 member.", show_alert=True)
+    if data == "s?":
+        bot.answerCallbackQuery(query.id, "Bot akan menghapus notifikasi member masuk atau member keluar secara otomatis jika di aktifkan.", show_alert=True)
     if data == "w":
         welcome_pref, _, _ = sql.get_welc_pref(chat_id)
         goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        cleanserv = sql.clean_service(chat_id)
         if welcome_pref:
             welc = "❎ Tidak Aktif"
             sql.set_welc_preference(str(chat_id), False)
@@ -632,15 +647,22 @@ def WELC_EDITBTN(bot: Bot, update: Update):
             gdby = "✅ Aktif"
         else:
             gdby = "❎ Tidak Aktif"
+        if cleanserv:
+            clserv = "✅ Aktif"
+        else:
+            clserv = "❎ Tidak Aktif"
         chat = bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
         text += "Obrolan ini preferensi pesan sambutannya telah diganti menjadi `{}`.\n".format(welc)
-        text += "Untuk preferensi pesan selamat tinggal `{}`.".format(gdby)
+        text += "Untuk preferensi pesan selamat tinggal `{}`.\n".format(gdby)
+        text += "Bot `{}` menghapus notifikasi member masuk/keluar secara otomatis".format(clserv)
         button = []
         button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
             InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
         button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
             InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Clean Service", callback_data="set_welc=s?|{}".format(chat_id)),
+            InlineKeyboardButton(text=clserv, callback_data="set_welc=s|{}".format(chat_id))])
         button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
@@ -649,6 +671,7 @@ def WELC_EDITBTN(bot: Bot, update: Update):
     if data == "g":
         welcome_pref, _, _ = sql.get_welc_pref(chat_id)
         goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        cleanserv = sql.clean_service(chat_id)
         if welcome_pref:
             welc = "✅ Aktif"
         else:
@@ -659,15 +682,57 @@ def WELC_EDITBTN(bot: Bot, update: Update):
         else:
             gdby = "✅ Aktif"
             sql.set_gdbye_preference(str(chat_id), True)
+        if cleanserv:
+            clserv = "✅ Aktif"
+        else:
+            clserv = "❎ Tidak Aktif"
         chat = bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
         text += "Obrolan ini preferensi pesan selamat tinggal telah diganti menjadi `{}`.\n".format(gdby)
-        text += "Untuk preferensi pesan sambutan `{}`.".format(welc)
+        text += "Untuk preferensi pesan sambutan `{}`.\n".format(welc)
+        text += "Bot `{}` menghapus notifikasi member masuk/keluar secara otomatis".format(clserv)
         button = []
         button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
             InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
         button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
             InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Clean Service", callback_data="set_welc=s?|{}".format(chat_id)),
+            InlineKeyboardButton(text=clserv, callback_data="set_welc=s|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
+        query.message.edit_text(text=text,
+                                  parse_mode=ParseMode.MARKDOWN,
+                                  reply_markup=InlineKeyboardMarkup(button))
+        bot.answer_callback_query(query.id)
+    if data == "s":
+        welcome_pref, _, _ = sql.get_welc_pref(chat_id)
+        goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        cleanserv = sql.clean_service(chat_id)
+        if welcome_pref:
+            welc = "✅ Aktif"
+        else:
+            welc = "❎ Tidak Aktif"
+        if goodbye_pref:
+            gdby = "✅ Aktif"
+        else:
+            gdby = "❎ Tidak Aktif"
+        if cleanserv:
+            clserv = "❎ Tidak Aktif"
+            sql.set_clean_service(chat_id, False)
+        else:
+            clserv = "✅ Aktif"
+            sql.set_clean_service(chat_id, True)
+        chat = bot.get_chat(chat_id)
+        text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
+        text += "Pengaturan clean service telah di ubah. Bot `{}` menghapus notifikasi member masuk/keluar.\n".format(clserv)
+        text += "Untuk preferensi pesan sambutan `{}`.\n".format(welc)
+        text += "Untuk preferensi pesan selamat tinggal `{}`.".format(gdby)
+        button = []
+        button.append([InlineKeyboardButton(text="Selamat datang", callback_data="set_welc=w?|{}".format(chat_id)),
+            InlineKeyboardButton(text=welc, callback_data="set_welc=w|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Selamat tinggal", callback_data="set_welc=g?|{}".format(chat_id)),
+            InlineKeyboardButton(text=gdby, callback_data="set_welc=g|{}".format(chat_id))])
+        button.append([InlineKeyboardButton(text="Clean Service", callback_data="set_welc=s?|{}".format(chat_id)),
+            InlineKeyboardButton(text=clserv, callback_data="set_welc=s|{}".format(chat_id))])
         button.append([InlineKeyboardButton(text="Kembali", callback_data="stngs_back({})".format(chat_id))])
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
