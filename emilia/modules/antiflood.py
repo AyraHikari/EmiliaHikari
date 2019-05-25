@@ -373,6 +373,14 @@ __help__ = """
 
 *Hanya admin:*
  - /setflood <int/'no'/'off'>: mengaktifkan atau menonaktifkan kontrol pesan beruntun
+ - /setfloodmode <ban/kick/mute/tban/tmute> <value>: pilih tindakan yang akan diambil pada pengguna yang mengirim pesan beruntun.
+
+ Note:
+ - Value wajib di isi untuk tban dan tmute, Bisa menjadi:
+    `4m` = 4 minutes
+    `3h` = 4 hours
+    `2d` = 2 days
+    `1w` = 1 week
 """
 
 __mod_name__ = "Anti Pesan Beruntun"
