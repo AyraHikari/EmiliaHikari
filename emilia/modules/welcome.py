@@ -68,11 +68,14 @@ def send(update, message, keyboard, backup_message):
             LOGGER.warning(keyboard)
             LOGGER.exception("Could not parse! got invalid url host errors")
         else:
-            msg = update.effective_message.reply_text(markdown_parser(backup_message +
+            try:
+                msg = update.effective_message.reply_text(markdown_parser(backup_message +
                                                                       "\nCatatan: Terjadi kesalahan saat mengirim pesan "
                                                                       "kustom. Harap perbarui."),
                                                       parse_mode=ParseMode.MARKDOWN)
-            LOGGER.exception()
+                LOGGER.exception()
+            except BadRequest:
+                print("Cannot send welcome msg, bot is muted!")
 
     return msg
 
