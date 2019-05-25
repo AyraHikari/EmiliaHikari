@@ -431,6 +431,7 @@ __help__ = """
 *Hanya admin:*
  - /pin: diam-diam pin pesan yang dibalas - tambahkan 'loud' atau 'notify' untuk memberikan notif kepada pengguna.
  - /unpin: buka pin pesan yang saat ini disematkan
+ - /permapin <teks>: Sematkan pesan khusus melalui bot. Pesan ini dapat berisi markdown, dan dapat digunakan dalam balasan ke media untuk menyertakan tombol dan teks tambahan.
  - /invitelink: dapatkan tautan undangan
  - /promote: mempromosikan pengguna yang dibalas
  - /demote: demosikan pengguna yang dibalas
