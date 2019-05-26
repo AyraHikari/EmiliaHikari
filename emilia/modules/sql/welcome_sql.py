@@ -78,11 +78,32 @@ class CleanServiceSetting(BASE):
 class WelcomeSecurity(BASE):
     __tablename__ = "welcome_security"
     chat_id = Column(String(14), primary_key=True)
-    security = Column(UnicodeText)
+    security = Column(Boolean, default=False)
+    mute_time = Column(UnicodeText, default="0")
+    custom_text = Column(UnicodeText, default="Klik disini untuk mensuarakan")
 
-    def __init__(self, chat_id, security):
+    def __init__(self, chat_id, security=False, mute_time="0", custom_text="Klik disini untuk mensuarakan"):
         self.chat_id = str(chat_id) # ensure string
         self.security = security
+        self.mute_time = mute_time
+        self.custom_text = custom_text
+
+class UserRestirect(BASE):
+    __tablename__ = "welcome_restirectlist"
+    chat_id = Column(String(14), primary_key=True)
+    user_id = Column(Integer, primary_key=True, nullable=False)
+
+    def __init__(self, chat_id, user_id):
+        self.chat_id = str(chat_id)  # ensure string
+        self.user_id = user_id
+
+    def __repr__(self):
+        return "<User restirect '%s' in %s>" % (self.user_id, self.chat_id)
+
+    def __eq__(self, other):
+        return bool(isinstance(other, UserRestirect)
+                    and self.chat_id == other.chat_id
+                    and self.user_id == other.user_id)
 
 
 Welcome.__table__.create(checkfirst=True)
@@ -90,31 +111,71 @@ WelcomeButtons.__table__.create(checkfirst=True)
 GoodbyeButtons.__table__.create(checkfirst=True)
 CleanServiceSetting.__table__.create(checkfirst=True)
 WelcomeSecurity.__table__.create(checkfirst=True)
+UserRestirect.__table__.create(checkfirst=True)
 
 INSERTION_LOCK = threading.RLock()
 WELC_BTN_LOCK = threading.RLock()
 LEAVE_BTN_LOCK = threading.RLock()
 CS_LOCK = threading.RLock()
 WS_LOCK = threading.RLock()
+UR_LOCK = threading.RLock()
+
+CHAT_USERRESTIRECT = {}
+
+
+def add_to_userlist(chat_id, user_id):
+    with UR_LOCK:
+        user_filt = UserRestirect(str(chat_id), user_id)
+
+        SESSION.merge(user_filt)  # merge to avoid duplicate key issues
+        SESSION.commit()
+        global CHAT_USERRESTIRECT
+        if CHAT_USERRESTIRECT.get(str(chat_id), set()) == set():
+            CHAT_USERRESTIRECT[str(chat_id)] = {user_id}
+        else:
+            CHAT_USERRESTIRECT.get(str(chat_id), set()).add(user_id)
+
+
+def rm_from_userlist(chat_id, user_id):
+    with UR_LOCK:
+        user_filt = SESSION.query(UserRestirect).get((str(chat_id), user_id))
+        if user_filt:
+            if user_id in CHAT_USERRESTIRECT.get(str(chat_id), set()):  # sanity check
+                CHAT_USERRESTIRECT.get(str(chat_id), set()).remove(user_id)
+
+            SESSION.delete(user_filt)
+            SESSION.commit()
+            return True
+
+        SESSION.close()
+        return False
+
+def get_chat_userlist(chat_id):
+    return CHAT_USERRESTIRECT.get(str(chat_id), set())
 
 
 def welcome_security(chat_id):
     try:
         security = SESSION.query(WelcomeSecurity).get(str(chat_id))
         if security:
-            return security.security
-        return False
+            return security.security, security.mute_time, security.custom_text
+        else:
+            return False, "0", "Klik disini untuk mensuarakan"
     finally:
         SESSION.close()
 
 
-def set_welcome_security(chat_id, security):
+def set_welcome_security(chat_id, security, mute_time, custom_text):
     with WS_LOCK:
-        prev = SESSION.query(WelcomeSecurity).get((str(chat_id)))
-        if prev:
-            SESSION.delete(prev)
-        welcome_s = WelcomeSecurity(str(chat_id), security)
-        SESSION.add(welcome_s)
+        curr_setting = SESSION.query(WelcomeSecurity).get((str(chat_id)))
+        if not curr_setting:
+            curr_setting = WelcomeSecurity(chat_id, security=security, mute_time=mute_time, custom_text=custom_text)
+
+        curr_setting.security = bool(security)
+        curr_setting.mute_time = str(mute_time)
+        curr_setting.custom_text = str(custom_text)
+
+        SESSION.add(curr_setting)
         SESSION.commit()
 
 
@@ -320,3 +381,21 @@ def migrate_chat(old_chat_id, new_chat_id):
                 btn.chat_id = str(new_chat_id)
 
         SESSION.commit()
+
+def __load_chat_userrestirect():
+    global CHAT_USERRESTIRECT
+    try:
+        chats = SESSION.query(UserRestirect.chat_id).distinct().all()
+        for (chat_id,) in chats:  # remove tuple by ( ,)
+            CHAT_USERRESTIRECT[chat_id] = []
+
+        all_filters = SESSION.query(UserRestirect).all()
+        for x in all_filters:
+            CHAT_USERRESTIRECT[x.chat_id] += [x.user_id]
+
+        CHAT_USERRESTIRECT = {x: set(y) for x, y in CHAT_USERRESTIRECT.items()}
+
+    finally:
+        SESSION.close()
+
+__load_chat_userrestirect()

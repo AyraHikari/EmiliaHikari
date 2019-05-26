@@ -14,7 +14,7 @@ from emilia.modules.helper_funcs.chat_status import user_admin, is_user_ban_prot
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_welcome_type
 from emilia.modules.helper_funcs.string_handling import markdown_parser, \
-    escape_invalid_curly_brackets
+    escape_invalid_curly_brackets, extract_time
 from emilia.modules.log_channel import loggable
 
 VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'count', 'chatname', 'mention']
@@ -147,6 +147,16 @@ def new_member(bot: Bot, update: Update):
                     res = sql.DEFAULT_WELCOME.format(first=first_name)
                     keyb = []
 
+                getsec, mutetime, custom_text = sql.welcome_security(chat.id)
+                if getsec:
+                    sql.add_to_userlist(chat.id, new_mem.id)
+                    keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+                if mutetime:
+                    if mutetime[:1] == "0":
+                        bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                    else:
+                        mutetime = extract_time(update.effective_message, mutetime)
+                        bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
                 keyboard = InlineKeyboardMarkup(keyb)
 
                 sent = send(update, res, keyboard,
@@ -155,23 +165,6 @@ def new_member(bot: Bot, update: Update):
                 # If user ban protected don't apply security on him
                 if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
                     continue
-
-                # Security soft mode
-                if sql.welcome_security(chat.id) == "soft":
-                    try:
-                        bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=True, can_send_media_messages=False, can_send_other_messages=False, can_add_web_page_previews=False, until_date=(int(time.time() + 24 * 60 * 60)))
-                    except:
-                        pass
-
-                # Add "I'm not bot button if enabled hard security"
-                if sql.welcome_security(chat.id) == "hard":
-                    try:
-                        update.effective_message.reply_text("Hai {}, klik tombol di bawah ini untuk disuarakan.".format(new_mem.first_name), 
-                         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="Klik di sini untuk meyakinkan Anda manusia!", 
-                         callback_data="check_bot_({})".format(new_mem.id)) ]]))
-                        bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False, can_send_media_messages=False, can_send_other_messages=False, can_add_web_page_previews=False)
-                    except:
-                        pass
 
                 
             prev_welc = sql.get_clean_pref(chat.id)
@@ -190,17 +183,17 @@ def check_bot_button(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     query = update.callback_query  # type: Optional[CallbackQuery]
-    #bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)))
     match = re.match(r"check_bot_\((.+?)\)", query.data)
     user_id = int(match.group(1))
     message = update.effective_message  # type: Optional[Message]
-    if user_id == user.id:
-        query.answer(text="Disuarakan!")
-        #Unmute user
+    getalluser = sql.get_chat_userlist(chat.id)
+    if user.id in getalluser:
+        query.answer(text="Kamu telah disuarakan!")
+        # Unmute user
         bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-        bot.deleteMessage(chat.id, message.message_id)
+        sql.rm_from_userlist(chat.id, user.id)
     else:
-        query.answer(text="Anda bukan pengguna baru!")
+        query.answer(text="Kamu bukan pengguna baru!")
     #TODO need kick users after 2 hours and remove message 
 
 
@@ -262,23 +255,80 @@ def security(bot: Bot, update: Update, args: List[str]) -> str:
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
     chat = update.effective_chat  # type: Optional[Chat]
+    getcur, cur_value, cust_text = sql.welcome_security(chat.id)
     if len(args) >= 1:
         var = args[0]
-        print(var)
-        if (var == "no" or var == "off"):
-            sql.set_welcome_security(chat.id, False)
-            update.effective_message.reply_text("Keamanan selamat datang yang dinonaktifkan")
-        elif(var == "soft"):
-            sql.set_welcome_security(chat.id, "soft")
-            update.effective_message.reply_text("Saya akan membatasi pengguna untuk mengirim media selama 24 jam")
-        elif(var == "hard"):
-            sql.set_welcome_security(chat.id, "hard")
-            update.effective_message.reply_text("Saya akan mematikan pengguna saat dia tidak mengklik tombol")
+        if (var == "yes" or var == "ya" or var == "y"):
+            sql.set_welcome_security(chat.id, True, str(cur_value), cust_text)
+            update.effective_message.reply_text("Keamanan untuk member baru di aktifkan!")
+        elif (var == "no" or var == "ga" or var == "n"):
+            sql.set_welcome_security(chat.id, False, str(cur_value), cust_text)
+            update.effective_message.reply_text("Di nonaktifkan")
         else:
-            update.effective_message.reply_text("Silakan tulis `off`/`no`/`soft`/`hard`!", parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text("Silakan tulis `ya`/`y`/`no`/`n`!", parse_mode=ParseMode.MARKDOWN)
     else:
         status = sql.welcome_security(chat.id)
         update.effective_message.reply_text(status)
+
+
+@run_async
+@user_admin
+def security_mute(bot: Bot, update: Update, args: List[str]) -> str:
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+    chat = update.effective_chat  # type: Optional[Chat]
+    message = update.effective_message  # type: Optional[Message]
+    getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+    if len(args) >= 1:
+        var = args[0]
+        if var[:1] == "0":
+            mutetime = "0"
+            sql.set_welcome_security(chat.id, getcur, "0", cust_text)
+            text = "Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!"
+        else:
+            mutetime = extract_time(message, var)
+            if mutetime == "":
+                return
+            sql.set_welcome_security(chat.id, getcur, str(var), cust_text)
+            text = "Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!".format(var)
+        update.effective_message.reply_text(text)
+    else:
+        if str(cur_value) == "0":
+            update.effective_message.reply_text("Pengaturans saat ini: member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!")
+        else:
+            update.effective_message.reply_text("Pengaturans saat ini: member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!".format(cur_value))
+
+
+@run_async
+@user_admin
+def security_text(bot: Bot, update: Update, args: List[str]) -> str:
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+    chat = update.effective_chat  # type: Optional[Chat]
+    message = update.effective_message  # type: Optional[Message]
+    getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+    if len(args) >= 1:
+        text = " ".join(args)
+        sql.set_welcome_security(chat.id, getcur, cur_value, text)
+        text = "Tombol custom teks telah di ubah menjadi: `{}`".format(text)
+        update.effective_message.reply_text(text, parse_mode="markdown")
+    else:
+        update.effective_message.reply_text("Tombol teks security saat ini adalah: `{}`".format(cust_text), parse_mode="markdown")
+
+
+@run_async
+@user_admin
+def security_text_reset(bot: Bot, update: Update):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+    chat = update.effective_chat  # type: Optional[Chat]
+    message = update.effective_message  # type: Optional[Message]
+    getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+    sql.set_welcome_security(chat.id, getcur, cur_value, "Klik disini untuk mensuarakan")
+    update.effective_message.reply_text("Tombol custom teks security telah di reset menjadi: `Klik disini untuk mensuarakan`", parse_mode="markdown")
 
 
 @run_async
@@ -302,7 +352,11 @@ def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
         else:
             update.effective_message.reply_text("Silakan masukkan yes/ya atau no/tidak!", parse_mode=ParseMode.MARKDOWN)
     else:
-        update.effective_message.reply_text("Silakan masukkan yes/ya atau no/tidak di grup Anda!", parse_mode=ParseMode.MARKDOWN)
+        curr = sql.clean_service(chat.id)
+        if curr:
+            update.effective_message.reply_text("Saat ini saya akan membersihkan `x joined the group` ketika ada member baru.", parse_mode=ParseMode.MARKDOWN)
+        else:
+            update.effective_message.reply_text("Saat ini saya tidak akan membersihkan `x joined the group` ketika ada member baru.", parse_mode=ParseMode.MARKDOWN)
 
 
 
@@ -314,9 +368,28 @@ def welcome(bot: Bot, update: Update, args: List[str]):
     if len(args) == 0 or args[0].lower() == "noformat":
         noformat = args and args[0].lower() == "noformat"
         pref, welcome_m, welcome_type = sql.get_welc_pref(chat.id)
-        update.effective_message.reply_text(
-            "Obrolan ini diatur dengan setelan selamat datang: `{}`.\n*Pesan selamat datang "
-            "(tidak mengisi {{}}) adalah:*".format(pref),
+        prev_welc = sql.get_clean_pref(chat.id)
+        if prev_welc:
+            prev_welc = True
+        else:
+            prev_welc = False
+        cleanserv = sql.clean_service(chat.id)
+        getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+        if getcur:
+            welcsec = "Aktif "
+        else:
+            welcsec = "Tidak aktif "
+        if cur_value[:1] == "0":
+            welcsec += "(di bisukan selamanya sampai menekan tombol unmute)"
+        else:
+            welcsec += "(di bisukan selama {})".format(cur_value)
+        text = "Obrolan ini diatur dengan setelan selamat datang: `{}`\n".format(pref)
+        text += "Saat ini Saya menghapus pesan selamat datang lama: `{}`\n".format(prev_welc)
+        text += "Saat ini Saya menghapus layanan pesan: `{}`\n".format(cleanserv)
+        text += "Saat ini saya membisukan pengguna ketika mereka bergabung: `{}`\n".format(welcsec)
+        text += "Tombol welcomemute akan mengatakan: `{}`\n".format(cust_text)
+        text += "\n*Pesan selamat datang (tidak mengisi {{}}) adalah:*"
+        update.effective_message.reply_text(text,
             parse_mode=ParseMode.MARKDOWN)
 
         if welcome_type == sql.Types.BUTTON_TEXT:
@@ -772,7 +845,10 @@ RESET_WELCOME = CommandHandler("resetwelcome", reset_welcome, filters=Filters.gr
 RESET_GOODBYE = CommandHandler("resetgoodbye", reset_goodbye, filters=Filters.group)
 CLEAN_WELCOME = CommandHandler("cleanwelcome", clean_welcome, pass_args=True, filters=Filters.group)
 WELCOME_HELP = CommandHandler("welcomehelp", welcome_help)
-SECURITY_HANDLER = CommandHandler("welcomesecurity", security, pass_args=True, filters=Filters.group)
+SECURITY_HANDLER = CommandHandler("welcomemute", security, pass_args=True, filters=Filters.group)
+SECURITY_MUTE_HANDLER = CommandHandler("welcomemutetime", security_mute, pass_args=True, filters=Filters.group)
+SECURITY_BUTTONTXT_HANDLER = CommandHandler("setmutetext", security_text, pass_args=True, filters=Filters.group)
+SECURITY_BUTTONRESET_HANDLER = CommandHandler("resetmutetext", security_text_reset, filters=Filters.group)
 CLEAN_SERVICE_HANDLER = CommandHandler("cleanservice", cleanservice, pass_args=True, filters=Filters.group)
 
 help_callback_handler = CallbackQueryHandler(check_bot_button, pattern=r"check_bot_")
@@ -789,6 +865,9 @@ dispatcher.add_handler(RESET_GOODBYE)
 dispatcher.add_handler(CLEAN_WELCOME)
 dispatcher.add_handler(WELCOME_HELP)
 dispatcher.add_handler(SECURITY_HANDLER)
+dispatcher.add_handler(SECURITY_MUTE_HANDLER)
+dispatcher.add_handler(SECURITY_BUTTONTXT_HANDLER)
+dispatcher.add_handler(SECURITY_BUTTONRESET_HANDLER)
 dispatcher.add_handler(CLEAN_SERVICE_HANDLER)
 dispatcher.add_handler(WELC_BTNSET_HANDLER)
 
