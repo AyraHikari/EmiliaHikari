@@ -257,15 +257,15 @@ def security(bot: Bot, update: Update, args: List[str]) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     getcur, cur_value, cust_text = sql.welcome_security(chat.id)
     if len(args) >= 1:
-        var = args[0]
-        if (var == "yes" or var == "ya" or var == "y"):
+        var = args[0].lower()
+        if (var == "yes" or var == "ya" or var == "on"):
             sql.set_welcome_security(chat.id, True, str(cur_value), cust_text)
             update.effective_message.reply_text("Keamanan untuk member baru di aktifkan!")
-        elif (var == "no" or var == "ga" or var == "n"):
+        elif (var == "no" or var == "ga" or var == "off"):
             sql.set_welcome_security(chat.id, False, str(cur_value), cust_text)
             update.effective_message.reply_text("Di nonaktifkan")
         else:
-            update.effective_message.reply_text("Silakan tulis `ya`/`y`/`no`/`n`!", parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text("Silakan tulis `on`/`ya`/`off`/`ga`!", parse_mode=ParseMode.MARKDOWN)
     else:
         status = sql.welcome_security(chat.id)
         update.effective_message.reply_text(status)
@@ -340,7 +340,7 @@ def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     if chat.type != chat.PRIVATE:
         if len(args) >= 1:
-            var = args[0]
+            var = args[0].lower()
             if (var == "no" or var == "off" or var == "tidak"):
                 sql.set_clean_service(chat.id, False)
                 update.effective_message.reply_text("Saya meninggalkan pesan layanan")
@@ -828,9 +828,23 @@ __help__ = """
  - /resetgoodbye: reset ulang ke pesan selamat tinggal default.
  - /cleanwelcome <on/off>: Pada anggota baru, coba hapus pesan sambutan sebelumnya untuk menghindari spamming obrolan.
  - /cleanservice <on/off/yes/no>: menghapus semua pesan layanan; itu adalah "x bergabung kedalam grup" yang Anda lihat ketika orang-orang bergabung.
- - /welcomesecurity <off/soft/hard>: soft - batasi pengguna mengirim file media selama 24 jam, hard - Membatasi pengguna mengirim pesan sementara dia tidak mengklik tombol \"Saya bukan bot\"
+ - /welcomemute <on/ya/off/ga>: semua pengguna yang bergabung akan di bisukan; sebuah tombol ditambahkan ke pesan selamat datang bagi mereka untuk mensuarakan diri mereka sendiri. Ini membuktikan bahwa mereka bukan bot!
+ - /welcomemutetime <Xw/d/h/m>: jika pengguna belum menekan tombol "unmute" di pesan sambutan setelah beberapa waktu ini, mereka akan dibunyikan secara otomatis setelah periode waktu ini.
+   Catatan: jika Anda ingin mengatur ulang waktu bisu menjadi selamanya, gunakan `/welcomemutetime 0m`. 0 == abadi!
+ - /setmutetext <teks tombol>: Ubahsuaikan untuk tombol "Klik disini untuk mensuarakan" yang diperoleh dari mengaktifkan welcomemute.
+ - /resetmutetext: Reset teks tombol unmute menjadi default.
 
- - /welcomehelp: lihat informasi pemformatan lebih lanjut untuk pesan selamat datang/selamat tinggal kustom.
+Baca /welcomehelp untuk mempelajari tentang memformat teks Anda dan menyebutkan pengguna baru saat bergabung!
+
+Anda dapat mengaktifkan/menonaktifkan pesan sambutan:
+`/welcome off` atau `/welcome on`
+
+Jika Anda ingin menyimpan gambar, gif, atau stiker, atau data lain, lakukan hal berikut:
+Balas pesan stiker atau data apa pun yang Anda inginkan dengan teks `/setwelcome`. Data ini sekarang akan dikirim untuk menyambut pengguna baru.
+
+Tip: gunakan /welcome noformat untuk mengambil pesan sambutan yang belum diformat.
+Ini akan mengambil pesan selamat datang dan mengirimkannya tanpa memformatnya; memberi Anda markdown mentah, memungkinkan Anda untuk mengedit dengan mudah.
+Ini juga berfungsi dengan /goodbye.
 """.format(WELC_HELP_TXT)
 
 __mod_name__ = "Welcomes/Goodbyes"
