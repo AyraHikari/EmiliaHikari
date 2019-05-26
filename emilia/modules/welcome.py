@@ -97,7 +97,7 @@ def send(update, message, keyboard, backup_message):
 def new_member(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
 
-    should_welc, cust_welcome, welc_type = sql.get_welc_pref(chat.id)
+    should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
     if should_welc:
         sent = None
         new_members = update.effective_message.new_chat_members
@@ -125,7 +125,7 @@ def new_member(bot: Bot, update: Update):
                     if cleanserv:
                         dispatcher.bot.delete_message(chat.id, update.message.message_id)
                         reply = False
-                    ENUM_FUNC_MAP[welc_type](chat.id, cust_welcome, reply_to_message_id=reply)
+                    ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=cust_welcome, reply_to_message_id=reply)
                     return
                 # else, move on
                 first_name = new_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -373,7 +373,7 @@ def welcome(bot: Bot, update: Update, args: List[str]):
     # if no args, show current replies.
     if len(args) == 0 or args[0].lower() == "noformat":
         noformat = args and args[0].lower() == "noformat"
-        pref, welcome_m, welcome_type = sql.get_welc_pref(chat.id)
+        pref, welcome_m, cust_content, welcome_type = sql.get_welc_pref(chat.id)
         prev_welc = sql.get_clean_pref(chat.id)
         if prev_welc:
             prev_welc = True
@@ -398,7 +398,7 @@ def welcome(bot: Bot, update: Update, args: List[str]):
         update.effective_message.reply_text(text,
             parse_mode=ParseMode.MARKDOWN)
 
-        if welcome_type == sql.Types.BUTTON_TEXT:
+        if welcome_type == sql.Types.BUTTON_TEXT or welcome_type == sql.Types.TEXT:
             buttons = sql.get_welc_buttons(chat.id)
             if noformat:
                 welcome_m += revert_buttons(buttons)
@@ -411,11 +411,15 @@ def welcome(bot: Bot, update: Update, args: List[str]):
                 send(update, welcome_m, keyboard, sql.DEFAULT_WELCOME)
 
         else:
+            buttons = sql.get_welc_buttons(chat.id)
             if noformat:
-                ENUM_FUNC_MAP[welcome_type](chat.id, welcome_m)
+                welcome_m += revert_buttons(buttons)
+                ENUM_FUNC_MAP[welcome_type](chat.id, cust_content, caption=welcome_m)
 
             else:
-                ENUM_FUNC_MAP[welcome_type](chat.id, welcome_m, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+                keyb = build_keyboard(buttons)
+                keyboard = InlineKeyboardMarkup(keyb)
+                ENUM_FUNC_MAP[welcome_type](chat.id, cust_content, caption=welcome_m, reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
     elif len(args) >= 1:
         if args[0].lower() in ("on", "yes"):
@@ -494,7 +498,7 @@ def set_welcome(bot: Bot, update: Update) -> str:
         msg.reply_text("Anda tidak menentukan apa yang harus dibalas!")
         return ""
 
-    sql.set_custom_welcome(chat.id, content or text, data_type, buttons)
+    sql.set_custom_welcome(chat.id, content, text, data_type, buttons)
     msg.reply_text("Berhasil mengatur pesan sambutan kustom!")
 
     return "<b>{}:</b>" \
@@ -513,7 +517,7 @@ def reset_welcome(bot: Bot, update: Update) -> str:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
-    sql.set_custom_welcome(chat.id, sql.DEFAULT_WELCOME, sql.Types.TEXT)
+    sql.set_custom_welcome(chat.id, None, sql.DEFAULT_WELCOME, sql.Types.TEXT)
     update.effective_message.reply_text("Berhasil menyetel ulang pesan sambutan ke default!")
     return "<b>{}:</b>" \
            "\n#RESET_WELCOME" \
@@ -656,8 +660,8 @@ def __migrate__(old_chat_id, new_chat_id):
 
 
 def __chat_settings__(chat_id, user_id):
-    welcome_pref, _, _ = sql.get_welc_pref(chat_id)
-    goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+    welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
+    goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
     cleanserv = sql.clean_service(chat_id)
     if welcome_pref:
         welc = "✅ Aktif"
@@ -676,8 +680,8 @@ def __chat_settings__(chat_id, user_id):
            "Bot `{}` menghapus notifikasi member masuk/keluar secara otomatis".format(welc, gdby, clserv)
 
 def __chat_settings_btn__(chat_id, user_id):
-    welcome_pref, _, _ = sql.get_welc_pref(chat_id)
-    goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+    welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
+    goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
     cleanserv = sql.clean_service(chat_id)
     if welcome_pref:
         welc = "✅ Aktif"
@@ -713,8 +717,8 @@ def WELC_EDITBTN(bot: Bot, update: Update):
     if data == "s?":
         bot.answerCallbackQuery(query.id, "Bot akan menghapus notifikasi member masuk atau member keluar secara otomatis jika di aktifkan.", show_alert=True)
     if data == "w":
-        welcome_pref, _, _ = sql.get_welc_pref(chat_id)
-        goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
+        goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
         cleanserv = sql.clean_service(chat_id)
         if welcome_pref:
             welc = "❎ Tidak Aktif"
@@ -748,8 +752,8 @@ def WELC_EDITBTN(bot: Bot, update: Update):
                                   reply_markup=InlineKeyboardMarkup(button))
         bot.answer_callback_query(query.id)
     if data == "g":
-        welcome_pref, _, _ = sql.get_welc_pref(chat_id)
-        goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
+        goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
         cleanserv = sql.clean_service(chat_id)
         if welcome_pref:
             welc = "✅ Aktif"
@@ -783,8 +787,8 @@ def WELC_EDITBTN(bot: Bot, update: Update):
                                   reply_markup=InlineKeyboardMarkup(button))
         bot.answer_callback_query(query.id)
     if data == "s":
-        welcome_pref, _, _ = sql.get_welc_pref(chat_id)
-        goodbye_pref, _, _ = sql.get_gdbye_pref(chat_id)
+        welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
+        goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
         cleanserv = sql.clean_service(chat_id)
         if welcome_pref:
             welc = "✅ Aktif"
