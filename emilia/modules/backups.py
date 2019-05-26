@@ -192,6 +192,8 @@ def export_data(bot: Bot, update: Update, chat_data):
 			isicat += '###voice###:{}<###TYPESPLIT###>{}<###splitter###>'.format(note.file, note.value)
 		elif note.msgtype == 7:
 			isicat += '###video###:{}<###TYPESPLIT###>{}<###splitter###>'.format(note.file, note.value)
+		elif note.msgtype == 8:
+			isicat += '###video_note###:{}<###TYPESPLIT###>{}<###splitter###>'.format(note.file, note.value)
 		else:
 			isicat += '{}<###splitter###>'.format(note.value)
 	for x in range(count):
