@@ -206,13 +206,13 @@ def set_flood_mode(bot: Bot, update: Update, args: List[str]):
     if args:
         if args[0].lower() == 'ban':
             settypeflood = 'blokir'
-            sql.set_flood_strength(chat_id, 1)
+            sql.set_flood_strength(chat_id, 1, "0")
         elif args[0].lower() == 'kick':
             settypeflood = 'tendang'
-            sql.set_flood_strength(chat_id, 2)
+            sql.set_flood_strength(chat_id, 2, "0")
         elif args[0].lower() == 'mute':
             settypeflood = 'bisukan'
-            sql.set_flood_strength(chat_id, 3)
+            sql.set_flood_strength(chat_id, 3, "0")
         elif args[0].lower() == 'tban':
             if len(args) == 1:
                 teks = """Sepertinya Anda mencoba menetapkan nilai sementara untuk anti-banjir, tetapi belum menentukan waktu; gunakan `/setfloodmode tban <timevalue>`.
