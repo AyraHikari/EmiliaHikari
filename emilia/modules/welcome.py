@@ -119,7 +119,13 @@ def new_member(bot: Bot, update: Update):
             else:
                 # If welcome message is media, send with appropriate function
                 if welc_type != sql.Types.TEXT and welc_type != sql.Types.BUTTON_TEXT:
-                    ENUM_FUNC_MAP[welc_type](chat.id, cust_welcome)
+                    reply = update.message.message_id
+                    cleanserv = sql.clean_service(chat.id)
+                    # Clean service welcome
+                    if cleanserv:
+                        dispatcher.bot.delete_message(chat.id, update.message.message_id)
+                        reply = False
+                    ENUM_FUNC_MAP[welc_type](chat.id, cust_welcome, reply_to_message_id=reply)
                     return
                 # else, move on
                 first_name = new_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.

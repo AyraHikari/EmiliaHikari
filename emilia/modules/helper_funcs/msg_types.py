@@ -91,7 +91,10 @@ def get_welcome_type(msg: Message):
     content = None
     text = ""
 
-    args = msg.text.split(None, 1)  # use python's maxsplit to separate cmd and args
+    try:
+        args = msg.text.split(None, 1)  # use python's maxsplit to separate cmd and args
+    except AttributeError:
+        args = [msg.text]
 
     buttons = []
     # determine what the contents of the filter are - text, image, sticker, etc
@@ -105,37 +108,37 @@ def get_welcome_type(msg: Message):
 
     elif msg.reply_to_message and msg.reply_to_message.sticker:
         content = msg.reply_to_message.sticker.file_id
-        text = msg.reply_to_message.text
+        text = None
         data_type = Types.STICKER
 
     elif msg.reply_to_message and msg.reply_to_message.document:
         content = msg.reply_to_message.document.file_id
-        text = msg.reply_to_message.text
+        text = msg.reply_to_message.caption
         data_type = Types.DOCUMENT
 
     elif msg.reply_to_message and msg.reply_to_message.photo:
         content = msg.reply_to_message.photo[-1].file_id  # last elem = best quality
-        text = msg.reply_to_message.text
+        text = msg.reply_to_message.caption
         data_type = Types.PHOTO
 
     elif msg.reply_to_message and msg.reply_to_message.audio:
         content = msg.reply_to_message.audio.file_id
-        text = msg.reply_to_message.text
+        text = msg.reply_to_message.caption
         data_type = Types.AUDIO
 
     elif msg.reply_to_message and msg.reply_to_message.voice:
         content = msg.reply_to_message.voice.file_id
-        text = msg.reply_to_message.text
+        text = None
         data_type = Types.VOICE
 
     elif msg.reply_to_message and msg.reply_to_message.video:
         content = msg.reply_to_message.video.file_id
-        text = msg.reply_to_message.text
+        text = msg.reply_to_message.caption
         data_type = Types.VIDEO
 
     elif msg.reply_to_message and msg.reply_to_message.video_note:
         content = msg.reply_to_message.video_note.file_id
-        text = msg.reply_to_message.text
+        text = None
         data_type = Types.VIDEO_NOTE
 
     return text, data_type, content, buttons
