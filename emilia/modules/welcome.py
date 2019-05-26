@@ -125,7 +125,40 @@ def new_member(bot: Bot, update: Update):
                     if cleanserv:
                         dispatcher.bot.delete_message(chat.id, update.message.message_id)
                         reply = False
-                    ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=cust_welcome, reply_to_message_id=reply)
+                    # Formatting text
+                    first_name = new_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
+                    if new_mem.last_name:
+                        fullname = "{} {}".format(first_name, new_mem.last_name)
+                    else:
+                        fullname = first_name
+                    count = chat.get_members_count()
+                    mention = mention_markdown(new_mem.id, first_name)
+                    if new_mem.username:
+                        username = "@" + escape_markdown(new_mem.username)
+                    else:
+                        username = mention
+                    formatted_text = cust_welcome.format(first=escape_markdown(first_name),
+                                              last=escape_markdown(new_mem.last_name or first_name),
+                                              fullname=escape_markdown(fullname), username=username, mention=mention,
+                                              count=count, chatname=escape_markdown(chat.title), id=new_mem.id)
+                    # Build keyboard
+                    buttons = sql.get_welc_buttons(chat.id)
+                    keyb = build_keyboard(buttons)
+                    getsec, mutetime, custom_text = sql.welcome_security(chat.id)
+                    # If security welcome is turned on
+                    if getsec:
+                        sql.add_to_userlist(chat.id, new_mem.id)
+                        keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+                    # If mute time is turned on
+                    if mutetime:
+                        if mutetime[:1] == "0":
+                            bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                        else:
+                            mutetime = extract_time(update.effective_message, mutetime)
+                            bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                    keyboard = InlineKeyboardMarkup(keyb)
+                    # Send message
+                    ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
                     return
                 # else, move on
                 first_name = new_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -269,12 +302,19 @@ def security(bot: Bot, update: Update, args: List[str]) -> str:
             update.effective_message.reply_text("Keamanan untuk member baru di aktifkan!")
         elif (var == "no" or var == "ga" or var == "off"):
             sql.set_welcome_security(chat.id, False, str(cur_value), cust_text)
-            update.effective_message.reply_text("Di nonaktifkan")
+            update.effective_message.reply_text("Di nonaktifkan, saya tidak akan membisukan member masuk lagi")
         else:
             update.effective_message.reply_text("Silakan tulis `on`/`ya`/`off`/`ga`!", parse_mode=ParseMode.MARKDOWN)
     else:
-        status = sql.welcome_security(chat.id)
-        update.effective_message.reply_text(status)
+        getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+        if getcur:
+            getcur = "Aktif"
+        else:
+            getcur = "Tidak Aktif"
+        if cur_value[:1] == "0":
+            cur_value = "Selamanya"
+        text = "Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`".format(getcur, cur_value, cust_text)
+        update.effective_message.reply_text(text, parse_mode="markdown")
 
 
 @run_async
