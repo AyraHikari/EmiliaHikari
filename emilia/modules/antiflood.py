@@ -252,7 +252,7 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
         elif getmode == 3:
             settypeflood = 'bisukan'
         elif getmode == 4:
-            settypeflood = 'blokir sementara selama'.format(getvalue)
+            settypeflood = 'blokir sementara selama {}'.format(getvalue)
         elif getmode == 5:
             settypeflood = 'bisukan sementara selama {}'.format(getvalue)
         if conn:
