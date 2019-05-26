@@ -98,6 +98,7 @@ def set_flood_strength(chat_id, flood_type, value):
             curr_setting = FloodSettings(chat_id, flood_type=int(flood_type), value=value)
 
         curr_setting.flood_type = int(flood_type)
+        curr_setting.value = str(value)
 
         SESSION.add(curr_setting)
         SESSION.commit()
