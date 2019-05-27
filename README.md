@@ -1,12 +1,12 @@
-# Emilia Hikari
+# Emilia
 Telegram modular Python bot berjalan di python3 dengan database sqlalchemy.
 
 Based on [marie bot](https://github.com/PaulSonOfLars/tgbot)
 
+Dapat ditemukan di telegram sebagai [Emilia](https://t.me/EmiliaHikariBot).
+
+
 Awalnya bot manajemen grup sederhana dengan beberapa fitur admin, telah berevolusi, menjadi sangat modular dan
-
-
-Dapat ditemukan di telegram sebagai [Marie](https://t.me/EmiliaHikariBot).
 
 Marie dan saya sedang memoderasi [support group](https://t.me/TeamNusantaraDevs), di mana Anda dapat meminta bantuan untuk mengaturnya
 bot, temukan / minta fitur baru, laporkan bug, dan tetap di dalam pengulangan setiap kali pembaruan baru tersedia. Tentu saja
@@ -168,3 +168,11 @@ perlu untuk memigrasikannya dalam db
 
 Fungsi `__stats __()` adalah untuk mengambil statistik modul, misalnya jumlah pengguna, jumlah obrolan. Ini diakses
 melalui perintah `/stats`, yang hanya tersedia untuk pemilik bot.
+
+
+## Special Credits
+This is not kanged bot, but all authorship on gitlab has gone (blame myself for doing stupid af). If anyone know how to reimport old git commit to this shit, PM me.
+
+Thanks to this user:
+- [Paul Larsen](https://github.com/PaulSonOfLars) - marie creator, inspiration to do many things
+- [Yan Gorobtsov](https://github.com/MrYacha) - for welcome security base and connection base and maybe others
