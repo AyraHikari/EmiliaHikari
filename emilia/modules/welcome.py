@@ -347,6 +347,11 @@ def security(bot: Bot, update: Update, args: List[str]) -> str:
     if len(args) >= 1:
         var = args[0].lower()
         if (var == "yes" or var == "ya" or var == "on"):
+            check = bot.getChatMember(chat.id, bot.id)
+            if check.status == 'member' or check['can_restrict_members'] == False:
+                text = "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!"
+                update.effective_message.reply_text(text, parse_mode="markdown")
+                return ""
             sql.set_welcome_security(chat.id, True, str(cur_value), cust_text)
             update.effective_message.reply_text("Keamanan untuk member baru di aktifkan!")
         elif (var == "no" or var == "ga" or var == "off"):
