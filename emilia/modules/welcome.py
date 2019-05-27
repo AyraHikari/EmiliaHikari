@@ -239,7 +239,7 @@ def check_bot_button(bot: Bot, update: Update):
 @run_async
 def left_member(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
-    should_goodbye, cust_goodbye, goodbye_type = sql.get_gdbye_pref(chat.id)
+    should_goodbye, cust_goodbye, cust_content, goodbye_type = sql.get_gdbye_pref(chat.id)
     if should_goodbye:
         left_mem = update.effective_message.left_chat_member
         if left_mem:
@@ -254,7 +254,34 @@ def left_member(bot: Bot, update: Update):
 
             # if media goodbye, use appropriate function for it
             if goodbye_type != sql.Types.TEXT and goodbye_type != sql.Types.BUTTON_TEXT:
-                ENUM_FUNC_MAP[goodbye_type](chat.id, cust_goodbye)
+                reply = update.message.message_id
+                cleanserv = sql.clean_service(chat.id)
+                # Clean service welcome
+                if cleanserv:
+                    dispatcher.bot.delete_message(chat.id, update.message.message_id)
+                    reply = False
+                # Formatting text
+                first_name = left_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
+                if left_mem.last_name:
+                    fullname = "{} {}".format(first_name, left_mem.last_name)
+                else:
+                    fullname = first_name
+                count = chat.get_members_count()
+                mention = mention_markdown(left_mem.id, first_name)
+                if left_mem.username:
+                    username = "@" + escape_markdown(left_mem.username)
+                else:
+                    username = mention
+                formatted_text = cust_goodbye.format(first=escape_markdown(first_name),
+                                              last=escape_markdown(left_mem.last_name or first_name),
+                                              fullname=escape_markdown(fullname), username=username, mention=mention,
+                                              count=count, chatname=escape_markdown(chat.title), id=left_mem.id)
+                # Build keyboard
+                buttons = sql.get_gdbye_buttons(chat.id)
+                keyb = build_keyboard(buttons)
+                keyboard = InlineKeyboardMarkup(keyb)
+                # Send message
+                ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=cust_goodbye, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
                 return
 
             first_name = left_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -482,7 +509,7 @@ def goodbye(bot: Bot, update: Update, args: List[str]):
 
     if len(args) == 0 or args[0] == "noformat":
         noformat = args and args[0] == "noformat"
-        pref, goodbye_m, goodbye_type = sql.get_gdbye_pref(chat.id)
+        pref, goodbye_m, cust_content, goodbye_type = sql.get_gdbye_pref(chat.id)
         update.effective_message.reply_text(
             "Obrolan ini memiliki setelan selamat tinggal yang disetel ke: `{}`.\n*Pesan selamat tinggal "
             "(tidak mengisi {{}}) adalah:*".format(pref),
@@ -501,11 +528,15 @@ def goodbye(bot: Bot, update: Update, args: List[str]):
                 send(update, goodbye_m, keyboard, sql.DEFAULT_GOODBYE)
 
         else:
+            buttons = sql.get_gdbye_buttons(chat.id)
             if noformat:
-                ENUM_FUNC_MAP[goodbye_type](chat.id, goodbye_m)
+                goodbye_m += revert_buttons(buttons)
+                ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=goodbye_m)
                 
             else:
-                ENUM_FUNC_MAP[goodbye_type](chat.id, goodbye_m, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+                keyb = build_keyboard(buttons)
+                keyboard = InlineKeyboardMarkup(keyb)
+                ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=goodbye_m, reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
     elif len(args) >= 1:
         if args[0].lower() in ("on", "yes"):
@@ -582,7 +613,7 @@ def set_goodbye(bot: Bot, update: Update) -> str:
         msg.reply_text("Anda tidak menentukan apa yang harus dibalas!")
         return ""
 
-    sql.set_custom_gdbye(chat.id, content or text, data_type, buttons)
+    sql.set_custom_gdbye(chat.id, content, text, data_type, buttons)
     msg.reply_text("Berhasil mengatur pesan selamat tinggal kustom!")
     return "<b>{}:</b>" \
            "\n#SET_GOODBYE" \
