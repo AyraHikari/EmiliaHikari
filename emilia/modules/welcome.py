@@ -145,17 +145,25 @@ def new_member(bot: Bot, update: Update):
                     buttons = sql.get_welc_buttons(chat.id)
                     keyb = build_keyboard(buttons)
                     getsec, mutetime, custom_text = sql.welcome_security(chat.id)
-                    # If security welcome is turned on
-                    if getsec:
-                        sql.add_to_userlist(chat.id, new_mem.id)
-                        keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                     # If mute time is turned on
                     if mutetime:
                         if mutetime[:1] == "0":
-                            bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                            try:
+                                bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                                canrest = True
+                            except BadRequest:
+                                canrest = False
                         else:
                             mutetime = extract_time(update.effective_message, mutetime)
-                            bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                            try:
+                                bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                                canrest = True
+                            except BadRequest:
+                                canrest = False
+                    # If security welcome is turned on
+                    if getsec and canrest:
+                        sql.add_to_userlist(chat.id, new_mem.id)
+                        keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                     keyboard = InlineKeyboardMarkup(keyb)
                     # Send message
                     ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
@@ -187,15 +195,24 @@ def new_member(bot: Bot, update: Update):
                     keyb = []
 
                 getsec, mutetime, custom_text = sql.welcome_security(chat.id)
-                if getsec:
-                    sql.add_to_userlist(chat.id, new_mem.id)
-                    keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+                
                 if mutetime:
                     if mutetime[:1] == "0":
-                        bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                        try:
+                            bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                            canrest = True
+                        except BadRequest:
+                            canrest = False
                     else:
                         mutetime = extract_time(update.effective_message, mutetime)
-                        bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                        try:
+                            bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                            canrest = True
+                        except BadRequest:
+                            canrest = False
+                if getsec and canrest:
+                    sql.add_to_userlist(chat.id, new_mem.id)
+                    keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                 keyboard = InlineKeyboardMarkup(keyb)
 
                 sent = send(update, res, keyboard,
