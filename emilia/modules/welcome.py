@@ -149,7 +149,7 @@ def new_member(bot: Bot, update: Update):
                     # If user ban protected don't apply security on him
                     if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
                         pass
-                    else:
+                    elif getsec:
                         # If mute time is turned on
                         if mutetime:
                             if mutetime[:1] == "0":
@@ -166,7 +166,7 @@ def new_member(bot: Bot, update: Update):
                                 except BadRequest:
                                     canrest = False
                         # If security welcome is turned on
-                        if getsec and canrest:
+                        if canrest:
                             sql.add_to_userlist(chat.id, new_mem.id)
                             keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                     keyboard = InlineKeyboardMarkup(keyb)
@@ -204,7 +204,7 @@ def new_member(bot: Bot, update: Update):
                 # If user ban protected don't apply security on him
                 if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
                     pass
-                else:
+                elif getsec:
                     if mutetime:
                         if mutetime[:1] == "0":
                             try:
@@ -219,7 +219,7 @@ def new_member(bot: Bot, update: Update):
                                 canrest = True
                             except BadRequest:
                                 canrest = False
-                    if getsec and canrest:
+                    if canrest:
                         sql.add_to_userlist(chat.id, new_mem.id)
                         keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                 keyboard = InlineKeyboardMarkup(keyb)
