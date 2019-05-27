@@ -71,6 +71,7 @@ if ENV:
     API_WEATHER = os.environ.get('API_OPENWEATHER', None)
     API_ACCUWEATHER = os.environ.get('API_ACCUWEATHER', None)
     MAPS_API = os.environ.get('MAPS_API', None)
+    TEMPORARY_DATA = os.environ.get('TEMPORARY_DATA', None)
 
 else:
     from emilia.config import Development as Config
@@ -120,6 +121,7 @@ else:
     API_WEATHER = Config.API_OPENWEATHER
     API_ACCUWEATHER = Config.API_ACCUWEATHER
     MAPS_API = Config.MAPS_API
+    TEMPORARY_DATA = Config.TEMPORARY_DATA
 
 
 SUDO_USERS.add(OWNER_ID)

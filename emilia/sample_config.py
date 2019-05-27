@@ -39,6 +39,7 @@ class Config(object):
     BAN_STICKER = 'CAADAgADOwADPPEcAXkko5EB3YGYAg'  # banhammer marie sticker
     ALLOW_EXCL = False  # Allow ! commands as well as /
     SPAMMERS = "" # Will not allow to interact with bot
+    TEMPORARY_DATA = None # Temporary data for backup module, use int number
 
 
 class Production(Config):

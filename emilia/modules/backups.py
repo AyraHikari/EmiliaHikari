@@ -8,7 +8,7 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamfilters
+from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamfilters, TEMPORARY_DATA
 from emilia.__main__ import DATA_IMPORT
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
@@ -242,41 +242,42 @@ def export_data(bot: Bot, update: Update, chat_data):
 	# Locked
 	locks = locksql.get_locks(chat_id)
 	locked = []
-	if locks.sticker:
-		locked.append('sticker')
-	if locks.document:
-		locked.append('document')
-	if locks.contact:
-		locked.append('contact')
-	if locks.audio:
-		locked.append('audio')
-	if locks.game:
-		locked.append('game')
-	if locks.bots:
-		locked.append('bots')
-	if locks.gif:
-		locked.append('gif')
-	if locks.photo:
-		locked.append('photo')
-	if locks.video:
-		locked.append('video')
-	if locks.voice:
-		locked.append('voice')
-	if locks.location:
-		locked.append('location')
-	if locks.forward:
-		locked.append('forward')
-	if locks.url:
-		locked.append('url')
-	restr = locksql.get_restr(chat_id)
-	if restr.other:
-		locked.append('other')
-	if restr.messages:
-		locked.append('messages')
-	if restr.preview:
-		locked.append('preview')
-	if restr.media:
-		locked.append('media')
+	if locks:
+		if locks.sticker:
+			locked.append('sticker')
+		if locks.document:
+			locked.append('document')
+		if locks.contact:
+			locked.append('contact')
+		if locks.audio:
+			locked.append('audio')
+		if locks.game:
+			locked.append('game')
+		if locks.bots:
+			locked.append('bots')
+		if locks.gif:
+			locked.append('gif')
+		if locks.photo:
+			locked.append('photo')
+		if locks.video:
+			locked.append('video')
+		if locks.voice:
+			locked.append('voice')
+		if locks.location:
+			locked.append('location')
+		if locks.forward:
+			locked.append('forward')
+		if locks.url:
+			locked.append('url')
+		restr = locksql.get_restr(chat_id)
+		if restr.other:
+			locked.append('other')
+		if restr.messages:
+			locked.append('messages')
+		if restr.preview:
+			locked.append('preview')
+		if restr.media:
+			locked.append('media')
 	# Warns (TODO)
 	# warns = warnssql.get_warns(chat_id)
 	# Backing up
@@ -287,7 +288,10 @@ def export_data(bot: Bot, update: Update, chat_data):
 	f.close()
 	bot.sendChatAction(current_chat_id, "upload_document")
 	tgl = time.strftime("%H:%M:%S - %d/%m/%Y", time.localtime(time.time()))
-	bot.sendMessage(-1001405078933, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
+	try:
+		bot.sendMessage(TEMPORARY_DATA, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
+	except BadRequest:
+		pass
 	bot.sendDocument(current_chat_id, document=open('cadangan{}.backup'.format(chat_id), 'rb'), caption="*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang".format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
 	os.remove("cadangan{}.backup".format(chat_id)) # Cleaning file
 
