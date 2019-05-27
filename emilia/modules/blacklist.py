@@ -98,7 +98,7 @@ def add_blacklist(bot: Bot, update: Update):
 
         else:
             msg.reply_text(
-                    "<code>{}</code> Pemicu ditambahkan ke daftar hitam di <b>{}</b>!".format(len(to_blacklist)), chat_name, parse_mode=ParseMode.HTML)
+                    "<code>{}</code> Pemicu ditambahkan ke daftar hitam di <b>{}</b>!".format(len(to_blacklist), chat_name), parse_mode=ParseMode.HTML)
 
     else:
         msg.reply_text("Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam.")
