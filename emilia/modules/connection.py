@@ -141,6 +141,32 @@ def allow_connections(bot: Bot, update: Update, args: List[str]) -> str:
     else:
         update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
 
+@run_async
+def connection_chat(bot, update):
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type != "private":
+            return
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
+    if conn:
+        teks = "Saat ini Anda terhubung dengan {}.\n".format(chat_name)
+    else:
+        teks = "Saat ini Anda tidak terhubung dengan grup.\n"
+    teks += supportcmd
+    update.effective_message.reply_text(teks, parse_mode="markdown")
 
 @run_async
 def connect_chat(bot, update, args):
@@ -188,7 +214,23 @@ def connect_chat(bot, update, args):
                 update.effective_message.reply_text("Tulis ID obrolan untuk terhubung!")
 
     else:
-        update.effective_message.reply_text("Penggunaan terbatas hanya untuk PM!")
+        getstatusadmin = bot.get_chat_member(chat.id, update.effective_message.from_user.id)
+        isadmin = getstatusadmin.status in ('administrator', 'creator')
+        ismember = getstatusadmin.status in ('member')
+        isallow = sql.allow_connect_to_chat(chat.id)
+        if (isadmin) or (isallow and ismember) or (user.id in SUDO_USERS):
+            connection_status = sql.connect(update.effective_message.from_user.id, chat.id)
+            if connection_status:
+                chat_name = dispatcher.bot.getChat(chat.id).title
+                update.effective_message.reply_text("Berhasil tersambung ke *{}*".format(chat_name), parse_mode=ParseMode.MARKDOWN)
+                try:
+                    bot.send_message(update.effective_message.from_user.id, "Anda telah terhubung dengan Testing Bot. Gunakan /connection untuk informasi perintah apa saja yang tersedia.")
+                except BadRequest:
+                    pass
+            else:
+                update.effective_message.reply_text("Koneksi gagal!")
+        else:
+            update.effective_message.reply_text("Sambungan ke obrolan ini tidak diizinkan!")
 
 
 def disconnect_chat(bot, update):
@@ -248,10 +290,12 @@ def help_connect_chat(bot, update, args):
     else:
         update.effective_message.reply_text(supportcmd, parse_mode="markdown")
 
+
 __help__ = """
 Atur grup anda via PM dengan mudah.
 
  - /connect <chatid>: Hubungkan ke obrolan jarak jauh
+ - /connection: Minta list command koneksi yang di dukung
  - /disconnect: Putuskan sambungan dari obrolan
  - /allowconnect on/yes/off/no: Izinkan menghubungkan pengguna ke grup
  - /helpconnect: Dapatkan bantuan command untuk koneksi
@@ -260,11 +304,13 @@ Atur grup anda via PM dengan mudah.
 __mod_name__ = "Koneksi"
 
 CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, allow_edited=True, pass_args=True)
+CONNECTION_CHAT_HANDLER = CommandHandler("connection", connection_chat)
 DISCONNECT_CHAT_HANDLER = CommandHandler("disconnect", disconnect_chat, allow_edited=True)
 ALLOW_CONNECTIONS_HANDLER = CommandHandler("allowconnect", allow_connections, allow_edited=True, pass_args=True)
 HELP_CONNECT_CHAT_HANDLER = CommandHandler("helpconnect", help_connect_chat, allow_edited=True, pass_args=True)
 
 dispatcher.add_handler(CONNECT_CHAT_HANDLER)
+dispatcher.add_handler(CONNECTION_CHAT_HANDLER)
 dispatcher.add_handler(DISCONNECT_CHAT_HANDLER)
 dispatcher.add_handler(ALLOW_CONNECTIONS_HANDLER)
 dispatcher.add_handler(HELP_CONNECT_CHAT_HANDLER)
