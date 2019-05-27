@@ -103,7 +103,7 @@ def new_member(bot: Bot, update: Update):
         new_members = update.effective_message.new_chat_members
         for new_mem in new_members:
             # Give the owner a special welcome
-            if new_mem.id == OWNER_ID:
+            if new_mem.id == 12345:#OWNER_ID:
                 cleanserv = sql.clean_service(chat.id)
                 if cleanserv:
                     bot.delete_message(chat.id, update.message.message_id)
@@ -145,25 +145,30 @@ def new_member(bot: Bot, update: Update):
                     buttons = sql.get_welc_buttons(chat.id)
                     keyb = build_keyboard(buttons)
                     getsec, mutetime, custom_text = sql.welcome_security(chat.id)
-                    # If mute time is turned on
-                    if mutetime:
-                        if mutetime[:1] == "0":
-                            try:
-                                bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
-                                canrest = True
-                            except BadRequest:
-                                canrest = False
-                        else:
-                            mutetime = extract_time(update.effective_message, mutetime)
-                            try:
-                                bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
-                                canrest = True
-                            except BadRequest:
-                                canrest = False
-                    # If security welcome is turned on
-                    if getsec and canrest:
-                        sql.add_to_userlist(chat.id, new_mem.id)
-                        keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+
+                    # If user ban protected don't apply security on him
+                    if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
+                        pass
+                    else:
+                        # If mute time is turned on
+                        if mutetime:
+                            if mutetime[:1] == "0":
+                                try:
+                                    bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                                    canrest = True
+                                except BadRequest:
+                                    canrest = False
+                            else:
+                                mutetime = extract_time(update.effective_message, mutetime)
+                                try:
+                                    bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                                    canrest = True
+                                except BadRequest:
+                                    canrest = False
+                        # If security welcome is turned on
+                        if getsec and canrest:
+                            sql.add_to_userlist(chat.id, new_mem.id)
+                            keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                     keyboard = InlineKeyboardMarkup(keyb)
                     # Send message
                     ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
@@ -196,31 +201,31 @@ def new_member(bot: Bot, update: Update):
 
                 getsec, mutetime, custom_text = sql.welcome_security(chat.id)
                 
-                if mutetime:
-                    if mutetime[:1] == "0":
-                        try:
-                            bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
-                            canrest = True
-                        except BadRequest:
-                            canrest = False
-                    else:
-                        mutetime = extract_time(update.effective_message, mutetime)
-                        try:
-                            bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
-                            canrest = True
-                        except BadRequest:
-                            canrest = False
-                if getsec and canrest:
-                    sql.add_to_userlist(chat.id, new_mem.id)
-                    keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+                # If user ban protected don't apply security on him
+                if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
+                    pass
+                else:
+                    if mutetime:
+                        if mutetime[:1] == "0":
+                            try:
+                                bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+                                canrest = True
+                            except BadRequest:
+                                canrest = False
+                        else:
+                            mutetime = extract_time(update.effective_message, mutetime)
+                            try:
+                                bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+                                canrest = True
+                            except BadRequest:
+                                canrest = False
+                    if getsec and canrest:
+                        sql.add_to_userlist(chat.id, new_mem.id)
+                        keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                 keyboard = InlineKeyboardMarkup(keyb)
 
                 sent = send(update, res, keyboard,
                             sql.DEFAULT_WELCOME.format(first=first_name))  # type: Optional[Message]
-
-                # If user ban protected don't apply security on him
-                if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
-                    continue
 
                 
             prev_welc = sql.get_clean_pref(chat.id)
