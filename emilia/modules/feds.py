@@ -11,7 +11,7 @@ from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity
 from telegram.ext import run_async, CommandHandler, MessageHandler, Filters
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER, spamfilters
 from emilia.modules.helper_funcs.handlers import CMD_STARTERS
 from emilia.modules.helper_funcs.misc import is_module_loaded, send_to_list
 from emilia.modules.helper_funcs.chat_status import is_user_admin
@@ -63,6 +63,10 @@ UNFBAN_ERRORS = {
 
 @run_async
 def new_fed(bot: Bot, update: Update):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message
@@ -96,6 +100,10 @@ def new_fed(bot: Bot, update: Update):
 
 @run_async
 def del_fed(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -115,6 +123,10 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def fed_chat(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -139,6 +151,10 @@ def fed_chat(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def join_fed(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message
@@ -175,6 +191,10 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def leave_fed(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -191,6 +211,10 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def user_join_fed(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
@@ -234,6 +258,10 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def user_demote_fed(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -274,6 +302,10 @@ def user_demote_fed(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def fed_info(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -314,6 +346,10 @@ def fed_info(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def fed_admin(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -353,6 +389,10 @@ def fed_admin(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def fed_ban(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -465,6 +505,10 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def unfban(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
@@ -544,6 +588,10 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def set_frules(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
@@ -577,6 +625,10 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def get_frules(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     chat = update.effective_chat  # type: Optional[Chat]
     fed_id = sql.get_fed_id(chat.id)
     if not fed_id:
@@ -591,6 +643,10 @@ def get_frules(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def fed_broadcast(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
     if args:
