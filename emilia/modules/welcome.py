@@ -17,6 +17,9 @@ from emilia.modules.helper_funcs.string_handling import markdown_parser, \
     escape_invalid_curly_brackets, extract_time
 from emilia.modules.log_channel import loggable
 
+import emilia.modules.sql.feds_sql as fedsql
+
+
 VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'count', 'chatname', 'mention']
 
 ENUM_FUNC_MAP = {
@@ -98,12 +101,22 @@ def new_member(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
 
     should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
+    # Federation security
+    fed_id = fedsql.get_fed_id(chat.id)
+    if fed_id:
+        new_members = update.effective_message.new_chat_members
+        for new_mem in new_members:
+            fban, fbanreason = fedsql.get_fban_user(fed_id, new_mem.id)
+            if fban:
+                update.effective_message.reply_text("Pengguna ini dilarang di federasi saat ini!\nAlasan: {}".format(fbanreason))
+                bot.kick_chat_member(chat.id, new_mem.id)
+                return
     if should_welc:
         sent = None
         new_members = update.effective_message.new_chat_members
         for new_mem in new_members:
             # Give the owner a special welcome
-            if new_mem.id == 12345:#OWNER_ID:
+            if new_mem.id == OWNER_ID:
                 cleanserv = sql.clean_service(chat.id)
                 if cleanserv:
                     bot.delete_message(chat.id, update.message.message_id)
