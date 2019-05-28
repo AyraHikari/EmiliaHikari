@@ -944,13 +944,10 @@ __help__ = """
 
 Baca /welcomehelp untuk mempelajari tentang memformat teks Anda dan menyebutkan pengguna baru saat bergabung!
 
-Anda dapat mengaktifkan/menonaktifkan pesan sambutan:
-`/welcome off` atau `/welcome on`
-
 Jika Anda ingin menyimpan gambar, gif, atau stiker, atau data lain, lakukan hal berikut:
 Balas pesan stiker atau data apa pun yang Anda inginkan dengan teks `/setwelcome`. Data ini sekarang akan dikirim untuk menyambut pengguna baru.
 
-Tip: gunakan /welcome noformat untuk mengambil pesan sambutan yang belum diformat.
+Tip: gunakan `/welcome noformat` untuk mengambil pesan sambutan yang belum diformat.
 Ini akan mengambil pesan selamat datang dan mengirimkannya tanpa memformatnya; memberi Anda markdown mentah, memungkinkan Anda untuk mengedit dengan mudah.
 Ini juga berfungsi dengan /goodbye.
 """.format(WELC_HELP_TXT)

@@ -45,11 +45,7 @@ supportcmd = """
 
 *「 Hanya Untuk Admin 」*
 *Admin*
--> `/pin <loud/silent> <message link>`
--> `/unpin`
 -> `/adminlist`
--> `/promote @user`
--> `/demote @user`
 
 *Anti Flood*
 -> `/setflood`

@@ -30,7 +30,7 @@ ENUM_FUNC_MAP = {
 
 
 @run_async
-#@bot_admin
+@bot_admin
 @can_promote
 @user_admin
 @loggable
@@ -96,7 +96,7 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-#@bot_admin
+@bot_admin
 @can_promote
 @user_admin
 @loggable
@@ -165,7 +165,7 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-#@bot_admin
+@bot_admin
 @can_pin
 @user_admin
 @loggable
@@ -221,7 +221,7 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-#@bot_admin
+@bot_admin
 @can_pin
 @user_admin
 @loggable
@@ -263,7 +263,7 @@ def unpin(bot: Bot, update: Update) -> str:
 
 
 @run_async
-#@bot_admin
+@bot_admin
 @user_admin
 def invite(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
@@ -441,14 +441,14 @@ __help__ = """
 
 __mod_name__ = "Admin"
 
-PIN_HANDLER = CommandHandler("pin", pin, pass_args=True)
-UNPIN_HANDLER = CommandHandler("unpin", unpin)
-PERMAPIN_HANDLER = CommandHandler("permapin", permapin)
+PIN_HANDLER = CommandHandler("pin", pin, pass_args=True, filters=Filters.group)
+UNPIN_HANDLER = CommandHandler("unpin", unpin, filters=Filters.group)
+PERMAPIN_HANDLER = CommandHandler("permapin", permapin, filters=Filters.group)
 
-INVITE_HANDLER = CommandHandler("invitelink", invite)
+INVITE_HANDLER = CommandHandler("invitelink", invite, filters=Filters.group)
 
-PROMOTE_HANDLER = CommandHandler("promote", promote, pass_args=True)
-DEMOTE_HANDLER = CommandHandler("demote", demote, pass_args=True)
+PROMOTE_HANDLER = CommandHandler("promote", promote, pass_args=True, filters=Filters.group)
+DEMOTE_HANDLER = CommandHandler("demote", demote, pass_args=True, filters=Filters.group)
 
 ADMINLIST_HANDLER = DisableAbleCommandHandler(["adminlist", "admins"], adminlist)
 
