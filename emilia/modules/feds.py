@@ -72,8 +72,9 @@ def new_fed(bot: Bot, update: Update):
         fed_name = fednam
         LOGGER.info(fed_id)
 
-        #if fednam == 'Name':
-        #     fed_id = "Name"
+        # Currently only for creator
+        if fednam == 'Team Nusantara Devs':
+             fed_id = "TeamNusantaraDevs"
 
         x = sql.new_fed(user.id, fed_name, fed_id)
         if not x:
@@ -624,7 +625,7 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 
 def is_user_fed_admin(fed_id, user_id):
     fed_admins = sql.all_fed_users(fed_id)
-    if str(user_id) in fed_admins or is_user_fed_owner(fed_id, user_id):
+    if int(user_id) in fed_admins or is_user_fed_owner(fed_id, user_id):
         return True
     else:
         return False
@@ -669,7 +670,7 @@ def __user_info__(user_id, chat_id):
 
         if int(info['owner']) == user_id:
             text = "Pengguna ini adalah owner di federasi saat ini: <b>{}</b>.".format(infoname)
-        elif is_user_fed_admin(fed_id, user_id) == True:
+        elif is_user_fed_admin(fed_id, user_id):
             text = "Pengguna ini adalah admin di federasi saat ini: <b>{}</b>.".format(infoname)
 
         elif fban:
@@ -682,7 +683,7 @@ def __user_info__(user_id, chat_id):
     return text
 
 
-__mod_name__ = "Federations"
+__mod_name__ = "Federasi"
 
 __help__ = """
 Ah, manajemen grup. Semuanya menyenangkan, sampai mulai spammer masuk grup anda, dan Anda harus mencekalnya. Maka Anda perlu mulai melarang lebih banyak, dan lebih banyak lagi, dan itu terasa menyakitkan.

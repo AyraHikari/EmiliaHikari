@@ -371,17 +371,17 @@ def __load_all_feds():
 			check = FEDERATION_BYOWNER.get(x.owner_id)
 			if check == None:
 				FEDERATION_BYOWNER[x.owner_id] = []
-			FEDERATION_BYOWNER[str(x.owner_id)] = {'fid': str(x.fed_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': x.fed_users}
+			FEDERATION_BYOWNER[str(x.owner_id)] = {'fid': str(x.fed_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': str({'owner': str(x.owner_id), 'members': str(x.fed_users)})}
 			# Fed By FedId
 			check = FEDERATION_BYFEDID.get(x.fed_id)
 			if check == None:
 				FEDERATION_BYFEDID[x.fed_id] = []
-			FEDERATION_BYFEDID[str(x.fed_id)] = {'owner': str(x.owner_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': x.fed_users}
+			FEDERATION_BYFEDID[str(x.fed_id)] = {'owner': str(x.owner_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': str({'owner': str(x.owner_id), 'members': str(x.fed_users)})}
 			# Fed By Name
 			check = FEDERATION_BYNAME.get(x.fed_name)
 			if check == None:
 				FEDERATION_BYNAME[x.fed_name] = []
-			FEDERATION_BYNAME[x.fed_name] = {'fid': str(x.fed_id), 'owner': str(x.owner_id), 'frules': x.fed_rules, 'fusers': x.fed_users}
+			FEDERATION_BYNAME[x.fed_name] = {'fid': str(x.fed_id), 'owner': str(x.owner_id), 'frules': x.fed_rules, 'fusers': str({'owner': str(x.owner_id), 'members': str(x.fed_users)})}
 	finally:
 		SESSION.close()
 
