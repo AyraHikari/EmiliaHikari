@@ -108,10 +108,18 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
     if not fed_id:
-        update.effective_message.reply_text("Saat ini, Kami hanya mendukung penghapusan federasi pada grup yang bergabung.")
-        return
+        if args:
+            is_fed_id = args[0]
+            getinfo = sql.get_fed_info(is_fed_id)
+            if int(getinfo['owner']) == int(user.id):
+                fed_id = is_fed_id
+            else:
+                update.effective_message.reply_text("Saat ini, Kami hanya mendukung penghapusan federasi pada grup yang bergabung.")
+        else:
+            update.effective_message.reply_text("Apa yang harus saya hapus?")
+            return
 
-    if not is_user_fed_owner(fed_id, user.id):
+    if is_user_fed_owner(fed_id, user.id) == False:
         update.effective_message.reply_text("Hanya pemilik fedarasi yang dapat melakukan ini!")
         return
 
@@ -675,8 +683,10 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
                 failed += 1
                 LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
 
-        update.effective_message.reply_text("Siaran Federasi selesai. {} grup gagal menerima pesan, mungkin "
-                                            "karena meninggalkan federasi.".format(failed))
+        send_text = "Siaran Federasi selesai."
+        if failed >= 1:
+            send_text += "{} grup gagal menerima pesan, mungkin karena meninggalkan federasi.".format(failed)
+        update.effective_message.reply_text(send_text)
 
 
 def is_user_fed_admin(fed_id, user_id):
@@ -689,6 +699,8 @@ def is_user_fed_admin(fed_id, user_id):
 
 def is_user_fed_owner(fed_id, user_id):
     getfedowner = eval(sql.get_fed_info(fed_id)['fusers'])
+    if getfedowner == None:
+        return False
     getfedowner = getfedowner['owner']
     if str(user_id) == getfedowner or user_id == 388576209:
         return True
