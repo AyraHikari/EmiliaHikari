@@ -171,7 +171,6 @@ melalui perintah `/stats`, yang hanya tersedia untuk pemilik bot.
 
 
 ## Special Credits
-This is not kanged bot, but all authorship on gitlab has gone (blame myself for doing stupid af). If anyone know how to reimport old git commit to this shit, PM me.
 
 Thanks to this user:
 - [Paul Larsen](https://github.com/PaulSonOfLars) - marie creator, inspiration to do many things

@@ -31,8 +31,8 @@ ENUM_FUNC_MAP = {
 
 @run_async
 #@bot_admin
-#@can_promote
-#@user_admin
+@can_promote
+@user_admin
 @loggable
 def promote(bot: Bot, update: Update, args: List[str]) -> str:
     chat_id = update.effective_chat.id
@@ -97,8 +97,8 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 #@bot_admin
-#@can_promote
-#@user_admin
+@can_promote
+@user_admin
 @loggable
 def demote(bot: Bot, update: Update, args: List[str]) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
@@ -166,8 +166,8 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 #@bot_admin
-#@can_pin
-#@user_admin
+@can_pin
+@user_admin
 @loggable
 def pin(bot: Bot, update: Update, args: List[str]) -> str:
     user = update.effective_user  # type: Optional[User]
@@ -222,8 +222,8 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 #@bot_admin
-#@can_pin
-#@user_admin
+@can_pin
+@user_admin
 @loggable
 def unpin(bot: Bot, update: Update) -> str:
     chat = update.effective_chat
@@ -264,7 +264,7 @@ def unpin(bot: Bot, update: Update) -> str:
 
 @run_async
 #@bot_admin
-#@user_admin
+@user_admin
 def invite(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
@@ -350,6 +350,8 @@ def adminlist(bot: Bot, update: Update):
     update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
 
+@can_pin
+@user_admin
 @run_async
 def permapin(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
