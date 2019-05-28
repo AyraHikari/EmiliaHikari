@@ -150,7 +150,6 @@ def runs(bot: Bot, update: Update):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send messages
     update.effective_message.reply_text(random.choice(RUN_STRINGS))
 
 @run_async
@@ -158,7 +157,6 @@ def slap(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
     msg = update.effective_message  # type: Optional[Message]
 
     # reply to correct message
@@ -209,7 +207,6 @@ def get_id(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
     user_id = extract_user(update.effective_message, args)
     if user_id:
         if update.effective_message.reply_to_message and update.effective_message.reply_to_message.forward_from:
@@ -242,8 +239,8 @@ def info(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
     msg = update.effective_message  # type: Optional[Message]
+    chat = update.effective_chat  # type: Optional[Chat]
     user_id = extract_user(update.effective_message, args)
 
     if user_id:
@@ -289,7 +286,10 @@ def info(bot: Bot, update: Update, args: List[str]):
                         "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka."
 
     for mod in USER_INFO:
-        mod_info = mod.__user_info__(user.id).strip()
+        try:
+            mod_info = mod.__user_info__(user.id).strip()
+        except TypeError:
+            mod_info = mod.__user_info__(user.id, chat.id).strip()
         if mod_info:
             text += "\n\n" + mod_info
 
@@ -313,7 +313,6 @@ def get_time(bot: Bot, update: Update, args: List[str]):
     if res.status_code == 200:
         loc = json.loads(res.text)
         if loc.get('status') == 'OK':
-            bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
             lat = loc['results'][0]['geometry']['location']['lat']
             long = loc['results'][0]['geometry']['location']['lng']
 
@@ -372,7 +371,6 @@ def echo(bot: Bot, update: Update):
     args = update.effective_message.text.split(None, 1)
     message = update.effective_message
     message.delete()
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
     if message.reply_to_message:
         message.reply_to_message.reply_text(args[1], parse_mode=ParseMode.MARKDOWN)
     else:
@@ -410,7 +408,6 @@ def markdown_help(bot: Bot, update: Update):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
     update.effective_message.reply_text(MARKDOWN_HELP, parse_mode=ParseMode.HTML)
     update.effective_message.reply_text("Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!")
     update.effective_message.reply_text("/save Tes Ini adalah tes markdown. _miring_, *tebal*, `kode`, "
@@ -420,7 +417,6 @@ def markdown_help(bot: Bot, update: Update):
 
 @run_async
 def stats(bot: Bot, update: Update):
-    bot.sendChatAction(update.effective_chat.id, "typing") # Bot typing before send message
     update.effective_message.reply_text("Statistik saat ini:\n" + "\n".join([mod.__stats__() for mod in STATS]))
 
 
