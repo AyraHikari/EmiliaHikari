@@ -818,6 +818,8 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 
 def is_user_fed_admin(fed_id, user_id):
     fed_admins = sql.all_fed_users(fed_id)
+    if fed_admins == False:
+        return False
     if int(user_id) in fed_admins:
         return True
     else:

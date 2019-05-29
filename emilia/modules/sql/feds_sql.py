@@ -132,7 +132,7 @@ def del_fed(fed_id, chat_id):
 
 def chat_join_fed(fed_id, chat_id):
 	with FEDS_LOCK:
-		global FEDERATION_CHATS, FEDERATION_BYFEDID
+		global FEDERATION_CHATS, FEDERATION_CHATS_BYID
 		r = ChatF(chat_id, fed_id)
 		SESSION.add(r)
 		FEDERATION_CHATS[str(chat_id)] = {'fid': fed_id}
@@ -221,6 +221,7 @@ def user_join_fed(fed_id, user_id):
 
 def chat_leave_fed(chat_id):
 	with FEDS_LOCK:
+		global FEDERATION_CHATS, FEDERATION_CHATS_BYID
 		# Set variables
 		fed_info = FEDERATION_CHATS.get(str(chat_id))
 		if fed_info == None:
@@ -269,7 +270,7 @@ def set_frules(fed_id, rules):
 		getfed = FEDERATION_BYFEDID.get(str(fed_id))
 		owner_id = getfed['owner']
 		fed_name = getfed['fname']
-		fed_members = eval(getfed['fusers'])['members']
+		fed_members = getfed['fusers']
 		fed_rules = str(rules)
 		# Set user
 		FEDERATION_BYOWNER[str(owner_id)]['frules'] = fed_rules
@@ -406,17 +407,17 @@ def __load_all_feds():
 			check = FEDERATION_BYOWNER.get(x.owner_id)
 			if check == None:
 				FEDERATION_BYOWNER[x.owner_id] = []
-			FEDERATION_BYOWNER[str(x.owner_id)] = {'fid': str(x.fed_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': str({'owner': str(x.owner_id), 'members': str(x.fed_users)})}
+			FEDERATION_BYOWNER[str(x.owner_id)] = {'fid': str(x.fed_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': str(x.fed_users)}
 			# Fed By FedId
 			check = FEDERATION_BYFEDID.get(x.fed_id)
 			if check == None:
 				FEDERATION_BYFEDID[x.fed_id] = []
-			FEDERATION_BYFEDID[str(x.fed_id)] = {'owner': str(x.owner_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': str({'owner': str(x.owner_id), 'members': str(x.fed_users)})}
+			FEDERATION_BYFEDID[str(x.fed_id)] = {'owner': str(x.owner_id), 'fname': x.fed_name, 'frules': x.fed_rules, 'fusers': str(x.fed_users)}
 			# Fed By Name
 			check = FEDERATION_BYNAME.get(x.fed_name)
 			if check == None:
 				FEDERATION_BYNAME[x.fed_name] = []
-			FEDERATION_BYNAME[x.fed_name] = {'fid': str(x.fed_id), 'owner': str(x.owner_id), 'frules': x.fed_rules, 'fusers': str({'owner': str(x.owner_id), 'members': str(x.fed_users)})}
+			FEDERATION_BYNAME[x.fed_name] = {'fid': str(x.fed_id), 'owner': str(x.owner_id), 'frules': x.fed_rules, 'fusers': str(x.fed_users)}
 	finally:
 		SESSION.close()
 
