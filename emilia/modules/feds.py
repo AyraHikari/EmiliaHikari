@@ -194,11 +194,6 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
             message.reply_text("Silakan masukkan id federasi yang valid.")
             return
 
-        getusr = sql.all_fed_users(args[0])
-        if user.id not in getusr or user.id not in SUDO_USERS:
-            message.reply_text("Anda bukan admin dari federasi {}.".format(getfed['fname']))
-            return
-
         x = sql.chat_join_fed(args[0], chat.id)
         if not x:
             message.reply_text("Gagal bergabung dengan federasi! Tolong hubungi pembuat saya jika masalah ini masih berlanjut.")
@@ -779,6 +774,39 @@ def fed_notif(bot: Bot, update: Update, args: List[str]):
         getreport = sql.user_feds_report(user.id)
         msg.reply_text("Preferensi laporan federasi anda saat ini: `{}`".format(getreport), parse_mode="markdown")
 
+@run_async
+def fed_chats(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    fed_id = sql.get_fed_id(chat.id)
+    info = sql.get_fed_info(fed_id)
+
+    if not fed_id:
+        update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+        return
+
+    if is_user_fed_admin(fed_id, user.id) == False:
+        update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+        return
+
+    user = update.effective_user  # type: Optional[Chat]
+    chat = update.effective_chat  # type: Optional[Chat]
+    getlist = sql.all_fed_chats(fed_id)
+    if len(getlist) == 0:
+        update.effective_message.reply_text("Tidak ada pengguna yang di fban di federasi {}".format(info['fname']), parse_mode=ParseMode.HTML)
+        return
+
+    text = "<b>Obrolan yang bergabung pada federasi {}:</b>\n".format(info['fname'])
+    for chats in getlist:
+        chat_name = dispatcher.bot.getChat(chats).title
+        text += " • {} (<code>{}</code>)\n".format(chat_name, chats)
+
+    update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
+
 
 def is_user_fed_admin(fed_id, user_id):
     fed_admins = sql.all_fed_users(fed_id)
@@ -890,6 +918,7 @@ FED_CHAT_HANDLER = CommandHandler("chatfed", fed_chat, pass_args=True)
 FED_ADMIN_HANDLER = CommandHandler("fedadmins", fed_admin, pass_args=True)
 FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True)
 FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
+FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
 
 dispatcher.add_handler(NEW_FED_HANDLER)
 dispatcher.add_handler(DEL_FED_HANDLER)
@@ -907,3 +936,4 @@ dispatcher.add_handler(FED_CHAT_HANDLER)
 dispatcher.add_handler(FED_ADMIN_HANDLER)
 dispatcher.add_handler(FED_USERBAN_HANDLER)
 dispatcher.add_handler(FED_NOTIF_HANDLER)
+dispatcher.add_handler(FED_CHATLIST_HANDLER)
