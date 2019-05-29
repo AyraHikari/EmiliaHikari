@@ -1,6 +1,6 @@
 import threading
 
-from sqlalchemy import Column, String, UnicodeText, func, distinct
+from sqlalchemy import Column, String, UnicodeText, func, distinct, Integer, Boolean
 
 from emilia.modules.sql import SESSION, BASE
 
@@ -40,6 +40,17 @@ class BansF(BASE):
 		self.user_id = user_id
 		self.reason = reason
 
+class FedsUserSettings(BASE):
+    __tablename__ = "feds_settings"
+    user_id = Column(Integer, primary_key=True)
+    should_report = Column(Boolean, default=True)
+
+    def __init__(self, user_id):
+        self.user_id = user_id
+
+    def __repr__(self):
+        return "<Feds report settings ({})>".format(self.user_id)
+
 # Dropping db
 # Federations.__table__.drop()
 # ChatF.__table__.drop()
@@ -48,9 +59,12 @@ class BansF(BASE):
 Federations.__table__.create(checkfirst=True)
 ChatF.__table__.create(checkfirst=True)
 BansF.__table__.create(checkfirst=True)
+FedsUserSettings.__table__.create(checkfirst=True)
 
 FEDS_LOCK = threading.RLock()
 CHAT_FEDS_LOCK = threading.RLock()
+FEDS_SETTINGS_LOCK = threading.RLock()
+
 
 FEDERATION_BYNAME = {}
 FEDERATION_BYOWNER = {}
@@ -316,7 +330,6 @@ def get_fban_user(fed_id, user_id):
 	list_fbanned = FEDERATION_BANNED.get(fed_id)
 	if list_fbanned == None:
 		FEDERATION_BANNED[fed_id] = []
-	print(FEDERATION_BANNED[fed_id])
 	if user_id in FEDERATION_BANNED[fed_id]:
 		r = SESSION.query(BansF).all()
 		reason = None
@@ -363,6 +376,27 @@ def search_fed_by_id(fed_id):
 
 	return result
 
+def user_feds_report(user_id: int) -> bool:
+    try:
+        user_setting = SESSION.query(FedsUserSettings).get(user_id)
+        if user_setting:
+            return user_setting.should_report
+        return True
+    finally:
+        SESSION.close()
+
+
+def set_feds_setting(user_id: int, setting: bool):
+    with FEDS_SETTINGS_LOCK:
+        user_setting = SESSION.query(FedsUserSettings).get(user_id)
+        if not user_setting:
+            user_setting = FedsUserSettings(user_id)
+
+        user_setting.should_report = setting
+        SESSION.add(user_setting)
+        SESSION.commit()
+
+
 def __load_all_feds():
 	global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
 	try:
@@ -383,7 +417,6 @@ def __load_all_feds():
 			if check == None:
 				FEDERATION_BYNAME[x.fed_name] = []
 			FEDERATION_BYNAME[x.fed_name] = {'fid': str(x.fed_id), 'owner': str(x.owner_id), 'frules': x.fed_rules, 'fusers': str(x.fed_users)}
-			print(x.fed_users)
 	finally:
 		SESSION.close()
 

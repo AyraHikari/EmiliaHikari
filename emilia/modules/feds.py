@@ -412,6 +412,10 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
     info = sql.get_fed_info(fed_id)
     FEDADMIN = sql.all_fed_users(fed_id)
+    for x in FEDADMIN:
+        getreport = sql.user_feds_report(x)
+        if getreport == False:
+            FEDADMIN.remove(x)
 
     if is_user_fed_admin(fed_id, user.id) == False:
         update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
@@ -584,6 +588,10 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 
     message.reply_text("Orang ini telah di un-fbanned.")
     FEDADMIN = sql.all_fed_users(fed_id)
+    for x in FEDADMIN:
+        getreport = sql.user_feds_report(x)
+        if getreport == False:
+            FEDADMIN.remove(x)
     send_to_list(bot, FEDADMIN,
              "<b>Un-FedBan</b>" \
              "\n<b>Federasi:</b> {}" \
@@ -731,6 +739,34 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
             update.effective_message.reply_document(document=output, filename="gbanlist.txt",
                                                     caption="Berikut adalah daftar pengguna yang saat ini difban pada federasi {}.".format(info['fname']))
 
+@run_async
+def fed_notif(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    msg = update.effective_message  # type: Optional[Message]
+    fed_id = sql.get_fed_id(chat.id)
+
+    if not fed_id:
+        update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+        return
+
+    if args:
+        if args[0] in ("yes", "on", "ya"):
+            sql.set_feds_setting(user.id, True)
+            msg.reply_text("Pelaporan federasi hidup! Setiap ada pengguna yang di fban/unfban anda akan di beritahu via PM.")
+        elif args[0] in ("no", "off", "ga"):
+            sql.set_feds_setting(user.id, False)
+            msg.reply_text("Pelaporan federasi mati! Setiap ada pengguna yang di fban/unfban anda tidak akan di beritahu via PM.")
+        else:
+            msg.reply_text("Tolong masukan `ya`/`on`/`ga`/`off`", parse_mode="markdown")
+    else:
+        getreport = sql.user_feds_report(user.id)
+        msg.reply_text("Preferensi laporan federasi anda saat ini: `{}`".format(getreport), parse_mode="markdown")
+
 
 def is_user_fed_admin(fed_id, user_id):
     fed_admins = sql.all_fed_users(fed_id)
@@ -838,6 +874,7 @@ FED_GET_RULES_HANDLER = CommandHandler("frules", get_frules, pass_args=True)
 FED_CHAT_HANDLER = CommandHandler("chatfed", fed_chat, pass_args=True)
 FED_ADMIN_HANDLER = CommandHandler("fedadmins", fed_admin, pass_args=True)
 FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True)
+FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 
 dispatcher.add_handler(NEW_FED_HANDLER)
 dispatcher.add_handler(DEL_FED_HANDLER)
@@ -854,3 +891,4 @@ dispatcher.add_handler(FED_GET_RULES_HANDLER)
 dispatcher.add_handler(FED_CHAT_HANDLER)
 dispatcher.add_handler(FED_ADMIN_HANDLER)
 dispatcher.add_handler(FED_USERBAN_HANDLER)
+dispatcher.add_handler(FED_NOTIF_HANDLER)
