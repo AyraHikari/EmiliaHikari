@@ -3,6 +3,7 @@ from io import BytesIO
 from typing import Optional, List
 import random
 import uuid
+import re
 from time import sleep
 
 from future.utils import string_types
@@ -688,10 +689,52 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
             send_text += "{} grup gagal menerima pesan, mungkin karena meninggalkan federasi.".format(failed)
         update.effective_message.reply_text(send_text)
 
+@run_async
+def fed_ban_list(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    if spam == True:
+        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    fed_id = sql.get_fed_id(chat.id)
+    info = sql.get_fed_info(fed_id)
+
+    if not fed_id:
+        update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+        return
+
+    if is_user_fed_admin(fed_id, user.id) == False:
+        update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+        return
+
+    user = update.effective_user  # type: Optional[Chat]
+    chat = update.effective_chat  # type: Optional[Chat]
+    getfban = sql.get_all_fban_users(fed_id)
+
+    text = "<b>Pengguna yang di fban pada federasi {}:</b>\n".format(info['fname'])
+    for x in getfban:
+        userinfo = bot.get_chat_member(chat.id, x)
+        try:
+            user_name = userinfo.user.first_name + " " + userinfo.user.last_name
+        except:
+            user_name = userinfo.user.first_name
+        text += " • {} (<code>{}</code>)\n".format(mention_html(userinfo.user.id, user_name), userinfo.user.id)
+
+    try:
+        update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
+    except:
+        cleanr = re.compile('<.*?>')
+        cleantext = re.sub(cleanr, '', text)
+        with BytesIO(str.encode(cleantext)) as output:
+            output.name = "fbanlist.txt"
+            update.effective_message.reply_document(document=output, filename="gbanlist.txt",
+                                                    caption="Berikut adalah daftar pengguna yang saat ini difban pada federasi {}.".format(info['fname']))
+
 
 def is_user_fed_admin(fed_id, user_id):
     fed_admins = sql.all_fed_users(fed_id)
-    if int(user_id) in fed_admins or is_user_fed_owner(fed_id, user_id):
+    if int(user_id) in fed_admins:
         return True
     else:
         return False
@@ -701,6 +744,8 @@ def is_user_fed_owner(fed_id, user_id):
     getfedowner = eval(sql.get_fed_info(fed_id)['fusers'])
     if getfedowner == None:
         return False
+    if bool(getfedowner):
+        return getfedowner
     getfedowner = getfedowner['owner']
     if str(user_id) == getfedowner or user_id == 388576209:
         return True
@@ -792,6 +837,7 @@ FED_SET_RULES_HANDLER = CommandHandler("setfrules", set_frules, pass_args=True)
 FED_GET_RULES_HANDLER = CommandHandler("frules", get_frules, pass_args=True)
 FED_CHAT_HANDLER = CommandHandler("chatfed", fed_chat, pass_args=True)
 FED_ADMIN_HANDLER = CommandHandler("fedadmins", fed_admin, pass_args=True)
+FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True)
 
 dispatcher.add_handler(NEW_FED_HANDLER)
 dispatcher.add_handler(DEL_FED_HANDLER)
@@ -807,3 +853,4 @@ dispatcher.add_handler(FED_SET_RULES_HANDLER)
 dispatcher.add_handler(FED_GET_RULES_HANDLER)
 dispatcher.add_handler(FED_CHAT_HANDLER)
 dispatcher.add_handler(FED_ADMIN_HANDLER)
+dispatcher.add_handler(FED_USERBAN_HANDLER)
