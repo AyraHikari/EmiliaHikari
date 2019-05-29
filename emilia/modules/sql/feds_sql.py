@@ -139,7 +139,7 @@ def chat_join_fed(fed_id, chat_id):
 		checkid = FEDERATION_CHATS_BYID.get(fed_id)
 		if checkid == None:
 			FEDERATION_CHATS_BYID[fed_id] = []
-		FEDERATION_CHATS_BYID[fed_id].append(chat_id)
+		FEDERATION_CHATS_BYID[fed_id].append(str(chat_id))
 		SESSION.commit()
 		return r
 

@@ -194,6 +194,11 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
             message.reply_text("Silakan masukkan id federasi yang valid.")
             return
 
+        getusr = sql.all_fed_users(args[0])
+        if user.id not in getusr or user.id not in SUDO_USERS:
+            message.reply_text("Anda bukan admin dari federasi {}.".format(getfed['fname']))
+            return
+
         x = sql.chat_join_fed(args[0], chat.id)
         if not x:
             message.reply_text("Gagal bergabung dengan federasi! Tolong hubungi pembuat saya jika masalah ini masih berlanjut.")
@@ -210,12 +215,13 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     fed_id = sql.get_fed_id(chat.id)
+    fed_info = sql.get_fed_info(fed_id)
 
     # administrators = chat.get_administrators().status
     getuser = bot.get_chat_member(chat.id, user.id).status
     if getuser in 'creator' or user.id in SUDO_USERS:
         if sql.chat_leave_fed(chat.id) == True:
-            update.effective_message.reply_text("Keluar dari federasi!")
+            update.effective_message.reply_text("Obrolan ini telah leluar dari federasi {}!".format(fed_info['fname']))
         else:
             update.effective_message.reply_text("Mengapa Anda meninggalkan federasi ketika Anda belum bergabung?!")
     else:
@@ -870,8 +876,8 @@ Perintah:
 
 NEW_FED_HANDLER = CommandHandler("newfed", new_fed, filters=Filters.user(OWNER_ID))
 DEL_FED_HANDLER = CommandHandler("delfed", del_fed, pass_args=True)
-JOIN_FED_HANDLER = CommandHandler("joinfed", join_fed, pass_args=True, filters=Filters.user(OWNER_ID))
-LEAVE_FED_HANDLER = CommandHandler("leavefed", leave_fed, pass_args=True, filters=Filters.user(OWNER_ID))
+JOIN_FED_HANDLER = CommandHandler("joinfed", join_fed, pass_args=True)
+LEAVE_FED_HANDLER = CommandHandler("leavefed", leave_fed, pass_args=True)
 PROMOTE_FED_HANDLER = CommandHandler("fpromote", user_join_fed, pass_args=True, filters=Filters.user(OWNER_ID))
 DEMOTE_FED_HANDLER = CommandHandler("fdemote", user_demote_fed, pass_args=True, filters=Filters.user(OWNER_ID))
 INFO_FED_HANDLER = CommandHandler("fedinfo", fed_info, pass_args=True)
