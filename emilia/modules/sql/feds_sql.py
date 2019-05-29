@@ -35,13 +35,15 @@ class BansF(BASE):
 	user_id = Column(String(14), primary_key=True)
 	first_name = Column(UnicodeText, nullable=False)
 	last_name = Column(UnicodeText)
+	user_name = Column(UnicodeText)
 	reason = Column(UnicodeText, default="")
 
-	def __init__(self, fed_id, user_id, first_name, last_name, reason):
+	def __init__(self, fed_id, user_id, first_name, last_name, user_name, reason):
 		self.fed_id = fed_id
 		self.user_id = user_id
 		self.first_name = first_name
 		self.last_name = last_name
+		self.user_name = user_name
 		self.reason = reason
 
 class FedsUserSettings(BASE):
@@ -187,7 +189,7 @@ def user_demote_fed(fed_id, user_id):
 		FEDERATION_BYFEDID[str(fed_id)]['fusers'] = str({'owner': str(owner_id), 'members': str(members)})
 		FEDERATION_BYNAME[fed_name]['fusers'] = str({'owner': str(owner_id), 'members': str(members)})
 		# Set on database
-		fed = Federations(str(owner_id), fed_name, str(fed_id), fed_rules, str(members))
+		fed = Federations(str(owner_id), fed_name, str(fed_id), fed_rules, str({'owner': str(owner_id), 'members': str(members)}))
 		SESSION.merge(fed)
 		SESSION.commit()
 		return True
@@ -221,7 +223,7 @@ def user_join_fed(fed_id, user_id):
 		FEDERATION_BYFEDID[str(fed_id)]['fusers'] = str({'owner': str(owner_id), 'members': str(members)})
 		FEDERATION_BYNAME[fed_name]['fusers'] = str({'owner': str(owner_id), 'members': str(members)})
 		# Set on database
-		fed = Federations(str(owner_id), fed_name, str(fed_id), fed_rules, str(members))
+		fed = Federations(str(owner_id), fed_name, str(fed_id), fed_rules, str({'owner': str(owner_id), 'members': str(members)}))
 		SESSION.merge(fed)
 		SESSION.commit()
 		__load_all_feds_chats()
@@ -298,7 +300,7 @@ def get_frules(fed_id):
 		return rules
 
 
-def fban_user(fed_id, user_id, first_name, last_name, reason):
+def fban_user(fed_id, user_id, first_name, last_name, user_name, reason):
 	with FEDS_LOCK:
 		r = SESSION.query(BansF).all()
 		for I in r:
@@ -306,7 +308,7 @@ def fban_user(fed_id, user_id, first_name, last_name, reason):
 				if int(I.user_id) == int(user_id):
 					SESSION.delete(I)
 
-		r = BansF(str(fed_id), user_id, first_name, last_name, reason)
+		r = BansF(str(fed_id), user_id, first_name, last_name, user_name, reason)
 
 		SESSION.add(r)
 		try:
@@ -474,7 +476,7 @@ def __load_all_feds_banned():
 			check = FEDERATION_BANNED_FULL.get(x.fed_id)
 			if check == None:
 				FEDERATION_BANNED_FULL[x.fed_id] = {}
-			FEDERATION_BANNED_FULL[x.fed_id] = {x.user_id: {'first_name': x.first_name, 'last_name': x.last_name, 'reason': x.reason}}
+			FEDERATION_BANNED_FULL[x.fed_id] = {x.user_id: {'first_name': x.first_name, 'last_name': x.last_name, 'user_name': x.user_name, 'reason': x.reason}}
 	finally:
 		SESSION.close()
 
