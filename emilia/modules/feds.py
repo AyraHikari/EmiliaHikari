@@ -854,9 +854,11 @@ Perintah:
  - /fban <user>: melarang pengguna dari semua federasi tempat obrolan ini berlangsung, dan eksekutor memiliki kendali atas.
  - /unfban <user>: batalkan pengguna dari semua federasi tempat obrolan ini berlangsung, dan bahwa pelaksana memiliki kendali atas.
  - /setfrules: Atur peraturan federasi.
- - /frules: Lihat peraturan federasi
- - /chatfed: Lihat federasi pada obrolan saat ini
- - /fedadmins: Tampilkan admin federasi
+ - /frules: Lihat peraturan federasi.
+ - /chatfed: Lihat federasi pada obrolan saat ini.
+ - /fedadmins: Tampilkan admin federasi.
+ - /fbanlist: Menampilkan semua pengguna yang di fban pada federasi saat ini.
+ - /fednotif <on/off>: Atur federasi notif di PM ketika ada pengguna yang di fban/unfban.
 """
 
 NEW_FED_HANDLER = CommandHandler("newfed", new_fed, filters=Filters.user(OWNER_ID))
