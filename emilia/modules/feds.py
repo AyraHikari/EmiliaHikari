@@ -719,6 +719,9 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
     user = update.effective_user  # type: Optional[Chat]
     chat = update.effective_chat  # type: Optional[Chat]
     getfban = sql.get_all_fban_users(fed_id)
+    if len(getfban) == 0:
+        update.effective_message.reply_text("Tidak ada pengguna yang di fban di federasi {}".format(info['fname']), parse_mode=ParseMode.HTML)
+        return
 
     text = "<b>Pengguna yang di fban pada federasi {}:</b>\n".format(info['fname'])
     for x in getfban:
