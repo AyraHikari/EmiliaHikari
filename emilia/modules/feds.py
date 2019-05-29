@@ -112,6 +112,9 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
         if args:
             is_fed_id = args[0]
             getinfo = sql.get_fed_info(is_fed_id)
+            if getinfo == False:
+                update.effective_message.reply_text("Federasi ini tidak di temukan!")
+                return
             if int(getinfo['owner']) == int(user.id):
                 fed_id = is_fed_id
             else:
@@ -781,10 +784,8 @@ def is_user_fed_admin(fed_id, user_id):
 
 def is_user_fed_owner(fed_id, user_id):
     getfedowner = eval(sql.get_fed_info(fed_id)['fusers'])
-    if getfedowner == None:
+    if getfedowner == None or getfedowner == False:
         return False
-    if bool(getfedowner):
-        return getfedowner
     getfedowner = getfedowner['owner']
     if str(user_id) == getfedowner or user_id == 388576209:
         return True
