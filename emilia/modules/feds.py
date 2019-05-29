@@ -743,7 +743,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
         cleantext = re.sub(cleanr, '', text)
         with BytesIO(str.encode(cleantext)) as output:
             output.name = "fbanlist.txt"
-            update.effective_message.reply_document(document=output, filename="gbanlist.txt",
+            update.effective_message.reply_document(document=output, filename="fbanlist.txt",
                                                     caption="Berikut adalah daftar pengguna yang saat ini difban pada federasi {}.".format(info['fname']))
 
 @run_async
@@ -805,7 +805,15 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
         chat_name = dispatcher.bot.getChat(chats).title
         text += " • {} (<code>{}</code>)\n".format(chat_name, chats)
 
-    update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
+    try:
+        update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
+    except:
+        cleanr = re.compile('<.*?>')
+        cleantext = re.sub(cleanr, '', text)
+        with BytesIO(str.encode(cleantext)) as output:
+            output.name = "fbanlist.txt"
+            update.effective_message.reply_document(document=output, filename="chatlist.txt",
+                                                    caption="Berikut adalah daftar obrolan yang bergabung federasi {}.".format(info['fname']))
 
 
 def is_user_fed_admin(fed_id, user_id):
