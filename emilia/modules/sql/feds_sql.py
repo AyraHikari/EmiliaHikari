@@ -476,7 +476,7 @@ def __load_all_feds_banned():
 			check = FEDERATION_BANNED_FULL.get(x.fed_id)
 			if check == None:
 				FEDERATION_BANNED_FULL[x.fed_id] = {}
-			FEDERATION_BANNED_FULL[x.fed_id] = {x.user_id: {'first_name': x.first_name, 'last_name': x.last_name, 'user_name': x.user_name, 'reason': x.reason}}
+			FEDERATION_BANNED_FULL[x.fed_id][x.user_id] = {'first_name': x.first_name, 'last_name': x.last_name, 'user_name': x.user_name, 'reason': x.reason}
 	finally:
 		SESSION.close()
 

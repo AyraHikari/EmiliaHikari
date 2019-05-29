@@ -4,6 +4,7 @@ from typing import Optional, List
 import random
 import uuid
 import re
+import json
 from time import sleep
 
 from future.utils import string_types
@@ -726,6 +727,20 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
 	if len(getfban) == 0:
 		update.effective_message.reply_text("Tidak ada pengguna yang di fban di federasi {}".format(info['fname']), parse_mode=ParseMode.HTML)
 		return
+
+	if args:
+		if args[0] == 'json':
+			backups = ""
+			for users in getfban:
+				getuserinfo = sql.get_all_fban_users_target(fed_id, users)
+				json_parser = {"user_id": users, "first_name": getuserinfo['first_name'], "last_name": getuserinfo['last_name'], "user_name": getuserinfo['user_name'], "reason": getuserinfo['reason']}
+				backups += json.dumps(json_parser)
+				backups += "\n"
+			with BytesIO(str.encode(backups)) as output:
+				output.name = "emilia_fbanned_users.json"
+				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.json",
+													caption="Pengguna terkena blokir federasi {}.".format(info['fname']))
+			return
 
 	text = "<b>Pengguna yang di fban pada federasi {}:</b>\n".format(info['fname'])
 	for users in getfban:
