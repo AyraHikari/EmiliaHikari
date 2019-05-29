@@ -71,7 +71,7 @@ def new_fed(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message
-    fednam = message.text[len('/newfed '):]
+    fednam = message.text.split(None, 1)[1]
     if not fednam == '':
         fed_id = str(uuid.uuid4())
         fed_name = fednam
@@ -783,7 +783,10 @@ def is_user_fed_admin(fed_id, user_id):
 
 
 def is_user_fed_owner(fed_id, user_id):
-    getfedowner = eval(sql.get_fed_info(fed_id)['fusers'])
+    getsql = sql.get_fed_info(fed_id)
+    if getsql == False:
+        return False
+    getfedowner = eval(getsql['fusers'])
     if getfedowner == None or getfedowner == False:
         return False
     getfedowner = getfedowner['owner']
