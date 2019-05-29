@@ -810,8 +810,6 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
 		return
 
-	user = update.effective_user  # type: Optional[Chat]
-	chat = update.effective_chat  # type: Optional[Chat]
 	getlist = sql.all_fed_chats(fed_id)
 	if len(getlist) == 0:
 		update.effective_message.reply_text("Tidak ada pengguna yang di fban di federasi {}".format(info['fname']), parse_mode=ParseMode.HTML)
@@ -829,8 +827,60 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 		cleantext = re.sub(cleanr, '', text)
 		with BytesIO(str.encode(cleantext)) as output:
 			output.name = "fbanlist.txt"
-			update.effective_message.reply_document(document=output, filename="chatlist.txt",
+			update.effective_message.reply_document(document=output, filename="fbanlist.txt",
 													caption="Berikut adalah daftar obrolan yang bergabung federasi {}.".format(info['fname']))
+
+@run_async
+def fed_import_bans(bot: Bot, update: Update):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+	if spam == True:
+		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+	msg = update.effective_message  # type: Optional[Message]
+	fed_id = sql.get_fed_id(chat.id)
+	info = sql.get_fed_info(fed_id)
+
+	if not fed_id:
+		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		return
+
+	if is_user_fed_owner(fed_id, user.id) == False:
+		update.effective_message.reply_text("Hanya pemilik federasi yang dapat melakukan ini!")
+		return
+
+	if msg.reply_to_message and msg.reply_to_message.document:
+		if int(int(msg.reply_to_message.document.file_size)/1024) >= 1000:
+			msg.reply_text("File ini terlalu besar!")
+			return
+		success = 0
+		failed = 0
+		try:
+			file_info = bot.get_file(msg.reply_to_message.document.file_id)
+		except BadRequest:
+			msg.reply_text("Coba unduh dan unggah ulang filenya, yang ini sepertinya rusak!")
+			return
+		with BytesIO() as file:
+			file_info.download(out=file)
+			file.seek(0)
+			reading = file.read().decode('UTF-8')
+			splitting = reading.split('\n')
+			for x in splitting:
+				if x == '':
+					continue
+				try:
+					data = json.loads(x)
+				except json.decoder.JSONDecodeError as err:
+					failed += 1
+					continue
+				addtodb = sql.fban_user(fed_id, data['user_id'], data['first_name'], data['last_name'], data['user_name'], data['reason'])
+				if addtodb:
+					success += 1
+		text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
+		if failed >= 1:
+			text += " {} gagal di impor.".format(failed)
+		update.effective_message.reply_text(text)
 
 
 def is_user_fed_admin(fed_id, user_id):
@@ -946,6 +996,7 @@ FED_ADMIN_HANDLER = CommandHandler("fedadmins", fed_admin, pass_args=True)
 FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True)
 FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
+FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans)
 
 dispatcher.add_handler(NEW_FED_HANDLER)
 dispatcher.add_handler(DEL_FED_HANDLER)
@@ -964,3 +1015,4 @@ dispatcher.add_handler(FED_ADMIN_HANDLER)
 dispatcher.add_handler(FED_USERBAN_HANDLER)
 dispatcher.add_handler(FED_NOTIF_HANDLER)
 dispatcher.add_handler(FED_CHATLIST_HANDLER)
+dispatcher.add_handler(FED_IMPORTBAN_HANDLER)
