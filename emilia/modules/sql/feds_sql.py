@@ -111,7 +111,7 @@ def new_fed(owner_id, fed_name, fed_id):
 
 def del_fed(fed_id, chat_id):
 	with FEDS_LOCK:
-		global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
+		global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME, FEDERATION_CHATS, FEDERATION_CHATS_BYID
 		getcache = FEDERATION_BYFEDID.get(fed_id)
 		if getcache == None:
 			return False
@@ -123,17 +123,19 @@ def del_fed(fed_id, chat_id):
 		FEDERATION_BYOWNER.pop(owner_id)
 		FEDERATION_BYFEDID.pop(fed_id)
 		FEDERATION_BYNAME.pop(fed_name)
+		if FEDERATION_CHATS_BYID.get(fed_id):
+			for x in FEDERATION_CHATS_BYID[fed_id]:
+				FEDERATION_CHATS.pop(x)
+			FEDERATION_CHATS_BYID.pop(fed_id)
 		# Delete from database
 		curr = SESSION.query(Federations).get(fed_id)
 		if curr:
 			SESSION.delete(curr)
 			SESSION.commit()
-
-		curr = SESSION.query(ChatF).get(str(chat_id))
-		if curr:
-			SESSION.delete(curr)
+		delchats = SESSION.query(ChatF).get(str(chat_id))
+		if delchats:
+			SESSION.delete(delchats)
 			SESSION.commit()
-
 		return True
 
 def chat_join_fed(fed_id, chat_id):
@@ -222,6 +224,7 @@ def user_join_fed(fed_id, user_id):
 		fed = Federations(str(owner_id), fed_name, str(fed_id), fed_rules, str(members))
 		SESSION.merge(fed)
 		SESSION.commit()
+		__load_all_feds_chats()
 		return True
 
 
@@ -440,6 +443,8 @@ def __load_all_feds_chats():
 	global FEDERATION_CHATS, FEDERATION_CHATS_BYID
 	try:
 		qall = SESSION.query(ChatF).all()
+		FEDERATION_CHATS = {}
+		FEDERATION_CHATS_BYID = {}
 		for x in qall:
 			# Federation Chats
 			check = FEDERATION_CHATS.get(x.chat_id)

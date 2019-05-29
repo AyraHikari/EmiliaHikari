@@ -78,7 +78,7 @@ def new_fed(bot: Bot, update: Update):
         LOGGER.info(fed_id)
 
         # Currently only for creator
-        if fednam == 'Team Nusantara Devs':
+        if fednam == 'Team Nusantara Disciplinary Circle':
              fed_id = "TeamNusantaraDevs"
 
         x = sql.new_fed(user.id, fed_name, fed_id)
@@ -216,7 +216,7 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
     getuser = bot.get_chat_member(chat.id, user.id).status
     if getuser in 'creator' or user.id in SUDO_USERS:
         if sql.chat_leave_fed(chat.id) == True:
-            update.effective_message.reply_text("Obrolan ini telah leluar dari federasi {}!".format(fed_info['fname']))
+            update.effective_message.reply_text("Obrolan ini telah keluar dari federasi {}!".format(fed_info['fname']))
         else:
             update.effective_message.reply_text("Mengapa Anda meninggalkan federasi ketika Anda belum bergabung?!")
     else:
@@ -716,8 +716,8 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
         update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
         return
 
-    if is_user_fed_admin(fed_id, user.id) == False:
-        update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+    if is_user_fed_owner(fed_id, user.id) == False:
+        update.effective_message.reply_text("Hanya pemilik federasi yang dapat melakukan ini!")
         return
 
     user = update.effective_user  # type: Optional[Chat]
