@@ -31,13 +31,17 @@ class ChatF(BASE):
 
 class BansF(BASE):
 	__tablename__ = "bans_feds"
-	fed_id = Column(String(), primary_key=True)
+	fed_id = Column(UnicodeText, primary_key=True)
 	user_id = Column(String(14), primary_key=True)
+	first_name = Column(UnicodeText, nullable=False)
+	last_name = Column(UnicodeText)
 	reason = Column(UnicodeText, default="")
 
-	def __init__(self, fed_id, user_id, reason):
+	def __init__(self, fed_id, user_id, first_name, last_name, reason):
 		self.fed_id = fed_id
 		self.user_id = user_id
+		self.first_name = first_name
+		self.last_name = last_name
 		self.reason = reason
 
 class FedsUserSettings(BASE):
@@ -73,7 +77,9 @@ FEDERATION_BYFEDID = {}
 FEDERATION_CHATS = {}
 FEDERATION_CHATS_BYID = {}
 
-FEDERATION_BANNED = {}
+FEDERATION_BANNED_FULL = {}
+FEDERATION_BANNED_USERID = {}
+
 FEDERATION_NOTIFICATION = {}
 
 
@@ -289,7 +295,7 @@ def get_frules(fed_id):
 		return rules
 
 
-def fban_user(fed_id, user_id, reason):
+def fban_user(fed_id, user_id, first_name, last_name, reason):
 	with FEDS_LOCK:
 		r = SESSION.query(BansF).all()
 		for I in r:
@@ -297,7 +303,7 @@ def fban_user(fed_id, user_id, reason):
 				if int(I.user_id) == int(user_id):
 					SESSION.delete(I)
 
-		r = BansF(str(fed_id), user_id, reason)
+		r = BansF(str(fed_id), user_id, first_name, last_name, reason)
 
 		SESSION.add(r)
 		try:
@@ -329,10 +335,10 @@ def un_fban_user(fed_id, user_id):
 		return I
 
 def get_fban_user(fed_id, user_id):
-	list_fbanned = FEDERATION_BANNED.get(fed_id)
+	list_fbanned = FEDERATION_BANNED_USERID.get(fed_id)
 	if list_fbanned == None:
-		FEDERATION_BANNED[fed_id] = []
-	if user_id in FEDERATION_BANNED[fed_id]:
+		FEDERATION_BANNED_USERID[fed_id] = []
+	if user_id in FEDERATION_BANNED_USERID[fed_id]:
 		r = SESSION.query(BansF).all()
 		reason = None
 		for I in r:
@@ -345,16 +351,25 @@ def get_fban_user(fed_id, user_id):
 
 
 def get_all_fban_users(fed_id):
-	list_fbanned = FEDERATION_BANNED.get(fed_id)
+	list_fbanned = FEDERATION_BANNED_USERID.get(fed_id)
 	if list_fbanned == None:
-		FEDERATION_BANNED[fed_id] = []
-	return FEDERATION_BANNED[fed_id]
+		FEDERATION_BANNED_USERID[fed_id] = []
+	return FEDERATION_BANNED_USERID[fed_id]
+
+def get_all_fban_users_target(fed_id, user_id):
+	list_fbanned = FEDERATION_BANNED_FULL.get(fed_id)
+	if list_fbanned == None:
+		FEDERATION_BANNED_FULL[fed_id] = []
+		return False
+	getuser = list_fbanned[str(user_id)]
+	return getuser
+
 
 def get_all_fban_users_global():
-	list_fbanned = FEDERATION_BANNED
+	list_fbanned = FEDERATION_BANNED_USERID
 	total = []
-	for x in list(FEDERATION_BANNED):
-		for y in FEDERATION_BANNED[x]:
+	for x in list(FEDERATION_BANNED_USERID):
+		for y in FEDERATION_BANNED_USERID[x]:
 			total.append(y)
 	return total
 
@@ -440,16 +455,21 @@ def __load_all_feds_chats():
 		SESSION.close()
 
 def __load_all_feds_banned():
-	global FEDERATION_BANNED
+	global FEDERATION_BANNED_USERID, FEDERATION_BANNED_FULL
 	try:
-		FEDERATION_BANNED = {}
+		FEDERATION_BANNED_USERID = {}
+		FEDERATION_BANNED_FULL = {}
 		qall = SESSION.query(BansF).all()
 		for x in qall:
-			check = FEDERATION_BANNED.get(x.fed_id)
+			check = FEDERATION_BANNED_USERID.get(x.fed_id)
 			if check == None:
-				FEDERATION_BANNED[x.fed_id] = []
-			if int(x.user_id) not in FEDERATION_BANNED[x.fed_id]:
-				FEDERATION_BANNED[x.fed_id].append(int(x.user_id))
+				FEDERATION_BANNED_USERID[x.fed_id] = []
+			if int(x.user_id) not in FEDERATION_BANNED_USERID[x.fed_id]:
+				FEDERATION_BANNED_USERID[x.fed_id].append(int(x.user_id))
+			check = FEDERATION_BANNED_FULL.get(x.fed_id)
+			if check == None:
+				FEDERATION_BANNED_FULL[x.fed_id] = {}
+			FEDERATION_BANNED_FULL[x.fed_id] = {x.user_id: {'first_name': x.first_name, 'last_name': x.last_name, 'reason': x.reason}}
 	finally:
 		SESSION.close()
 

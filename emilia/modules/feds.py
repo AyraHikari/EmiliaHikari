@@ -481,7 +481,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
     if reason == "":
         reason = "Tidak ada alasan."
 
-    x = sql.fban_user(fed_id, user_id, reason)
+    x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, reason)
     if not x:
         message.reply_text("Gagal melarangan federasi! Mungkin bug ini belum diperbaiki karena pengembangnya malas.")
         return
@@ -728,13 +728,15 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
         return
 
     text = "<b>Pengguna yang di fban pada federasi {}:</b>\n".format(info['fname'])
-    for x in getfban:
-        userinfo = bot.get_chat_member(chat.id, x)
-        try:
-            user_name = userinfo.user.first_name + " " + userinfo.user.last_name
-        except:
-            user_name = userinfo.user.first_name
-        text += " • {} (<code>{}</code>)\n".format(mention_html(userinfo.user.id, user_name), userinfo.user.id)
+    for users in getfban:
+        getuserinfo = sql.get_all_fban_users_target(fed_id, users)
+        if getuserinfo == False:
+            text = "Tidak ada pengguna yang di fban di federasi {}".format(info['fname'])
+            break
+        user_name = getuserinfo['first_name']
+        if getuserinfo['last_name']:
+            user_name += " " + getuserinfo['last_name']
+        text += " • {} (<code>{}</code>)\n".format(mention_html(users, user_name), users)
 
     try:
         update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
