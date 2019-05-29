@@ -41,15 +41,15 @@ class BansF(BASE):
 		self.reason = reason
 
 class FedsUserSettings(BASE):
-    __tablename__ = "feds_settings"
-    user_id = Column(Integer, primary_key=True)
-    should_report = Column(Boolean, default=True)
+	__tablename__ = "feds_settings"
+	user_id = Column(Integer, primary_key=True)
+	should_report = Column(Boolean, default=True)
 
-    def __init__(self, user_id):
-        self.user_id = user_id
+	def __init__(self, user_id):
+		self.user_id = user_id
 
-    def __repr__(self):
-        return "<Feds report settings ({})>".format(self.user_id)
+	def __repr__(self):
+		return "<Feds report settings ({})>".format(self.user_id)
 
 # Dropping db
 # Federations.__table__.drop()
@@ -74,6 +74,7 @@ FEDERATION_CHATS = {}
 FEDERATION_CHATS_BYID = {}
 
 FEDERATION_BANNED = {}
+FEDERATION_NOTIFICATION = {}
 
 
 def get_fed_info(fed_id):
@@ -377,24 +378,23 @@ def search_fed_by_id(fed_id):
 	return result
 
 def user_feds_report(user_id: int) -> bool:
-    try:
-        user_setting = SESSION.query(FedsUserSettings).get(user_id)
-        if user_setting:
-            return user_setting.should_report
-        return True
-    finally:
-        SESSION.close()
+	user_setting = FEDERATION_NOTIFICATION.get(str(user_id))
+	if user_setting == None:
+		user_setting = True
+	return user_setting
 
 
 def set_feds_setting(user_id: int, setting: bool):
-    with FEDS_SETTINGS_LOCK:
-        user_setting = SESSION.query(FedsUserSettings).get(user_id)
-        if not user_setting:
-            user_setting = FedsUserSettings(user_id)
+	with FEDS_SETTINGS_LOCK:
+		global FEDERATION_NOTIFICATION
+		user_setting = SESSION.query(FedsUserSettings).get(user_id)
+		if not user_setting:
+			user_setting = FedsUserSettings(user_id)
 
-        user_setting.should_report = setting
-        SESSION.add(user_setting)
-        SESSION.commit()
+		user_setting.should_report = setting
+		FEDERATION_NOTIFICATION[str(user_id)] = setting
+		SESSION.add(user_setting)
+		SESSION.commit()
 
 
 def __load_all_feds():
@@ -452,7 +452,17 @@ def __load_all_feds_banned():
 	finally:
 		SESSION.close()
 
+def __load_all_feds_settings():
+	global FEDERATION_NOTIFICATION
+	try:
+		getuser = SESSION.query(FedsUserSettings).all()
+		for x in getuser:
+			FEDERATION_NOTIFICATION[str(x.user_id)] = x.should_report
+	finally:
+		SESSION.close()
+
 
 __load_all_feds()
 __load_all_feds_chats()
 __load_all_feds_banned()
+__load_all_feds_settings()
