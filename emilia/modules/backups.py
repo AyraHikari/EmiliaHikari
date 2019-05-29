@@ -140,7 +140,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 		chat_name = update.effective_message.chat.title
 
 	jam = time.time()
-	new_jam = jam + 86400
+	new_jam = jam + 10800
 	cek = get_chat(chat_id, chat_data)
 	if cek.get('status'):
 		if jam <= int(cek.get('value')):
@@ -295,6 +295,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 	bot.sendDocument(current_chat_id, document=open('cadangan{}.backup'.format(chat_id), 'rb'), caption="*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang".format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
 	os.remove("cadangan{}.backup".format(chat_id)) # Cleaning file
 
+
 # Temporary data
 def put_chat(chat_id, value, chat_data):
 	# print(chat_data)
@@ -302,12 +303,12 @@ def put_chat(chat_id, value, chat_data):
 		status = False
 	else:
 		status = True
-	chat_data[chat_id] = {"status": status, "value": value}
+	chat_data[chat_id] = {'backups': {"status": status, "value": value}}
 
 def get_chat(chat_id, chat_data):
 	# print(chat_data)
 	try:
-		value = chat_data[chat_id]
+		value = chat_data[chat_id]['backups']
 		return value
 	except KeyError:
 		return {"status": False, "value": False}

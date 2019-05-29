@@ -5,6 +5,7 @@ import random
 import uuid
 import re
 import json
+import time
 from time import sleep
 
 from future.utils import string_types
@@ -380,7 +381,7 @@ def fed_admin(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 	info = sql.get_fed_info(fed_id)
 
-	text = "<b>Admin Federasi:</b>\n\n"
+	text = "<b>Admin Federasi {}:</b>\n\n".format(info['fname'])
 	text += "👑 Owner:\n"
 	owner = bot.get_chat(info['owner'])
 	try:
@@ -703,13 +704,14 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 		update.effective_message.reply_text(send_text)
 
 @run_async
-def fed_ban_list(bot: Bot, update: Update, args: List[str]):
+def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
 	if spam == True:
 		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
 
@@ -730,6 +732,20 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
 
 	if args:
 		if args[0] == 'json':
+			jam = time.time()
+			new_jam = jam + 1800
+			cek = get_chat(chat.id, chat_data)
+			if cek.get('status'):
+				if jam <= int(cek.get('value')):
+					waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
+					update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+					return
+				else:
+					if user.id != SUDO_USERS:
+						put_chat(chat.id, new_jam, chat_data)
+			else:
+				if user.id != SUDO_USERS:
+					put_chat(chat.id, new_jam, chat_data)
 			backups = ""
 			for users in getfban:
 				getuserinfo = sql.get_all_fban_users_target(fed_id, users)
@@ -756,6 +772,20 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str]):
 	try:
 		update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
 	except:
+		jam = time.time()
+		new_jam = jam + 1800
+		cek = get_chat(chat.id, chat_data)
+		if cek.get('status'):
+			if jam <= int(cek.get('value')):
+				waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
+				update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+				return
+			else:
+				if user.id != SUDO_USERS:
+					put_chat(chat.id, new_jam, chat_data)
+		else:
+			if user.id != SUDO_USERS:
+				put_chat(chat.id, new_jam, chat_data)
 		cleanr = re.compile('<.*?>')
 		cleantext = re.sub(cleanr, '', text)
 		with BytesIO(str.encode(cleantext)) as output:
@@ -831,7 +861,7 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 													caption="Berikut adalah daftar obrolan yang bergabung federasi {}.".format(info['fname']))
 
 @run_async
-def fed_import_bans(bot: Bot, update: Update):
+def fed_import_bans(bot: Bot, update: Update, chat_data):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
 	if spam == True:
 		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
@@ -839,6 +869,7 @@ def fed_import_bans(bot: Bot, update: Update):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
+
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
 
@@ -851,6 +882,20 @@ def fed_import_bans(bot: Bot, update: Update):
 		return
 
 	if msg.reply_to_message and msg.reply_to_message.document:
+		jam = time.time()
+		new_jam = jam + 1800
+		cek = get_chat(chat.id, chat_data)
+		if cek.get('status'):
+			if jam <= int(cek.get('value')):
+				waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
+				update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+				return
+			else:
+				if user.id != SUDO_USERS:
+					put_chat(chat.id, new_jam, chat_data)
+		else:
+			if user.id != SUDO_USERS:
+				put_chat(chat.id, new_jam, chat_data)
 		if int(int(msg.reply_to_message.document.file_size)/1024) >= 1000:
 			msg.reply_text("File ini terlalu besar!")
 			return
@@ -950,6 +995,24 @@ def __user_info__(user_id, chat_id):
 	return text
 
 
+# Temporary data
+def put_chat(chat_id, value, chat_data):
+	# print(chat_data)
+	if value == False:
+		status = False
+	else:
+		status = True
+	chat_data[chat_id] = {'federation': {"status": status, "value": value}}
+
+def get_chat(chat_id, chat_data):
+	# print(chat_data)
+	try:
+		value = chat_data[chat_id]['federation']
+		return value
+	except KeyError:
+		return {"status": False, "value": False}
+
+
 __mod_name__ = "Federasi"
 
 __help__ = """
@@ -993,10 +1056,10 @@ FED_SET_RULES_HANDLER = CommandHandler("setfrules", set_frules, pass_args=True)
 FED_GET_RULES_HANDLER = CommandHandler("frules", get_frules, pass_args=True)
 FED_CHAT_HANDLER = CommandHandler("chatfed", fed_chat, pass_args=True)
 FED_ADMIN_HANDLER = CommandHandler("fedadmins", fed_admin, pass_args=True)
-FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True)
+FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True, pass_chat_data=True)
 FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
-FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans)
+FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True)
 
 dispatcher.add_handler(NEW_FED_HANDLER)
 dispatcher.add_handler(DEL_FED_HANDLER)
