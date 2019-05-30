@@ -741,10 +741,10 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 					update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
 					return
 				else:
-					if user.id != SUDO_USERS:
+					if user.id not in SUDO_USERS:
 						put_chat(chat.id, new_jam, chat_data)
 			else:
-				if user.id != SUDO_USERS:
+				if user.id not in SUDO_USERS:
 					put_chat(chat.id, new_jam, chat_data)
 			backups = ""
 			for users in getfban:
@@ -781,10 +781,10 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 				update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
 				return
 			else:
-				if user.id != SUDO_USERS:
+				if user.id not in SUDO_USERS:
 					put_chat(chat.id, new_jam, chat_data)
 		else:
-			if user.id != SUDO_USERS:
+			if user.id not in SUDO_USERS:
 				put_chat(chat.id, new_jam, chat_data)
 		cleanr = re.compile('<.*?>')
 		cleantext = re.sub(cleanr, '', text)
@@ -891,10 +891,10 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 				update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
 				return
 			else:
-				if user.id != SUDO_USERS:
+				if user.id not in SUDO_USERS:
 					put_chat(chat.id, new_jam, chat_data)
 		else:
-			if user.id != SUDO_USERS:
+			if user.id not in SUDO_USERS:
 				put_chat(chat.id, new_jam, chat_data)
 		if int(int(msg.reply_to_message.document.file_size)/1024) >= 1000:
 			msg.reply_text("File ini terlalu besar!")
