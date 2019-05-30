@@ -33,9 +33,9 @@ from emilia.modules.connection import connected
 # 
 # Time spended on feds = 10h by #MrYacha
 # Time spended on reworking on the whole feds = 22+ hours by @peaktogoo
-# Time spended on updating version to v2 = 11+ hours by @AyraHikari
+# Time spended on updating version to v2 = 26+ hours by @AyraHikari
 # 
-# Total spended for making this features is 43+ hours
+# Total spended for making this features is 68+ hours
 
 # LOGGER.info("Original federation module by MrYacha, reworked by Mizukito Akito (@peaktogoo) on Telegram.")
 
@@ -432,9 +432,6 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 	user_id, reason = extract_user_and_text(message, args)
 
 	fban, fbanreason = sql.get_fban_user(fed_id, user_id)
-	if fban:
-		update.effective_message.reply_text("Hm... Pengguna ini sudah di fban dengan alasan:\n{}".format(fbanreason))
-		return
 
 	if not user_id:
 		message.reply_text("Anda sepertinya tidak merujuk ke pengguna.")
@@ -474,6 +471,58 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 		message.reply_text("Itu bukan pengguna!")
 		return
 
+	if fban:
+		user_target = mention_html(user_chat.id, user_chat.first_name)
+		fed_name = info['fname']
+		starting = "Alasan fban di ganti untuk {} pada Federasi <b>{}</b>.".format(user_target, fed_name)
+		update.effective_message.reply_text(starting, parse_mode=ParseMode.HTML)
+
+		if reason == "":
+			reason = "Tidak ada alasan."
+
+		temp = sql.un_fban_user(fed_id, user_id)
+		if not temp:
+			message.reply_text("Gagal mengupdate alasan fedban!")
+			return
+		x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason)
+		if not x:
+			message.reply_text("Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya.")
+			return
+
+		fed_chats = sql.all_fed_chats(fed_id)
+		for chat in fed_chats:
+			try:
+				bot.send_message(chat, "<b>Alasan FedBan Diperbarui</b>" \
+							 "\n<b>Federasi:</b> {}" \
+							 "\n<b>Federasi Admin:</b> {}" \
+							 "\n<b>Pengguna:</b> {}" \
+							 "\n<b>Pengguna ID:</b> <code>{}</code>" \
+							 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+												   mention_html(user_chat.id, user_chat.first_name),
+																user_chat.id, reason), parse_mode="HTML")
+				bot.kick_chat_member(chat, user_id)
+			except BadRequest as excp:
+				if excp.message in FBAN_ERRORS:
+					pass
+				else:
+					message.reply_text("Tidak dapat fban karena: {}".format(excp.message))
+					return
+			except TelegramError:
+				pass
+
+		send_to_list(bot, FEDADMIN,
+				 "<b>Alasan FedBan Diperbarui</b>" \
+				 "\n<b>Federasi:</b> {}" \
+				 "\n<b>Federasi Admin:</b> {}" \
+				 "\n<b>Pengguna:</b> {}" \
+				 "\n<b>Pengguna ID:</b> <code>{}</code>" \
+				 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+									   mention_html(user_chat.id, user_chat.first_name),
+													user_chat.id, reason), 
+				html=True)
+		message.reply_text("Alasan fedban telah di perbarui.")
+		return
+
 	user_target = mention_html(user_chat.id, user_chat.first_name)
 	fed_name = info['fname']
 
@@ -485,7 +534,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 	x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason)
 	if not x:
-		message.reply_text("Gagal melarangan federasi! Mungkin bug ini belum diperbaiki karena pengembangnya malas.")
+		message.reply_text("Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya.")
 		return
 
 	fed_chats = sql.all_fed_chats(fed_id)
@@ -1040,6 +1089,8 @@ Perintah:
  - /fedadmins: Tampilkan admin federasi.
  - /fbanlist: Menampilkan semua pengguna yang di fban pada federasi saat ini.
  - /fednotif <on/off>: Atur federasi notif di PM ketika ada pengguna yang di fban/unfban.
+ - /fedchats: Dapatkan semua chat yang terhubung di federasi.
+ - /importfbans: Balas file pesan cadangan federasi untuk mengimpor list banned ke federasi sekarang.
 """
 
 NEW_FED_HANDLER = CommandHandler("newfed", new_fed, filters=Filters.user(OWNER_ID))
