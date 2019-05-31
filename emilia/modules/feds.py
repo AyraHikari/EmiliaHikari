@@ -1008,6 +1008,25 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					except ValueError:
 						failed += 1
 						continue
+					# Checking user
+					if int(import_userid) == bot.id:
+						failed += 1
+						continue
+					if is_user_fed_owner(fed_id, import_userid) == True:
+						failed += 1
+						continue
+					if is_user_fed_admin(fed_id, import_userid) == True:
+						failed += 1
+						continue
+					if str(import_userid) == str(OWNER_ID):
+						failed += 1
+						continue
+					if int(import_userid) in SUDO_USERS:
+						failed += 1
+						continue
+					if int(import_userid) in WHITELIST_USERS:
+						failed += 1
+						continue
 					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
 					if addtodb:
 						success += 1
@@ -1036,6 +1055,25 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 						import_username = str(data[3])
 						import_reason = str(data[4])
 					except ValueError:
+						failed += 1
+						continue
+					# Checking user
+					if int(import_userid) == bot.id:
+						failed += 1
+						continue
+					if is_user_fed_owner(fed_id, import_userid) == True:
+						failed += 1
+						continue
+					if is_user_fed_admin(fed_id, import_userid) == True:
+						failed += 1
+						continue
+					if str(import_userid) == str(OWNER_ID):
+						failed += 1
+						continue
+					if int(import_userid) in SUDO_USERS:
+						failed += 1
+						continue
+					if int(import_userid) in WHITELIST_USERS:
 						failed += 1
 						continue
 					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
