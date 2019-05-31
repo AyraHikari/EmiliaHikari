@@ -168,7 +168,7 @@ __help__ = """
  - /clearrules: kosongkan aturan untuk obrolan ini.
 """
 
-__mod_name__ = "Rules"
+__mod_name__ = "Peraturan"
 
 GET_RULES_HANDLER = CommandHandler("rules", get_rules)#, filters=Filters.group)
 SET_RULES_HANDLER = CommandHandler("setrules", set_rules)#, filters=Filters.group)

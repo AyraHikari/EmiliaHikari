@@ -965,7 +965,7 @@ Ini akan mengambil pesan selamat datang dan mengirimkannya tanpa memformatnya; m
 Ini juga berfungsi dengan /goodbye.
 """.format(WELC_HELP_TXT)
 
-__mod_name__ = "Welcomes/Goodbyes"
+__mod_name__ = "Salam"
 
 NEW_MEM_HANDLER = MessageHandler(Filters.status_update.new_chat_members, new_member)
 LEFT_MEM_HANDLER = MessageHandler(Filters.status_update.left_chat_member, left_member)

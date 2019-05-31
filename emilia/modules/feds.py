@@ -1045,7 +1045,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			if failed >= 1:
 				text += " {} gagal di impor.".format(failed)
 		else:
-			update.effective_message.reply_text("File tidak diketahui.")
+			update.effective_message.reply_text("File tidak di dukung.")
 			return
 		update.effective_message.reply_text(text)
 
