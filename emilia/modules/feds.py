@@ -10,8 +10,8 @@ from time import sleep
 
 from future.utils import string_types
 from telegram.error import BadRequest, TelegramError
-from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity
-from telegram.ext import run_async, CommandHandler, MessageHandler, Filters
+from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER, spamfilters
@@ -73,6 +73,9 @@ def new_fed(bot: Bot, update: Update):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message
+	if chat.type != "private":
+		update.effective_message.reply_text("Buat federasi Anda di PM saya, bukan dalam grup.")
+		return
 	fednam = message.text.split(None, 1)[1]
 	if not fednam == '':
 		fed_id = str(uuid.uuid4())
@@ -109,31 +112,32 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	fed_id = sql.get_fed_id(chat.id)
-	if not fed_id:
-		if args:
-			is_fed_id = args[0]
-			getinfo = sql.get_fed_info(is_fed_id)
-			if getinfo == False:
-				update.effective_message.reply_text("Federasi ini tidak di temukan!")
-				return
-			if int(getinfo['owner']) == int(user.id):
-				fed_id = is_fed_id
-			else:
-				update.effective_message.reply_text("Saat ini, Kami hanya mendukung penghapusan federasi pada grup yang bergabung.")
-		else:
-			update.effective_message.reply_text("Apa yang harus saya hapus?")
+	if chat.type != "private":
+		update.effective_message.reply_text("Hapus federasi Anda di PM saya, bukan dalam grup.")
+		return
+	if args:
+		is_fed_id = args[0]
+		getinfo = sql.get_fed_info(is_fed_id)
+		if getinfo == False:
+			update.effective_message.reply_text("Federasi ini tidak di temukan!")
 			return
+		if int(getinfo['owner']) == int(user.id):
+			fed_id = is_fed_id
+		else:
+			update.effective_message.reply_text("Hanya pemilik fedarasi yang dapat melakukan ini!")
+			return
+	else:
+		update.effective_message.reply_text("Apa yang harus saya hapus?")
+		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
 		update.effective_message.reply_text("Hanya pemilik fedarasi yang dapat melakukan ini!")
 		return
 
-	getfed = sql.get_fed_info(fed_id)
-	if getfed:
-		delete = sql.del_fed(fed_id, chat.id)
-		if delete:
-			update.effective_message.reply_text("Federasi {} telah di hapus!".format(getfed['fname']))
+	update.effective_message.reply_text("Anda yakin ingin menghapus federasi Anda? Tindakan ini tidak bisa dibatalkan, Anda akan kehilangan seluruh daftar larangan Anda, dan '{}' akan hilang secara permanen.".format(getinfo['fname']),
+			reply_markup=InlineKeyboardMarkup(
+						[[InlineKeyboardButton(text="⚠️ Hapus Federasi ⚠️", callback_data="rmfed_{}".format(fed_id))],
+						[InlineKeyboardButton(text="Batalkan", callback_data="rmfed_cancel")]]))
 
 @run_async
 def fed_chat(bot: Bot, update: Update, args: List[str]):
@@ -1045,6 +1049,22 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			return
 		update.effective_message.reply_text(text)
 
+@run_async
+def del_fed_button(bot, update):
+	query = update.callback_query
+	userid = query.message.chat.id
+	fed_id = query.data.split("_")[1]
+
+	if fed_id == 'cancel':
+		query.message.edit_text("Penghapusan federasi dibatalkan")
+		return
+
+	getfed = sql.get_fed_info(fed_id)
+	if getfed:
+		delete = sql.del_fed(fed_id)
+		if delete:
+			query.message.edit_text("Anda telah menghapus federasi Anda! Sekarang semua Grup yang terhubung dengan `{}` tidak memiliki federasi.".format(getfed['fname']), parse_mode='markdown')
+
 
 def is_user_fed_admin(fed_id, user_id):
 	fed_admins = sql.all_fed_users(fed_id)
@@ -1181,6 +1201,8 @@ FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
 FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True)
 
+DELETEBTN_FED_HANDLER = CallbackQueryHandler(del_fed_button, pattern=r"rmfed_")
+
 dispatcher.add_handler(NEW_FED_HANDLER)
 dispatcher.add_handler(DEL_FED_HANDLER)
 dispatcher.add_handler(JOIN_FED_HANDLER)
@@ -1199,3 +1221,5 @@ dispatcher.add_handler(FED_USERBAN_HANDLER)
 dispatcher.add_handler(FED_NOTIF_HANDLER)
 dispatcher.add_handler(FED_CHATLIST_HANDLER)
 dispatcher.add_handler(FED_IMPORTBAN_HANDLER)
+
+dispatcher.add_handler(DELETEBTN_FED_HANDLER)

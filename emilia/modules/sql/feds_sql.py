@@ -111,7 +111,7 @@ def new_fed(owner_id, fed_name, fed_id):
 		FEDERATION_BYNAME[fed_name] = ({'fid': str(fed_id), 'owner': str(owner_id), 'frules': 'Rules is not set in this federation.', 'fusers': str({'owner': str(owner_id), 'members': '[]'})})
 		return fed
 
-def del_fed(fed_id, chat_id):
+def del_fed(fed_id):
 	with FEDS_LOCK:
 		global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME, FEDERATION_CHATS, FEDERATION_CHATS_BYID
 		getcache = FEDERATION_BYFEDID.get(fed_id)
@@ -127,16 +127,16 @@ def del_fed(fed_id, chat_id):
 		FEDERATION_BYNAME.pop(fed_name)
 		if FEDERATION_CHATS_BYID.get(fed_id):
 			for x in FEDERATION_CHATS_BYID[fed_id]:
+				delchats = SESSION.query(ChatF).get(str(x))
+				if delchats:
+					SESSION.delete(delchats)
+					SESSION.commit()
 				FEDERATION_CHATS.pop(x)
 			FEDERATION_CHATS_BYID.pop(fed_id)
 		# Delete from database
 		curr = SESSION.query(Federations).get(fed_id)
 		if curr:
 			SESSION.delete(curr)
-			SESSION.commit()
-		delchats = SESSION.query(ChatF).get(str(chat_id))
-		if delchats:
-			SESSION.delete(delchats)
 			SESSION.commit()
 		return True
 
