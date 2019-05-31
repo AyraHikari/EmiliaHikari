@@ -808,7 +808,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 			with BytesIO(str.encode(backups)) as output:
 				output.name = "emilia_fbanned_users.json"
 				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.json",
-													caption="Pengguna terkena blokir federasi {}.".format(info['fname']))
+													caption="Total {} pengguna terkena blokir federasi {}.".format(len(getfban), info['fname']))
 			return
 		elif args[0] == 'csv':
 			jam = time.time()
@@ -833,10 +833,10 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 			with BytesIO(str.encode(backups)) as output:
 				output.name = "emilia_fbanned_users.csv"
 				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.csv",
-													caption="Pengguna terkena blokir federasi {}.".format(info['fname']))
+													caption="Total {} pengguna terkena blokir federasi {}.".format(len(getfban), info['fname']))
 			return
 
-	text = "<b>Pengguna yang di fban pada federasi {}:</b>\n".format(info['fname'])
+	text = "<b>Ada {} pengguna yang di fban pada federasi {}:</b>\n".format(len(getfban), info['fname'])
 	for users in getfban:
 		getuserinfo = sql.get_all_fban_users_target(fed_id, users)
 		if getuserinfo == False:
@@ -974,7 +974,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 		else:
 			if user.id not in SUDO_USERS:
 				put_chat(chat.id, new_jam, chat_data)
-		if int(int(msg.reply_to_message.document.file_size)/1024) >= 1000:
+		if int(int(msg.reply_to_message.document.file_size)/1024) >= 200:
 			msg.reply_text("File ini terlalu besar!")
 			return
 		success = 0
