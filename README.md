@@ -1,63 +1,52 @@
-# tgbot
-A modular telegram Python bot running on python3 with an sqlalchemy database.
+# Emilia
+Telegram modular Python bot berjalan di python3 dengan database sqlalchemy.
 
-Originally a simple group management bot with multiple admin features, it has evolved into becoming a basis for modular
-bots aiming to provide simple plugin expansion via a simple drag and drop.
+Based on [marie bot](https://github.com/PaulSonOfLars/tgbot)
 
-Can be found on telegram as [Marie](https://t.me/BanhammerMarie_bot).
-
-For questions regarding creating your own bot, please head to [this chat](https://t.me/MarieOT) where you'll find a
-group of volunteers to help. We'll also help when a database schema changes, and some table column needs to be
-modified/added (this info can also be found in the commit messages)
+Dapat ditemukan di telegram sebagai [Emilia](https://t.me/EmiliaHikariBot).
 
 
-Join the [news channel](https://t.me/MarieNews) if you just want to stay in the loop about new features or
-announcements.
+Awalnya bot manajemen grup sederhana dengan beberapa fitur admin, telah berevolusi, menjadi sangat modular dan
 
-Marie and I can also be found moderating the [marie support group](https://t.me/MarieSupport) aimed at providing help
-setting up Marie in your chats (*not* for bot clones).
-Feel free to join to report bugs, and stay in the loop on the status of the bot development.
+Marie dan saya sedang memoderasi [support group](https://t.me/TeamNusantaraDevs), di mana Anda dapat meminta bantuan untuk mengaturnya
+bot, temukan / minta fitur baru, laporkan bug, dan tetap di dalam pengulangan setiap kali pembaruan baru tersedia. Tentu saja
+Saya juga akan membantu ketika skema database berubah, dan beberapa kolom tabel perlu dimodifikasi/ditambahkan. Catatan untuk pengelola bahwa semua perubahan skema akan ditemukan dalam pesan commit, dan tanggung jawab mereka untuk membaca setiap commit baru.
 
-Note to maintainers that all schema changes will be found in the commit messages, and its their responsibility to read any new commits.
+Bergabunglah dengan [news channel](https://t.me/AyraBotNews) jika Anda hanya ingin tetap di loop tentang fitur-fitur baru atau pengumuman.
 
+Kalau tidak, [temukan aku di telegram](https://t.me/AyraHikari)! (Simpan semua pertanyaan dukungan dalam obrolan dukungan, tempat lebih banyak orang dapat membantu Anda.)
 
-## IMPORTANT NOTICE:
+## Mulai bot.
 
-This project is no longer under active maintenance. Occasional bug fixes may be released, but no new features are scheduled to be added.
-Users of [Marie](https://t.me/BanhammerMarie_bot) are encouraged to migrate to [Rose](https://t.me/MissRose_bot), which
-is the improved version of this project, written in goloang, with scalability in mind.
-
-## Starting the bot.
-
-Once you've setup your database and your configuration (see below) is complete, simply run:
+Setelah Anda mengatur database Anda dan konfigurasi Anda (lihat di bawah) selesai, jalankan saja:
 
 `python3 -m tg_bot`
 
 
-## Setting up the bot (Read this before trying to use!):
-Please make sure to use python3.6, as I cannot guarantee everything will work as expected on older python versions!
-This is because markdown parsing is done by iterating through a dict, which are ordered by default in 3.6.
+## Menyiapkan bot (Baca ini sebelum mencoba menggunakannya!):
+Harap pastikan untuk menggunakan python3.6, karena saya tidak dapat menjamin semuanya akan bekerja seperti yang diharapkan pada versi python yang lebih tua!
+Ini karena parsing markdown dilakukan dengan mengulangi melalui dict, yang diurutkan secara default di 3.6.
 
-### Configuration
+### Konfigurasi
 
-There are two possible ways of configuring your bot: a config.py file, or ENV variables.
+Ada dua kemungkinan cara mengkonfigurasi bot Anda: file config.py, atau variabel ENV.
 
-The prefered version is to use a `config.py` file, as it makes it easier to see all your settings grouped together.
-This file should be placed in your `tg_bot` folder, alongside the `__main__.py` file . 
-This is where your bot token will be loaded from, as well as your database URI (if you're using a database), and most of 
-your other settings.
+Versi yang lebih disukai adalah menggunakan file `config.py`, karena memudahkan untuk melihat semua pengaturan Anda dikelompokkan bersama.
+File ini harus ditempatkan di folder `tg_bot` Anda, bersama file `__main__.py` . 
+Di sinilah token bot Anda akan dimuat, serta URI database Anda (jika Anda menggunakan database), dan sebagian besar
+pengaturan Anda yang lain.
 
-It is recommended to import sample_config and extend the Config class, as this will ensure your config contains all 
-defaults set in the sample_config, hence making it easier to upgrade.
+Dianjurkan untuk mengimpor sample_config dan memperluas kelas Config, karena ini akan memastikan konfigurasi Anda berisi semua
+default ditetapkan di sample_config, sehingga lebih mudah untuk ditingkatkan.
 
-An example `config.py` file could be:
+Sebuah contoh file `config.py` seperti ini:
 ```
 from tg_bot.sample_config import Config
 
 
 class Development(Config):
-    OWNER_ID = 254318997  # my telegram ID
-    OWNER_USERNAME = "SonOfLars"  # my telegram username
+    OWNER_ID = 388576209  # my telegram ID
+    OWNER_USERNAME = "AyraHikari"  # my telegram username
     API_KEY = "your bot api key"  # my api key, as provided by the botfather
     SQLALCHEMY_DATABASE_URI = 'postgresql://username:password@localhost:5432/database'  # sample db credentials
     MESSAGE_DUMP = '-1234567890' # some group chat that your bot is a member of
@@ -67,119 +56,123 @@ class Development(Config):
     NO_LOAD = ['translation']
 ```
 
-If you can't have a config.py file (EG on heroku), it is also possible to use environment variables.
-The following env variables are supported:
- - `ENV`: Setting this to ANYTHING will enable env variables
+Jika Anda tidak dapat memiliki file config.py (EG on heroku), juga dimungkinkan untuk menggunakan variabel lingkungan.
+Variabel env berikut ini didukung:
+ - `ENV`: Pengaturan ini ke APA SAJA akan mengaktifkan variabel env
 
- - `TOKEN`: Your bot token, as a string.
- - `OWNER_ID`: An integer of consisting of your owner ID
- - `OWNER_USERNAME`: Your username
+ - `TOKEN`: Token bot Anda, sebagai string.
+ - `OWNER_ID`: Bilangan bulat yang terdiri dari ID pemilik Anda
+ - `OWNER_USERNAME`: Nama pengguna Anda
 
- - `DATABASE_URL`: Your database URL
- - `MESSAGE_DUMP`: optional: a chat where your replied saved messages are stored, to stop people deleting their old 
- - `LOAD`: Space separated list of modules you would like to load
- - `NO_LOAD`: Space separated list of modules you would like NOT to load
- - `WEBHOOK`: Setting this to ANYTHING will enable webhooks when in env mode
- messages
- - `URL`: The URL your webhook should connect to (only needed for webhook mode)
+ - `DATABASE_URL`: URL basis data Anda
+ - `MESSAGE_DUMP`: opsional: obrolan tempat Anda menyimpan pesan yang disimpan, untuk menghentikan orang yang menghapus pesan lama mereka
+ - `LOAD`: Daftar modul terpisah ruang yang ingin Anda muat
+ - `NO_LOAD`: Daftar modul terpisah ruang yang Anda ingin TIDAK memuat
+ - `WEBHOOK`: Mengatur ini ke APA SAJA akan mengaktifkan webhooks ketika dalam mode pesan env
+ - `URL`: URL webhook Anda harus terhubung ke (hanya diperlukan untuk mode webhook)
 
- - `SUDO_USERS`: A space separated list of user_ids which should be considered sudo users
- - `SUPPORT_USERS`: A space separated list of user_ids which should be considered support users (can gban/ungban,
- nothing else)
- - `WHITELIST_USERS`: A space separated list of user_ids which should be considered whitelisted - they can't be banned.
- - `DONATION_LINK`: Optional: link where you would like to receive donations.
- - `CERT_PATH`: Path to your webhook certificate
- - `PORT`: Port to use for your webhooks
- - `DEL_CMDS`: Whether to delete commands from users which don't have rights to use that command
- - `STRICT_GBAN`: Enforce gbans across new groups as well as old groups. When a gbanned user talks, he will be banned.
- - `WORKERS`: Number of threads to use. 8 is the recommended (and default) amount, but your experience may vary.
- __Note__ that going crazy with more threads wont necessarily speed up your bot, given the large amount of sql data 
- accesses, and the way python asynchronous calls work.
- - `BAN_STICKER`: Which sticker to use when banning people.
- - `ALLOW_EXCL`: Whether to allow using exclamation marks ! for commands as well as /.
+ - `SUDO_USERS`: Daftar terpisah dari user_id yang harus dipertimbangkan pengguna sudo
+ - `SUPPORT_USERS`: Daftar terpisah dari user_id yang harus dipertimbangkan sebagai pengguna dukungan (dapat gban / ungban, tidak ada yang lain)
+ - `WHITELIST_USERS`: Daftar terpisah dari user_id yang harus dipertimbangkan dalam daftar putih - mereka tidak dapat dicekal.
+ - `DONATION_LINK`: Opsional: tautan di mana Anda ingin menerima donasi.
+ - `CERT_PATH`: Path ke sertifikat webhook Anda
+ - `PORT`: Port digunakan untuk webhooks Anda
+ - `DEL_CMDS`: Apakah akan menghapus perintah dari pengguna yang tidak memiliki hak untuk menggunakan perintah itu
+ - `STRICT_GBAN`: Tegakkan gban melintasi kelompok-kelompok baru serta kelompok-kelompok lama. Ketika seorang pengguna yang di-gbanned berbicara, dia akan dilarang.
+ - `WORKERS`: Jumlah utas yang akan digunakan. 8 adalah jumlah yang disarankan (dan standar), tetapi pengalaman Anda mungkin bervariasi.
+ __Note__ bahwa menjadi gila dengan lebih banyak thread tidak akan selalu mempercepat bot Anda, mengingat banyaknya akses data sql, dan cara python asynchronous calls bekerja.
+ - `BAN_STICKER`: Stiker mana yang digunakan saat melarang orang.
+ - `ALLOW_EXCL`: Apakah akan mengizinkan menggunakan tanda seru! untuk perintah serta /.
 
-### Python dependencies
+### Dependensi Python
 
-Install the necessary python dependencies by moving to the project directory and running:
+Instal dependensi python yang diperlukan dengan berpindah ke direktori proyek dan menjalankan:
 
 `pip3 install -r requirements.txt`.
 
-This will install all necessary python packages.
+Ini akan menginstal semua paket python yang diperlukan.
 
 ### Database
 
-If you wish to use a database-dependent module (eg: locks, notes, userinfo, users, filters, welcomes),
-you'll need to have a database installed on your system. I use postgres, so I recommend using it for optimal compatibility.
+Jika Anda ingin menggunakan modul yang bergantung pada database (misalnya: kunci, catatan, userinfo, pengguna, filter, selamat datang),
+Anda harus memiliki database yang terpasang di sistem Anda. Saya menggunakan postgres, jadi saya sarankan menggunakannya untuk kompatibilitas optimal.
 
-In the case of postgres, this is how you would set up a the database on a debian/ubuntu system. Other distributions may vary.
+Dalam kasus postgres, ini adalah bagaimana Anda akan mengatur database pada sistem debian / ubuntu. Distribusi lainnya dapat bervariasi.
 
 - install postgresql:
 
 `sudo apt-get update && sudo apt-get install postgresql`
 
-- change to the postgres user:
+- ganti ke pengguna postgres:
 
 `sudo su - postgres`
 
-- create a new database user (change YOUR_USER appropriately):
+- buat pengguna basis data baru (ubah YOUR_USER secara tepat):
 
 `createuser -P -s -e YOUR_USER`
 
-This will be followed by you needing to input your password.
+Ini akan diikuti dengan Anda perlu memasukkan kata sandi Anda.
 
-- create a new database table:
+- buat tabel database baru:
 
 `createdb -O YOUR_USER YOUR_DB_NAME`
 
-Change YOUR_USER and YOUR_DB_NAME appropriately.
+Ubah YOUR_USER dan YOUR_DB_NAME dengan tepat.
 
-- finally:
+- akhirnya:
 
 `psql YOUR_DB_NAME -h YOUR_HOST YOUR_USER`
 
-This will allow you to connect to your database via your terminal.
-By default, YOUR_HOST should be 0.0.0.0:5432.
+Ini akan memungkinkan Anda untuk terhubung ke database Anda melalui terminal Anda.
+Secara default, YOUR_HOST seharusnya be 0.0.0.0:5432.
 
-You should now be able to build your database URI. This will be:
+Anda sekarang harus dapat membangun URI basis data Anda. Ini akan menjadi:
 
 `sqldbtype://username:pw@hostname:port/db_name`
 
-Replace sqldbtype with whichever db youre using (eg postgres, mysql, sqllite, etc)
-repeat for your username, password, hostname (localhost?), port (5432?), and db name.
+Ganti jenis sqldbtype dengan mana saja db yang Anda gunakan (mis. Postgresql, mysql, sqlite, dll)
+ulangi untuk nama pengguna, kata sandi, nama host (localhost?), port (5432?), dan nama db Anda.
 
-## Modules
-### Setting load order.
+## Modul
+### Mengatur urutan pemuatan.
 
-The module load order can be changed via the `LOAD` and `NO_LOAD` configuration settings.
-These should both represent lists.
+Urutan pemuatan modul dapat diubah melalui pengaturan konfigurasi `LOAD` dan `NO_LOAD`.
+Ini harus mewakili daftar.
 
-If `LOAD` is an empty list, all modules in `modules/` will be selected for loading by default.
+Jika `LOAD` adalah daftar kosong, semua modul dalam `modules/` akan dipilih untuk memuat secara default.
 
-If `NO_LOAD` is not present, or is an empty list, all modules selected for loading will be loaded.
+Jika `NO_LOAD` tidak ada, atau daftar kosong, semua modul yang dipilih untuk memuat akan dimuat.
 
-If a module is in both `LOAD` and `NO_LOAD`, the module will not be loaded - `NO_LOAD` takes priority.
+Jika modul ada di `LOAD` dan `NO_LOAD`, modul tidak akan dimuat - `NO_LOAD` mengambil prioritas.
 
-### Creating your own modules.
+### Membuat modul Anda sendiri.
 
-Creating a module has been simplified as much as possible - but do not hesitate to suggest further simplification.
+Membuat modul telah disederhanakan semaksimal mungkin - tetapi jangan ragu untuk menyarankan penyederhanaan lebih lanjut.
 
-All that is needed is that your .py file be in the modules folder.
+Semua yang diperlukan adalah file .py Anda berada di folder modul.
 
-To add commands, make sure to import the dispatcher via
+Untuk menambahkan perintah, pastikan untuk mengimpor petugas operator melalui
 
 `from tg_bot import dispatcher`.
 
-You can then add commands using the usual
+Anda kemudian dapat menambahkan perintah menggunakan perintah biasa
 
 `dispatcher.add_handler()`.
 
-Assigning the `__help__` variable to a string describing this modules' available
-commands will allow the bot to load it and add the documentation for
-your module to the `/help` command. Setting the `__mod_name__` variable will also allow you to use a nicer, user
-friendly name for a module.
+Menetapkan variabel `__help__` ke string yang menjelaskan modul ini tersedia
+perintah akan memungkinkan bot untuk memuatnya dan menambahkan dokumentasi untuk
+modul Anda ke perintah `/help`. Mengatur variabel `__mod_name__` juga akan memungkinkan Anda menggunakan nama ramah pengguna yang lebih baik untuk modul.
 
-The `__migrate__()` function is used for migrating chats - when a chat is upgraded to a supergroup, the ID changes, so 
-it is necessary to migrate it in the db.
+Fungsi `__migrate __()` digunakan untuk melakukan migrasi obrolan - saat obrolan ditingkatkan ke supergrup, ID berubah, jadi
+perlu untuk memigrasikannya dalam db
 
-The `__stats__()` function is for retrieving module statistics, eg number of users, number of chats. This is accessed 
-through the `/stats` command, which is only available to the bot owner.
+Fungsi `__stats __()` adalah untuk mengambil statistik modul, misalnya jumlah pengguna, jumlah obrolan. Ini diakses
+melalui perintah `/stats`, yang hanya tersedia untuk pemilik bot.
+
+
+## Special Credits
+
+Thanks to this user:
+- [Paul Larsen](https://github.com/PaulSonOfLars) - marie creator, inspiration to do many things
+- [Yan Gorobtsov](https://github.com/MrYacha) - for welcome security base and connection base and maybe others
+- [アキト ミズキト](https://github.com/peaktogoo) - for reworked federation module
