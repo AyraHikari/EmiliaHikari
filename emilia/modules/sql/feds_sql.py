@@ -308,7 +308,7 @@ def fban_user(fed_id, user_id, first_name, last_name, user_name, reason):
 				if int(I.user_id) == int(user_id):
 					SESSION.delete(I)
 
-		r = BansF(str(fed_id), user_id, first_name, last_name, user_name, reason)
+		r = BansF(str(fed_id), str(user_id), first_name, last_name, user_name, reason)
 
 		SESSION.add(r)
 		try:

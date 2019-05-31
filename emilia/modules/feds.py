@@ -806,6 +806,31 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.json",
 													caption="Pengguna terkena blokir federasi {}.".format(info['fname']))
 			return
+		elif args[0] == 'csv':
+			jam = time.time()
+			new_jam = jam + 1800
+			cek = get_chat(chat.id, chat_data)
+			if cek.get('status'):
+				if jam <= int(cek.get('value')):
+					waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
+					update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+					return
+				else:
+					if user.id not in SUDO_USERS:
+						put_chat(chat.id, new_jam, chat_data)
+			else:
+				if user.id not in SUDO_USERS:
+					put_chat(chat.id, new_jam, chat_data)
+			backups = "id,firstname,lastname,username,reason\n"
+			for users in getfban:
+				getuserinfo = sql.get_all_fban_users_target(fed_id, users)
+				backups += "{user_id},{first_name},{last_name},{user_name},{reason}".format(user_id=users, first_name=getuserinfo['first_name'], last_name=getuserinfo['last_name'], user_name=getuserinfo['user_name'], reason=getuserinfo['reason'])
+				backups += "\n"
+			with BytesIO(str.encode(backups)) as output:
+				output.name = "emilia_fbanned_users.csv"
+				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.csv",
+													caption="Pengguna terkena blokir federasi {}.".format(info['fname']))
+			return
 
 	text = "<b>Pengguna yang di fban pada federasi {}:</b>\n".format(info['fname'])
 	for users in getfban:
@@ -955,25 +980,69 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 		except BadRequest:
 			msg.reply_text("Coba unduh dan unggah ulang filenya, yang ini sepertinya rusak!")
 			return
-		with BytesIO() as file:
-			file_info.download(out=file)
-			file.seek(0)
-			reading = file.read().decode('UTF-8')
-			splitting = reading.split('\n')
-			for x in splitting:
-				if x == '':
-					continue
-				try:
-					data = json.loads(x)
-				except json.decoder.JSONDecodeError as err:
-					failed += 1
-					continue
-				addtodb = sql.fban_user(fed_id, data['user_id'], data['first_name'], data['last_name'], data['user_name'], data['reason'])
-				if addtodb:
-					success += 1
-		text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
-		if failed >= 1:
-			text += " {} gagal di impor.".format(failed)
+		fileformat = msg.reply_to_message.document.file_name.split('.')[-1]
+		if fileformat == 'json':
+			with BytesIO() as file:
+				file_info.download(out=file)
+				file.seek(0)
+				reading = file.read().decode('UTF-8')
+				splitting = reading.split('\n')
+				for x in splitting:
+					if x == '':
+						continue
+					try:
+						data = json.loads(x)
+					except json.decoder.JSONDecodeError as err:
+						failed += 1
+						continue
+					try:
+						import_userid = int(data['user_id']) # Make sure it int
+						import_firstname = str(data['first_name'])
+						import_lastname = str(data['last_name'])
+						import_username = str(data['user_name'])
+						import_reason = str(data['reason'])
+					except ValueError:
+						failed += 1
+						continue
+					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
+					if addtodb:
+						success += 1
+			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
+			if failed >= 1:
+				text += " {} gagal di impor.".format(failed)
+		elif fileformat == 'csv':
+			with BytesIO() as file:
+				file_info.download(out=file)
+				file.seek(0)
+				reading = file.read().decode('UTF-8')
+				splitting = reading.split('\n')
+				for x in splitting:
+					if x == '':
+						continue
+					data = x.split(',')
+					if data[0] == 'id':
+						continue
+					if len(data) != 5:
+						failed += 1
+						continue
+					try:
+						import_userid = int(data[0]) # Make sure it int
+						import_firstname = str(data[1])
+						import_lastname = str(data[2])
+						import_username = str(data[3])
+						import_reason = str(data[4])
+					except ValueError:
+						failed += 1
+						continue
+					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
+					if addtodb:
+						success += 1
+			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
+			if failed >= 1:
+				text += " {} gagal di impor.".format(failed)
+		else:
+			update.effective_message.reply_text("File tidak diketahui.")
+			return
 		update.effective_message.reply_text(text)
 
 
