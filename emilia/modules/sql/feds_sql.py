@@ -113,7 +113,7 @@ def new_fed(owner_id, fed_name, fed_id):
 
 def del_fed(fed_id):
 	with FEDS_LOCK:
-		global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME, FEDERATION_CHATS, FEDERATION_CHATS_BYID
+		global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME, FEDERATION_CHATS, FEDERATION_CHATS_BYID, FEDERATION_BANNED_USERID, FEDERATION_BANNED_FULL
 		getcache = FEDERATION_BYFEDID.get(fed_id)
 		if getcache == None:
 			return False
@@ -133,6 +133,16 @@ def del_fed(fed_id):
 					SESSION.commit()
 				FEDERATION_CHATS.pop(x)
 			FEDERATION_CHATS_BYID.pop(fed_id)
+		# Delete fedban users
+		getall = FEDERATION_BANNED_USERID.get(fed_id)
+		if getall:
+			for x in getall:
+				banlist = SESSION.query(BansF).get((fed_id, str(x)))
+				if banlist:
+					SESSION.delete(banlist)
+					SESSION.commit()
+		FEDERATION_BANNED_USERID.pop(fed_id)
+		FEDERATION_BANNED_FULL.pop(fed_id)
 		# Delete from database
 		curr = SESSION.query(Federations).get(fed_id)
 		if curr:
