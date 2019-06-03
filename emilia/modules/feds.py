@@ -50,7 +50,8 @@ FBAN_ERRORS = {
 	"Chat_admin_required",
 	"Only the creator of a basic group can kick group administrators",
 	"Channel_private",
-	"Not in the chat"
+	"Not in the chat",
+	"Have no rights to send a message"
 }
 
 UNFBAN_ERRORS = {
@@ -62,6 +63,7 @@ UNFBAN_ERRORS = {
 	"Not in the chat",
 	"Channel_private",
 	"Chat_admin_required",
+	"Have no rights to send a message"
 }
 
 @run_async
@@ -509,8 +511,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 				if excp.message in FBAN_ERRORS:
 					pass
 				else:
-					message.reply_text("Tidak dapat fban karena: {}".format(excp.message))
-					return
+					LOGGER.warning("Tidak dapat fban di {} karena: {}".format(chat, excp.message))
 			except TelegramError:
 				pass
 
@@ -557,8 +558,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 			if excp.message in FBAN_ERRORS:
 				pass
 			else:
-				message.reply_text("Tidak dapat fban karena: {}".format(excp.message))
-				return
+				LOGGER.warning("Tidak dapat fban di {} karena: {}".format(chat, excp.message))
 		except TelegramError:
 			pass
 
@@ -632,8 +632,7 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 			if excp.message in UNFBAN_ERRORS:
 				pass
 			else:
-				message.reply_text("Tidak dapat un-fban karena: {}".format(excp.message))
-				return
+				LOGGER.warning("Tidak dapat fban di {} karena: {}".format(chat, excp.message))
 		except TelegramError:
 			pass
 
