@@ -90,7 +90,7 @@ def add_blacklist(bot: Bot, update: Update):
         text = words[1]
         to_blacklist = list(set(trigger.strip() for trigger in text.split("\n") if trigger.strip()))
         for trigger in to_blacklist:
-            sql.add_to_blacklist(chat_id, trigger.lower(), reason)
+            sql.add_to_blacklist(chat_id, trigger.lower())
 
         if len(to_blacklist) == 1:
             msg.reply_text("<code>{}</code> ditambahkan ke daftar hitam di <b>{}</b>!".format(html.escape(to_blacklist[0]), chat_name),
@@ -283,66 +283,30 @@ def del_blacklist(bot: Bot, update: Update):
                 elif getmode == 1:
                     message.delete()
                 elif getmode == 2:
-                    try:
-                        getwarn = sql.get_chat_blacklist_reason(chat.id, trigger)
-                        if getwarn == None:
-                            getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    except KeyError:
-                        getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    warn(update.effective_user, chat, getwarn, message, update.effective_user, conn=False)
+                    warn(update.effective_user, chat, "Mengatakan kata-kata yang ada di daftar hitam", message, update.effective_user, conn=False)
                     return
                 elif getmode == 3:
-                    try:
-                        getwarn = sql.get_chat_blacklist_reason(chat.id, trigger)
-                        if getwarn == None:
-                            getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    except KeyError:
-                        getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
                     bot.restrict_chat_member(chat.id, update.effective_user.id, can_send_messages=False)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan karena {}".format(user.first_name, user.id, getwarn), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id), parse_mode="markdown")
                     return
                 elif getmode == 4:
                     res = chat.unban_member(update.effective_user.id)
-                    try:
-                        getwarn = sql.get_chat_blacklist_reason(chat.id, trigger)
-                        if getwarn == None:
-                            getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    except KeyError:
-                        getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
                     if res:
-                        update.effective_message.reply_text("[{}](tg://user?id={}) di tendang karena {}".format(user.first_name, user.id, getwarn), parse_mode="markdown")
+                        update.effective_message.reply_text("[{}](tg://user?id={}) di tendang karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id), parse_mode="markdown")
                     return
                 elif getmode == 5:
                     chat.kick_member(user.id)
-                    try:
-                        getwarn = sql.get_chat_blacklist_reason(chat.id, trigger)
-                        if getwarn == None:
-                            getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    except KeyError:
-                        getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir karena {}".format(user.first_name, user.id, getwarn), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id), parse_mode="markdown")
                     return
                 elif getmode == 6:
                     bantime = extract_time(message, value)
                     chat.kick_member(user.id, until_date=bantime)
-                    try:
-                        getwarn = sql.get_chat_blacklist_reason(chat.id, trigger)
-                        if getwarn == None:
-                            getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    except KeyError:
-                        getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir selama {} karena {}".format(user.first_name, user.id, value, getwarn), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir selama {} karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id, value), parse_mode="markdown")
                     return
                 elif getmode == 7:
                     mutetime = extract_time(message, value)
                     bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
-                    try:
-                        getwarn = sql.get_chat_blacklist_reason(chat.id, trigger)
-                        if getwarn == None:
-                            getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    except KeyError:
-                        getwarn = "Mengatakan kata-kata yang ada di daftar hitam"
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan selama {} karena {}".format(user.first_name, user.id, value, getwarn), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan selama {} karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id, value), parse_mode="markdown")
                     return
             except BadRequest as excp:
                 if excp.message == "Message to delete not found":
@@ -356,8 +320,7 @@ def __import_data__(chat_id, data):
     # set chat blacklist
     blacklist = data.get('blacklist', {})
     for trigger in blacklist:
-        # TODO
-        sql.add_to_blacklist(chat_id, trigger, None)
+        sql.add_to_blacklist(chat_id, trigger)
 
 
 def __migrate__(old_chat_id, new_chat_id):
