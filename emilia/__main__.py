@@ -512,7 +512,11 @@ def process_update(self, update):
         return
 
     now = datetime.datetime.utcnow()
-    cnt = CHATS_CNT.get(update.effective_chat.id, 0)
+    try:
+        cnt = CHATS_CNT.get(update.effective_chat.id, 0)
+    except AttributeError:
+        self.logger.exception('An uncaught error was raised while updating process')
+        return
 
     t = CHATS_TIME.get(update.effective_chat.id, datetime.datetime(1970, 1, 1))
     if t and now > t + datetime.timedelta(0, 1):

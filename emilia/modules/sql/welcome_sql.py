@@ -219,7 +219,7 @@ def get_gdbye_pref(chat_id):
         return welc.should_goodbye, welc.custom_leave, welc.custom_content_leave, welc.leave_type
     else:
         # Welcome by default.
-        return True, DEFAULT_GOODBYE, Types.TEXT
+        return True, DEFAULT_GOODBYE, None, Types.TEXT
 
 
 def set_clean_welcome(chat_id, clean_welcome):

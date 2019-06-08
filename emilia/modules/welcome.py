@@ -267,6 +267,7 @@ def check_bot_button(bot: Bot, update: Update):
         bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
         sql.rm_from_userlist(chat.id, user.id)
     else:
+        print("Not new user")
         query.answer(text="Kamu bukan pengguna baru!")
     #TODO need kick users after 2 hours and remove message 
 
