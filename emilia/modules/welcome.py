@@ -41,7 +41,10 @@ def send(update, message, keyboard, backup_message):
     reply = update.message.message_id
     # Clean service welcome
     if cleanserv:
-        dispatcher.bot.delete_message(chat.id, update.message.message_id)
+        try:
+            dispatcher.bot.delete_message(chat.id, update.message.message_id)
+        except BadRequest:
+            pass
         reply = False
     try:
         msg = dispatcher.bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, reply_to_message_id=reply, disable_web_page_preview=True)
@@ -136,7 +139,10 @@ def new_member(bot: Bot, update: Update):
                     cleanserv = sql.clean_service(chat.id)
                     # Clean service welcome
                     if cleanserv:
-                        dispatcher.bot.delete_message(chat.id, update.message.message_id)
+                        try:
+                            dispatcher.bot.delete_message(chat.id, update.message.message_id)
+                        except BadRequest:
+                            pass
                         reply = False
                     # Formatting text
                     first_name = new_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -294,7 +300,10 @@ def left_member(bot: Bot, update: Update):
                 cleanserv = sql.clean_service(chat.id)
                 # Clean service welcome
                 if cleanserv:
-                    dispatcher.bot.delete_message(chat.id, update.message.message_id)
+                    try:
+                        dispatcher.bot.delete_message(chat.id, update.message.message_id)
+                    except BadRequest:
+                        pass
                     reply = False
                 # Formatting text
                 first_name = left_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
