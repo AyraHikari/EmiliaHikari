@@ -87,6 +87,7 @@ def filters(bot: Bot, update: Update):
             chat_name = chat.title
 
     if len(args) < 2:
+        msg.reply_text("Anda harus memberi nama untuk filter ini!")
         return
 
     extracted = split_quotes(args[1])
@@ -176,6 +177,7 @@ def stop_filter(bot: Bot, update: Update):
             chat_name = chat.title
 
     if len(args) < 2:
+        update.effective_message.reply_text("Apa yang harus saya hentikan?")
         return
 
     chat_filters = sql.get_chat_triggers(chat_id)

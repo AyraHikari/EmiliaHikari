@@ -165,6 +165,8 @@ def lock(bot: Bot, update: Update, args: List[str]) -> str:
 
             else:
                 message.reply_text("Apa yang Anda coba untuk kunci...? Coba /locktypes untuk daftar kunci yang dapat dikunci")
+        else:
+           message.reply_text("Apa yang Anda ingin kunci...?")
 
     else:
         message.reply_text("Saya bukan admin, atau tidak punya hak menghapus.")
@@ -253,7 +255,7 @@ def unlock(bot: Bot, update: Update, args: List[str]) -> str:
                 message.reply_text("Apa yang Anda coba untuk membuka kunci...? Coba /locktypes untuk daftar kunci yang dapat dikunci")
 
         else:
-            bot.sendMessage(chat.id, "Apa yang Anda coba untuk buka kunci...?")
+            message.reply_text("Apa yang Anda coba untuk buka kunci...?")
 
     return ""
 
