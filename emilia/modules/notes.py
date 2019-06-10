@@ -182,6 +182,16 @@ def save(bot: Bot, update: Update):
 
 	msg = update.effective_message  # type: Optional[Message]
 
+	checktext = msg.text.split()
+	if msg.reply_to_message:
+		if len(checktext) <= 1:
+			msg.reply_text("Anda harus memberi nama untuk catatan ini!")
+			return
+	else:
+		if len(checktext) <= 2:
+			msg.reply_text("Anda harus memberi nama untuk catatan ini!")
+			return
+
 	note_name, text, data_type, content, buttons = get_note_type(msg)
 
 	if data_type is None:
@@ -242,6 +252,8 @@ def clear(bot: Bot, update: Update, args: List[str]):
 			update.effective_message.reply_text("Catatan di *{}* untuk {}gagal dihapus!".format(chat_name, catatangagal), parse_mode=ParseMode.MARKDOWN)
 		else:
 			update.effective_message.reply_text("Catatan di *{}* untuk {}berhasil dihapus 😁\nCatatan {}gagal dihapus!".format(chat_name, catatan, catatangagal), parse_mode=ParseMode.MARKDOWN)
+	else:
+		update.effective_message.reply_text("Apa yang ingin dihapus?")
 
 @run_async
 def list_notes(bot: Bot, update: Update):
