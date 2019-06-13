@@ -80,7 +80,7 @@ def markdown_parser(txt: str, entities: Dict[MessageEntity, str] = None, offset:
         end = ent.offset + offset + ent.length - 1  # end of entity
 
         # we only care about code, url, text links
-        if ent.type in ("bold", "code", "url", "text_link"):
+        if ent.type in ("bold", "italic", "code", "url", "text_link"):
             # count emoji to switch counter
             count = _calc_emoji_offset(txt[:start])
             start -= count
@@ -98,6 +98,10 @@ def markdown_parser(txt: str, entities: Dict[MessageEntity, str] = None, offset:
             # bold handling
             elif ent.type == "bold":
                 res += _selective_escape(txt[prev:start]) + '*' + ent_text + '*'
+
+            # italic handling
+            elif ent.type == "italic":
+                res += _selective_escape(txt[prev:start]) + '_' + ent_text + '_'
 
             # code handling
             elif ent.type == "code":
