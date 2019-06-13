@@ -343,7 +343,23 @@ def build_lock_message(chat_id):
         res = "Tidak ada kunci saat ini dalam obrolan ini."
     else:
         res = "Ini adalah kunci dalam obrolan ini:"
+        locklist = []
         if locks:
+            locklist.append("sticker = `{}`".format(locks.sticker))
+            locklist.append("audio = `{}`".format(locks.audio))
+            locklist.append("voice = `{}`".format(locks.voice))
+            locklist.append("document = `{}`".format(locks.document))
+            locklist.append("video = `{}`".format(locks.video))
+            locklist.append("contact = `{}`".format(locks.contact))
+            locklist.append("photo = `{}`".format(locks.photo))
+            locklist.append("gif = `{}`".format(locks.gif))
+            locklist.append("url = `{}`".format(locks.url))
+            locklist.append("bots = `{}`".format(locks.bots))
+            locklist.append("forward = `{}`".format(locks.forward))
+            locklist.append("game = `{}`".format(locks.game))
+            locklist.append("location = `{}`".format(locks.location))
+            locklist.append("rtl = `{}`".format(locks.rtl))
+            """
             res += "\n - sticker = `{}`" \
                    "\n - audio = `{}`" \
                    "\n - voice = `{}`" \
@@ -360,13 +376,26 @@ def build_lock_message(chat_id):
                    "\n - rtl = `{}` ".format(locks.sticker, locks.audio, locks.voice, locks.document,
                                              locks.video, locks.contact, locks.photo, locks.gif, locks.url, locks.bots,
                                              locks.forward, locks.game, locks.location, locks.rtl)
+            """
         if restr:
+            locklist.append("messages = `{}`".format(restr.messages))
+            locklist.append("media = `{}`".format(restr.media))
+            locklist.append("other = `{}`".format(restr.other))
+            locklist.append("previews = `{}`".format(restr.preview))
+            locklist.append("all = `{}`".format(all([restr.messages, restr.media, restr.other, restr.preview])))
+            """
             res += "\n - messages = `{}`" \
                    "\n - media = `{}`" \
                    "\n - other = `{}`" \
                    "\n - previews = `{}`" \
                    "\n - all = `{}`".format(restr.messages, restr.media, restr.other, restr.preview,
                                             all([restr.messages, restr.media, restr.other, restr.preview]))
+            """
+        # Ordering lock list
+        locklist.sort()
+        # Building lock list string
+        for x in locklist:
+            res += "\n - {}".format(x)
     return res
 
 
