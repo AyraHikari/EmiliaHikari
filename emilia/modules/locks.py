@@ -9,6 +9,8 @@ from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html
 
+from alphabet_detector import AlphabetDetector
+
 import emilia.modules.sql.locks_sql as sql
 from emilia import dispatcher, SUDO_USERS, LOGGER, spamfilters
 from emilia.modules.disable import DisableAbleCommandHandler
@@ -18,6 +20,8 @@ from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import users_sql
 from emilia.modules.connection import connected
+
+ad = AlphabetDetector()
 
 LOCK_TYPES = {'sticker': Filters.sticker,
               'audio': Filters.audio,
@@ -32,6 +36,7 @@ LOCK_TYPES = {'sticker': Filters.sticker,
               'forward': Filters.forwarded,
               'game': Filters.game,
               'location': Filters.location,
+              'rtl': 'rtl',
               }
 
 GIF = Filters.document & CustomFilters.mime_type("video/mp4")
@@ -267,6 +272,29 @@ def del_lockables(bot: Bot, update: Update):
     message = update.effective_message  # type: Optional[Message]
     
     for lockable, filter in LOCK_TYPES.items():
+        if lockable == "rtl":
+            if sql.is_locked(chat.id, lockable) and can_delete(chat, bot.id):
+                if message.caption:
+                    check = ad.detect_alphabet(u'{}'.format(message.caption))
+                    if 'ARABIC' in check:
+                        try:
+                            message.delete()
+                        except BadRequest as excp:
+                            if excp.message == "Message to delete not found":
+                                pass
+                            else:
+                                LOGGER.exception("ERROR in lockables")
+                if message.text:
+                    check = ad.detect_alphabet(u'{}'.format(message.text))
+                    if 'ARABIC' in check:
+                        try:
+                            message.delete()
+                        except BadRequest as excp:
+                            if excp.message == "Message to delete not found":
+                                pass
+                            else:
+                                LOGGER.exception("ERROR in lockables")
+            break
         if filter(message) and sql.is_locked(chat.id, lockable) and can_delete(chat, bot.id):
             if lockable == "bots":
                 new_members = update.effective_message.new_chat_members
@@ -328,9 +356,10 @@ def build_lock_message(chat_id):
                    "\n - bots = `{}`" \
                    "\n - forward = `{}`" \
                    "\n - game = `{}`" \
-                   "\n - location = `{}`".format(locks.sticker, locks.audio, locks.voice, locks.document,
+                   "\n - location = `{}`" \
+                   "\n - rtl = `{}` ".format(locks.sticker, locks.audio, locks.voice, locks.document,
                                              locks.video, locks.contact, locks.photo, locks.gif, locks.url, locks.bots,
-                                             locks.forward, locks.game, locks.location)
+                                             locks.forward, locks.game, locks.location, locks.rtl)
         if restr:
             res += "\n - messages = `{}`" \
                    "\n - media = `{}`" \

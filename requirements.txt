@@ -5,10 +5,9 @@ sqlalchemy
 python-telegram-bot>=11.1.0
 psycopg2-binary
 feedparser
-psycopg2-binary
-feedparser
 pyowm
 googletrans
 wikipedia
 kbbi
 Pillow
+alphabet_detector
