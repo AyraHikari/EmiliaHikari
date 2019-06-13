@@ -8,7 +8,7 @@ import locale
 
 import requests
 from telegram.error import BadRequest, Unauthorized
-from telegram import Message, Chat, Update, Bot, MessageEntity
+from telegram import Message, Chat, Update, Bot, MessageEntity, InlineKeyboardMarkup
 from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html
@@ -18,6 +18,8 @@ from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
+from emilia.modules.helper_funcs.msg_types import get_message_type
+from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 
 # Change language locale to Indonesia
 # Install language:
@@ -368,13 +370,24 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def echo(bot: Bot, update: Update):
-    args = update.effective_message.text.split(None, 1)
     message = update.effective_message
-    message.delete()
-    if message.reply_to_message:
-        message.reply_to_message.reply_text(args[1], parse_mode=ParseMode.MARKDOWN)
-    else:
-        message.reply_text(args[1], quote=False, parse_mode=ParseMode.MARKDOWN)
+    chat_id = update.effective_chat.id
+    try:
+        message.delete()
+    except BadRequest:
+        pass
+    # Advanced
+    text, data_type, content, buttons = get_message_type(message)
+    tombol = build_keyboard_alternate(buttons)
+    if str(data_type) in ('Types.BUTTON_TEXT', 'Types.TEXT'):
+        try:
+            if message.reply_to_message:
+                bot.send_message(chat_id, text, parse_mode="markdown", reply_to_message_id=message.reply_to_message.message_id, disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
+            else:
+                bot.send_message(chat_id, text, quote=False, disable_web_page_preview=True, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(tombol))
+        except BadRequest:
+            bot.send_message(chat_id, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.", parse_mode="markdown")
+            return
         
 
 
