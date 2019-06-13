@@ -613,6 +613,11 @@ def set_welcome(bot: Bot, update: Update) -> str:
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
 
+    # If user is not set text
+    if len(msg.text.split()) == 1:
+        msg.reply_text("Anda harus memberikan isi dalam pesan selamat datang!\nKetik `/welcomehelp` untuk beberapa bantuan pada welcome", parse_mode="markdown")
+        return ""
+
     text, data_type, content, buttons = get_welcome_type(msg)
 
     if data_type is None:
@@ -657,6 +662,12 @@ def set_goodbye(bot: Bot, update: Update) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
+
+    # If user is not set text
+    if len(msg.text.split()) == 1:
+        msg.reply_text("Anda harus memberikan isi dalam pesan selamat datang!\nKetik `/welcomehelp` untuk beberapa bantuan pada welcome", parse_mode="markdown")
+        return ""
+
     text, data_type, content, buttons = get_welcome_type(msg)
 
     if data_type is None:
