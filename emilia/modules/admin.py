@@ -381,22 +381,23 @@ def permapin(bot: Bot, update: Update):
 
     text, data_type, content, buttons = get_message_type(message)
     tombol = build_keyboard_alternate(buttons)
-    if True:
+    try:
+        message.delete()
+    except BadRequest:
+        pass
+    if str(data_type) in ('Types.BUTTON_TEXT', 'Types.TEXT'):
         try:
-            message.delete()
-        except:
-            update.effective_message.reply_text("Saya bukan admin!")
-            return
-        if str(data_type) in ('Types.BUTTON_TEXT', 'Types.TEXT'):
-            try:
-                sendingmsg = bot.send_message(chat_id, text, parse_mode="markdown",
+            sendingmsg = bot.send_message(chat_id, text, parse_mode="markdown",
                                  disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
-            except BadRequest:
-                bot.send_message(chat_id, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.", parse_mode="markdown")
-                return
-        else:
-            sendingmsg = ENUM_FUNC_MAP[str(data_type)](chat_id, content, caption=text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
+        except BadRequest:
+            bot.send_message(chat_id, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.", parse_mode="markdown")
+            return
+    else:
+        sendingmsg = ENUM_FUNC_MAP[str(data_type)](chat_id, content, caption=text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
+    try:
         bot.pinChatMessage(chat_id, sendingmsg.message_id)
+    except BadRequest:
+        update.effective_message.reply_text("Saya tidak punya akses untuk pin pesan!")
 
 
 
