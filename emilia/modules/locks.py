@@ -101,7 +101,9 @@ def locktypes(bot: Bot, update: Update):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    update.effective_message.reply_text("\n - ".join(["Locks: "] + list(LOCK_TYPES) + list(RESTRICTION_TYPES)))
+    locklist = list(LOCK_TYPES) + list(RESTRICTION_TYPES)
+    locklist.sort()
+    update.effective_message.reply_text("\n - ".join(["Jenis kunci yang tersedia adalah: "] + locklist))
 
 
 @user_admin
