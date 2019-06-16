@@ -283,30 +283,30 @@ def del_blacklist(bot: Bot, update: Update):
                 elif getmode == 1:
                     message.delete()
                 elif getmode == 2:
-                    warn(update.effective_user, chat, "Mengatakan kata-kata yang ada di daftar hitam", message, update.effective_user, conn=False)
+                    warn(update.effective_user, chat, "Mengatakan kata '{}' yang ada di daftar hitam".format(trigger), message, update.effective_user, conn=False)
                     return
                 elif getmode == 3:
                     bot.restrict_chat_member(chat.id, update.effective_user.id, can_send_messages=False)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, trigger), parse_mode="markdown")
                     return
                 elif getmode == 4:
                     res = chat.unban_member(update.effective_user.id)
                     if res:
-                        update.effective_message.reply_text("[{}](tg://user?id={}) di tendang karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id), parse_mode="markdown")
+                        update.effective_message.reply_text("[{}](tg://user?id={}) di tendang karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, trigger), parse_mode="markdown")
                     return
                 elif getmode == 5:
                     chat.kick_member(user.id)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, trigger), parse_mode="markdown")
                     return
                 elif getmode == 6:
                     bantime = extract_time(message, value)
                     chat.kick_member(user.id, until_date=bantime)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir selama {} karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id, value), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, value, trigger), parse_mode="markdown")
                     return
                 elif getmode == 7:
                     mutetime = extract_time(message, value)
                     bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan selama {} karena mengatakan kata-kata yang ada di daftar hitam".format(user.first_name, user.id, value), parse_mode="markdown")
+                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, value, trigger), parse_mode="markdown")
                     return
             except BadRequest as excp:
                 if excp.message == "Message to delete not found":
