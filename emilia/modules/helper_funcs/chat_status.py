@@ -142,6 +142,9 @@ def user_admin_no_reply(func):
         elif DEL_CMDS and " " not in update.effective_message.text:
             update.effective_message.delete()
 
+        else:
+            bot.answer_callback_query(update.callback_query.id, "Anda bukan admin di grup ini!")
+
     return is_admin
 
 
