@@ -140,8 +140,8 @@ def start(bot: Bot, update: Update, args: List[str]):
                 else:
                     send_settings(match.group(1), update.effective_user.id, True)
 
-            elif args[0][1:].isdigit() and "rules" in IMPORTED:
-                IMPORTED["rules"].send_rules(update, args[0], from_pm=True)
+            elif args[0][1:].isdigit() and "peraturan" in IMPORTED:
+                IMPORTED["peraturan"].send_rules(update, args[0], from_pm=True)
 
             elif args[0][:4] == "wiki":
                 wiki = args[0].split("-")[1].replace('_', ' ')
