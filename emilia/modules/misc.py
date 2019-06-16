@@ -349,23 +349,26 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
     if spam == True:
         return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
-    location = " ".join(args)
-    if location.lower() == bot.first_name.lower():
-        update.effective_message.reply_text("Selalu ada waktu banned untukku!")
-        bot.send_sticker(update.effective_chat.id, BAN_STICKER)
-        return
-
-    res = requests.get('https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}'.format(location, MAPS_API))
-
-    if res.status_code == 200:
-        loc = res.json()
-        if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
-            update.message.reply_text("Lokasi tidak di temukan!")
+    if args:
+        location = " ".join(args)
+        if location.lower() == bot.first_name.lower():
+            update.effective_message.reply_text("Selalu ada waktu banned untukku!")
+            bot.send_sticker(update.effective_chat.id, BAN_STICKER)
             return
-        placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
-        localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
-        time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
-        update.message.reply_text("Sekarang pukul `{}` di `{}`".format(time, placename), parse_mode="markdown")
+
+        res = requests.get('https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}'.format(location, MAPS_API))
+
+        if res.status_code == 200:
+            loc = res.json()
+            if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
+                update.message.reply_text("Lokasi tidak di temukan!")
+                return
+            placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
+            localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
+            time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
+            update.message.reply_text("Sekarang pukul `{}` di `{}`".format(time, placename), parse_mode="markdown")
+    else:
+        update.message.reply_text("Gunakan `/time nama daerah`\nMisal: `/time jakarta`", parse_mode="markdown")
 
 
 @run_async
