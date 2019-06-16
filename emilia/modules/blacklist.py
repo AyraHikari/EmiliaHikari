@@ -10,6 +10,7 @@ from telegram.utils.helpers import mention_html, escape_markdown
 import emilia.modules.sql.blacklist_sql as sql
 from emilia import dispatcher, LOGGER, spamfilters
 from emilia.modules.disable import DisableAbleCommandHandler
+from telegram.utils.helpers import mention_markdown
 from emilia.modules.helper_funcs.chat_status import user_admin, user_not_admin
 from emilia.modules.helper_funcs.extraction import extract_text
 from emilia.modules.helper_funcs.misc import split_message
@@ -287,26 +288,26 @@ def del_blacklist(bot: Bot, update: Update):
                     return
                 elif getmode == 3:
                     bot.restrict_chat_member(chat.id, update.effective_user.id, can_send_messages=False)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, trigger), parse_mode="markdown")
+                    update.effective_message.reply_text("{} di bisukan karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
                     return
                 elif getmode == 4:
                     res = chat.unban_member(update.effective_user.id)
                     if res:
-                        update.effective_message.reply_text("[{}](tg://user?id={}) di tendang karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, trigger), parse_mode="markdown")
+                        update.effective_message.reply_text("{} di tendang karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
                     return
                 elif getmode == 5:
                     chat.kick_member(user.id)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, trigger), parse_mode="markdown")
+                    update.effective_message.reply_text("{} di blokir karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
                     return
                 elif getmode == 6:
                     bantime = extract_time(message, value)
                     chat.kick_member(user.id, until_date=bantime)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, value, trigger), parse_mode="markdown")
+                    update.effective_message.reply_text("{} di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
                     return
                 elif getmode == 7:
                     mutetime = extract_time(message, value)
                     bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
-                    update.effective_message.reply_text("[{}](tg://user?id={}) di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(user.first_name, user.id, value, trigger), parse_mode="markdown")
+                    update.effective_message.reply_text("{} di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
                     return
             except BadRequest as excp:
                 if excp.message == "Message to delete not found":
