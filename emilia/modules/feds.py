@@ -202,7 +202,7 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 			message.reply_text("Silakan masukkan id federasi yang valid.")
 			return
 
-		x = sql.chat_join_fed(args[0], chat.id)
+		x = sql.chat_join_fed(args[0], chat.title, chat.id)
 		if not x:
 			message.reply_text("Gagal bergabung dengan federasi! Tolong hubungi pembuat saya jika masalah ini masih berlanjut.")
 			return
@@ -509,7 +509,12 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 				bot.kick_chat_member(chat, user_id)
 			except BadRequest as excp:
 				if excp.message in FBAN_ERRORS:
-					pass
+					try:
+						dispatcher.bot.getChat(chat)
+					except Unauthorized:
+						sql.chat_leave_fed(chat)
+						LOGGER.info("Chat {} has leave fed {} because bot is kicked".format(chat, info['fname']))
+						continue
 				else:
 					LOGGER.warning("Tidak dapat fban di {} karena: {}".format(chat, excp.message))
 			except TelegramError:
@@ -924,12 +929,7 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 
 	text = "<b>Obrolan yang bergabung pada federasi {}:</b>\n".format(info['fname'])
 	for chats in getlist:
-		try:
-			chat_name = dispatcher.bot.getChat(chats).title
-		except Unauthorized:
-			sql.chat_leave_fed(chats)
-			LOGGER.info("Chat {} has leave fed {} because bot is kicked".format(chats, info['fname']))
-			continue
+		chat_name = sql.get_fed_name(chats)
 		text += " • {} (<code>{}</code>)\n".format(chat_name, chats)
 
 	try:
@@ -978,9 +978,9 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 		else:
 			if user.id not in SUDO_USERS:
 				put_chat(chat.id, new_jam, chat_data)
-		if int(int(msg.reply_to_message.document.file_size)/1024) >= 200:
-			msg.reply_text("File ini terlalu besar!")
-			return
+		# if int(int(msg.reply_to_message.document.file_size)/1024) >= 200:
+		# 	msg.reply_text("File ini terlalu besar!")
+		# 	return
 		success = 0
 		failed = 0
 		try:

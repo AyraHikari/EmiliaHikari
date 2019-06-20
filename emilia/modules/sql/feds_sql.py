@@ -23,10 +23,12 @@ class Federations(BASE):
 class ChatF(BASE):
 	__tablename__ = "chat_feds"
 	chat_id = Column(String(14), primary_key=True)
+	chat_name = Column(UnicodeText)
 	fed_id = Column(UnicodeText)
 
-	def __init__(self, chat_id, fed_id):
+	def __init__(self, chat_id, chat_name, fed_id):
 		self.chat_id = chat_id
+		self.chat_name = chat_name
 		self.fed_id = fed_id
 
 class BansF(BASE):
@@ -99,6 +101,13 @@ def get_fed_id(chat_id):
 	else:
 		return get['fid']
 
+def get_fed_name(chat_id):
+	get = FEDERATION_CHATS.get(str(chat_id))
+	if get == None:
+		return False
+	else:
+		return get['chat_name']
+
 
 def new_fed(owner_id, fed_name, fed_id):
 	with FEDS_LOCK:
@@ -152,12 +161,12 @@ def del_fed(fed_id):
 			SESSION.commit()
 		return True
 
-def chat_join_fed(fed_id, chat_id):
+def chat_join_fed(fed_id, chat_name, chat_id):
 	with FEDS_LOCK:
 		global FEDERATION_CHATS, FEDERATION_CHATS_BYID
-		r = ChatF(chat_id, fed_id)
+		r = ChatF(chat_id, chat_name, fed_id)
 		SESSION.add(r)
-		FEDERATION_CHATS[str(chat_id)] = {'fid': fed_id}
+		FEDERATION_CHATS[str(chat_id)] = {'chat_name': chat_name, 'fid': fed_id}
 		checkid = FEDERATION_CHATS_BYID.get(fed_id)
 		if checkid == None:
 			FEDERATION_CHATS_BYID[fed_id] = []
@@ -464,7 +473,7 @@ def __load_all_feds_chats():
 			check = FEDERATION_CHATS.get(x.chat_id)
 			if check == None:
 				FEDERATION_CHATS[x.chat_id] = {}
-			FEDERATION_CHATS[x.chat_id] = {'fid': x.fed_id}
+			FEDERATION_CHATS[x.chat_id] = {'chat_name': x.chat_name, 'fid': x.fed_id}
 			# Federation Chats By ID
 			check = FEDERATION_CHATS_BYID.get(x.fed_id)
 			if check == None:
