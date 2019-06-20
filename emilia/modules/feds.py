@@ -209,6 +209,10 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 			message.reply_text("Gagal bergabung dengan federasi! Tolong hubungi pembuat saya jika masalah ini masih berlanjut.")
 			return
 
+		get_fedlog = sql.get_fed_log(args[0])
+		if eval(get_fedlog):
+			bot.send_message(get_fedlog, "Obrolan *{}* telah bergabung ke federasi *{}*".format(chat.title, getfed['fname']), parse_mode="markdown")
+
 		message.reply_text("Obrolan ini telah bergabung dengan federasi {}!".format(getfed['fname']))
 
 @run_async
@@ -226,6 +230,9 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
 	getuser = bot.get_chat_member(chat.id, user.id).status
 	if getuser in 'creator' or user.id in SUDO_USERS:
 		if sql.chat_leave_fed(chat.id) == True:
+			get_fedlog = sql.get_fed_log(fed_id)
+			if eval(get_fedlog):
+				bot.send_message(get_fedlog, "Obrolan *{}* telah keluar ke federasi *{}*".format(chat.title, fed_info['fname']), parse_mode="markdown")
 			update.effective_message.reply_text("Obrolan ini telah keluar dari federasi {}!".format(fed_info['fname']))
 		else:
 			update.effective_message.reply_text("Mengapa Anda meninggalkan federasi ketika Anda belum bergabung?!")
@@ -679,11 +686,11 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text("This chat is not in any federation!")
+		update.effective_message.reply_text("Obrolan ini tidak ada di federasi apa pun!")
 		return
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Only fed admins can do this!")
+		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
 		return
 
 	if len(args) >= 1:
@@ -696,10 +703,14 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 			markdown_rules = markdown_parser(txt, entities=msg.parse_entities(), offset=offset)
 		x = sql.set_frules(fed_id, markdown_rules)
 		if not x:
-			update.effective_message.reply_text("Big F! There is an error while setting federation rules! If you wondered why please ask it in support group!")
+			update.effective_message.reply_text("There is an error while setting federation rules! If you wondered why please ask it in support group!")
 			return
 
 		rules = sql.get_fed_info(fed_id)['frules']
+		getfed = sql.get_fed_info(fed_id)
+		get_fedlog = sql.get_fed_log(fed_id)
+		if eval(get_fedlog):
+			bot.send_message(get_fedlog, "*{}* telah mengganti aturan federasi *{}*".format(user.first_name, getfed['fname']), parse_mode="markdown")
 		update.effective_message.reply_text(f"Aturan telah di ganti menjadi:\n{rules}!")
 	else:
 		update.effective_message.reply_text("Please write rules to set it up!")
@@ -956,6 +967,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
+	getfed = sql.get_fed_info(fed_id)
 
 	if not fed_id:
 		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
@@ -1038,7 +1050,13 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 						success += 1
 			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
 			if failed >= 1:
-				text += " {} gagal di impor.".format(failed)
+				tekt += " {} gagal di impor.".format(failed)
+			get_fedlog = sql.get_fed_log(fed_id)
+			if eval(get_fedlog):
+				teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
+				if failed >= 1:
+					teks += " {} gagal di impor.".format(failed)
+				bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		elif fileformat == 'csv':
 			file_info.download("fban_{}.csv".format(msg.reply_to_message.document.file_id))
 			with open("fban_{}.csv".format(msg.reply_to_message.document.file_id), 'r', encoding="utf8") as csvFile:
@@ -1080,6 +1098,12 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
 			if failed >= 1:
 				text += " {} gagal di impor.".format(failed)
+			get_fedlog = sql.get_fed_log(fed_id)
+			if eval(get_fedlog):
+				teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
+				if failed >= 1:
+					teks += " {} gagal di impor.".format(failed)
+				bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		else:
 			update.effective_message.reply_text("File tidak di dukung.")
 			return
@@ -1180,6 +1204,57 @@ def fed_stat_user(bot, update, args):
 			update.effective_message.reply_text("{} tidak di larang di federasi ini".format(name))
 			return
 		update.effective_message.reply_text("{} di larang di federasi ini karena:\n`{}`".format(name, reason), parse_mode="markdown")
+
+
+@run_async
+def set_fed_log(bot, update, args):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+	if spam == True:
+		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+	msg = update.effective_message  # type: Optional[Message]
+
+	if args:
+		fedinfo = sql.get_fed_info(args[0])
+		if not fedinfo:
+			update.effective_message.reply_text("Federasi ini tidak ada!")
+			return
+		isowner = is_user_fed_owner(args[0], user.id)
+		if not isowner:
+			update.effective_message.reply_text("Hanya pencipta federasi yang bisa menetapkan log federasi.")
+			return
+		setlog = sql.set_fed_log(args[0], chat.id)
+		if setlog:
+			update.effective_message.reply_text("Log federasi `{}` di setel pada {}".format(fedinfo['fname'], chat.title), parse_mode="markdown")
+	else:
+		update.effective_message.reply_text("Anda belum memberikan ID federasinya!")
+
+@run_async
+def unset_fed_log(bot, update, args):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+	if spam == True:
+		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+	msg = update.effective_message  # type: Optional[Message]
+
+	if args:
+		fedinfo = sql.get_fed_info(args[0])
+		if not fedinfo:
+			update.effective_message.reply_text("Federasi ini tidak ada!")
+			return
+		isowner = is_user_fed_owner(args[0], user.id)
+		if not isowner:
+			update.effective_message.reply_text("Hanya pencipta federasi yang bisa menetapkan log federasi.")
+			return
+		setlog = sql.set_fed_log(args[0], None)
+		if setlog:
+			update.effective_message.reply_text("Log federasi `{}` telah di cabut pada {}".format(fedinfo['fname'], chat.title), parse_mode="markdown")
+	else:
+		update.effective_message.reply_text("Anda belum memberikan ID federasinya!")
 
 
 def is_user_fed_admin(fed_id, user_id):
@@ -1322,6 +1397,8 @@ FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
 FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True)
 FEDSTAT_USER = DisableAbleCommandHandler("fedstat", fed_stat_user, pass_args=True)
+SET_FED_LOG = CommandHandler("setfedlog", set_fed_log, pass_args=True)
+UNSET_FED_LOG = CommandHandler("unsetfedlog", unset_fed_log, pass_args=True)
 
 DELETEBTN_FED_HANDLER = CallbackQueryHandler(del_fed_button, pattern=r"rmfed_")
 
@@ -1344,5 +1421,7 @@ dispatcher.add_handler(FED_NOTIF_HANDLER)
 dispatcher.add_handler(FED_CHATLIST_HANDLER)
 dispatcher.add_handler(FED_IMPORTBAN_HANDLER)
 dispatcher.add_handler(FEDSTAT_USER)
+dispatcher.add_handler(SET_FED_LOG)
+dispatcher.add_handler(UNSET_FED_LOG)
 
 dispatcher.add_handler(DELETEBTN_FED_HANDLER)
