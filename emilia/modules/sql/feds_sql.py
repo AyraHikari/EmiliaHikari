@@ -108,6 +108,25 @@ def get_fed_name(chat_id):
 	else:
 		return get['chat_name']
 
+def get_user_fban(fed_id, user_id):
+	if not FEDERATION_BANNED_FULL.get(fed_id):
+		return False, False
+	user_info = FEDERATION_BANNED_FULL[fed_id].get(user_id)
+	if not user_info:
+		return None, None
+	return user_info['first_name'], user_info['reason']
+
+def get_user_fbanlist(user_id):
+	banlist = FEDERATION_BANNED_FULL
+	user_name = ""
+	fedname = []
+	for x in banlist:
+		if banlist[x].get(user_id):
+			if user_name == "":
+				user_name = banlist[x][user_id].get('first_name')
+			fedname.append([x, banlist[x][user_id].get('reason')])
+	return user_name, fedname
+
 
 def new_fed(owner_id, fed_name, fed_id):
 	with FEDS_LOCK:

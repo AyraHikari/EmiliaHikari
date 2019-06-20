@@ -1101,6 +1101,86 @@ def del_fed_button(bot, update):
 		if delete:
 			query.message.edit_text("Anda telah menghapus federasi Anda! Sekarang semua Grup yang terhubung dengan `{}` tidak memiliki federasi.".format(getfed['fname']), parse_mode='markdown')
 
+@run_async
+def fed_stat_user(bot, update, args):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+	if spam == True:
+		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+	msg = update.effective_message  # type: Optional[Message]
+
+	if args:
+		if args[0].isdigit():
+			user_id = args[0]
+		else:
+			user_id = extract_user(msg, args)
+	else:
+		user_id = extract_user(msg, args)
+
+	if user_id:
+		if len(args) == 2 and args[0].isdigit():
+			fed_id = args[1]
+			user_name, reason = sql.get_user_fban(fed_id, user_id)
+			if user_name == False:
+				update.effective_message.reply_text("Federasi {} tidak di temukan!".format(fed_id), parse_mode="markdown")
+				return
+			if user_name == "":
+				user_name = "Dia"
+			if not reason:
+				update.effective_message.reply_text("{} belum di larang di federasi ini!".format(user_name))
+			else:
+				teks = "{} di larang di federasi ini karena:\n`{}`".format(user_name, reason)
+				update.effective_message.reply_text(teks, parse_mode="markdown")
+			return
+		user_name, fbanlist = sql.get_user_fbanlist(user_id)
+		if user_name == "":
+			try:
+				user_name = bot.get_chat(user_id).first_name
+			except BadRequest:
+				update.effective_message.reply_text("Saya tidak bisa mengambil info pengguna ini")
+				return
+			if user_name == "":
+				user_name = "Dia"
+		if len(fbanlist) == 0:
+			update.effective_message.reply_text("{} belum di larang di federasi mana pun!".format(user_name))
+			return
+		else:
+			teks = "{} sudah di larang di federasi ini:\n".format(user_name)
+			for x in fbanlist:
+				teks += "- `{}`: {}\n".format(x[0], x[1][:20])
+			teks += "\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>"
+			update.effective_message.reply_text(teks, parse_mode="markdown")
+
+	elif not msg.reply_to_message and not args:
+		user_id = msg.from_user.id
+		user_name, fbanlist = sql.get_user_fbanlist(user_id)
+		if user_name == "":
+			user_name = msg.from_user.first_name
+		if len(fbanlist) == 0:
+			update.effective_message.reply_text("{} belum di larang di federasi mana pun!".format(user_name))
+		else:
+			teks = "{} sudah di larang di federasi ini:\n".format(user_name)
+			for x in fbanlist:
+				teks += "- `{}`: {}\n".format(x[0], x[1][:20])
+			teks += "\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>"
+			update.effective_message.reply_text(teks, parse_mode="markdown")
+
+	else:
+		fed_id = args[0]
+		fedinfo = sql.get_fed_info(fed_id)
+		if not fedinfo:
+			update.effective_message.reply_text("Federasi {} tidak di temukan!".format(fed_id))
+			return
+		name, reason = sql.get_user_fban(fed_id, msg.from_user.id)
+		if not name:
+			name = msg.from_user.first_name
+		if not reason:
+			update.effective_message.reply_text("{} tidak di larang di federasi ini".format(name))
+			return
+		update.effective_message.reply_text("{} di larang di federasi ini karena:\n`{}`".format(name, reason), parse_mode="markdown")
+
 
 def is_user_fed_admin(fed_id, user_id):
 	fed_admins = sql.all_fed_users(fed_id)
@@ -1198,7 +1278,12 @@ Anda bahkan dapat menunjuk admin federasi, sehingga admin tepercaya Anda dapat m
 
 Masih tahap percobaan, untuk membuat federasi hanya bisa di lakukan oleh pembuat saya
 
-Perintah:
+*Perintah:*
+ - /fedstat: Daftarkan semua federasi yang telah dilarang dari Anda.
+ - /fedstat <user ID>: Dapatkan info federasi banned yang telah ditentukan oleh pengguna (bisa juga menyebut nama pengguna, mention, dan balasan).
+ - /fedstat <user ID> <Fed ID>: Memberikan informasi tentang alasan larangan pengguna yang ditentukan dalam federasi itu. Jika tidak ada pengguna yang ditentukan, periksa pengirimnya.
+
+*Hanya admin federasi:*
  - /newfed <fedname>: membuat federasi baru dengan nama yang diberikan. Pengguna hanya diperbolehkan memiliki satu federasi. Metode ini juga dapat digunakan untuk mengubah nama federasi. (maks. 64 karakter)
  - /delfed: menghapus federasi Anda, dan informasi apa pun yang berkaitan dengannya. Tidak akan membatalkan pencekalan pengguna yang diblokir.
  - /fedinfo <FedID>: informasi tentang federasi yang ditentukan.
@@ -1236,6 +1321,7 @@ FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True, p
 FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
 FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True)
+FEDSTAT_USER = DisableAbleCommandHandler("fedstat", fed_stat_user, pass_args=True)
 
 DELETEBTN_FED_HANDLER = CallbackQueryHandler(del_fed_button, pattern=r"rmfed_")
 
@@ -1257,5 +1343,6 @@ dispatcher.add_handler(FED_USERBAN_HANDLER)
 dispatcher.add_handler(FED_NOTIF_HANDLER)
 dispatcher.add_handler(FED_CHATLIST_HANDLER)
 dispatcher.add_handler(FED_IMPORTBAN_HANDLER)
+dispatcher.add_handler(FEDSTAT_USER)
 
 dispatcher.add_handler(DELETEBTN_FED_HANDLER)
