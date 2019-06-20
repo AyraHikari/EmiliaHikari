@@ -6,6 +6,8 @@ import uuid
 import re
 import json
 import time
+import csv
+import os
 from time import sleep
 
 from future.utils import string_types
@@ -1038,20 +1040,10 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			if failed >= 1:
 				text += " {} gagal di impor.".format(failed)
 		elif fileformat == 'csv':
-			with BytesIO() as file:
-				file_info.download(out=file)
-				file.seek(0)
-				reading = file.read().decode('UTF-8')
-				splitting = reading.split('\n')
-				for x in splitting:
-					if x == '':
-						continue
-					data = x.split(',')
-					if data[0] == 'id':
-						continue
-					if len(data) != 5:
-						failed += 1
-						continue
+			file_info.download("fban_{}.csv".format(msg.reply_to_message.document.file_id))
+			with open("fban_{}.csv".format(msg.reply_to_message.document.file_id), 'r', encoding="utf8") as csvFile:
+				reader = csv.reader(csvFile)
+				for data in reader:
 					try:
 						import_userid = int(data[0]) # Make sure it int
 						import_firstname = str(data[1])
@@ -1083,6 +1075,8 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
 					if addtodb:
 						success += 1
+			csvFile.close()
+			os.remove("fban_{}.csv".format(msg.reply_to_message.document.file_id))
 			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
 			if failed >= 1:
 				text += " {} gagal di impor.".format(failed)
