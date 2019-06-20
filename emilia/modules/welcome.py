@@ -190,7 +190,10 @@ def new_member(bot: Bot, update: Update):
                             keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
                     keyboard = InlineKeyboardMarkup(keyb)
                     # Send message
-                    ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
+                    try:
+                        ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
+                    except BadRequest:
+                        update.effective_message.reply_text("Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui.")
                     return
                 # else, move on
                 first_name = new_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -326,7 +329,10 @@ def left_member(bot: Bot, update: Update):
                 keyb = build_keyboard(buttons)
                 keyboard = InlineKeyboardMarkup(keyb)
                 # Send message
-                ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=cust_goodbye, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
+                try:
+                    ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=cust_goodbye, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
+                except BadRequest:
+                    update.effective_message.reply_text("Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui.")
                 return
 
             first_name = left_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
