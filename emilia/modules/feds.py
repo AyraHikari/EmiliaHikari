@@ -210,8 +210,9 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 			return
 
 		get_fedlog = sql.get_fed_log(args[0])
-		if eval(get_fedlog):
-			bot.send_message(get_fedlog, "Obrolan *{}* telah bergabung ke federasi *{}*".format(chat.title, getfed['fname']), parse_mode="markdown")
+		if get_fedlog:
+			if eval(get_fedlog):
+				bot.send_message(get_fedlog, "Obrolan *{}* telah bergabung ke federasi *{}*".format(chat.title, getfed['fname']), parse_mode="markdown")
 
 		message.reply_text("Obrolan ini telah bergabung dengan federasi {}!".format(getfed['fname']))
 
@@ -231,8 +232,9 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
 	if getuser in 'creator' or user.id in SUDO_USERS:
 		if sql.chat_leave_fed(chat.id) == True:
 			get_fedlog = sql.get_fed_log(fed_id)
-			if eval(get_fedlog):
-				bot.send_message(get_fedlog, "Obrolan *{}* telah keluar ke federasi *{}*".format(chat.title, fed_info['fname']), parse_mode="markdown")
+			if get_fedlog:
+				if eval(get_fedlog):
+					bot.send_message(get_fedlog, "Obrolan *{}* telah keluar ke federasi *{}*".format(chat.title, fed_info['fname']), parse_mode="markdown")
 			update.effective_message.reply_text("Obrolan ini telah keluar dari federasi {}!".format(fed_info['fname']))
 		else:
 			update.effective_message.reply_text("Mengapa Anda meninggalkan federasi ketika Anda belum bergabung?!")
@@ -709,8 +711,9 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 		rules = sql.get_fed_info(fed_id)['frules']
 		getfed = sql.get_fed_info(fed_id)
 		get_fedlog = sql.get_fed_log(fed_id)
-		if eval(get_fedlog):
-			bot.send_message(get_fedlog, "*{}* telah mengganti aturan federasi *{}*".format(user.first_name, getfed['fname']), parse_mode="markdown")
+		if get_fedlog:
+			if eval(get_fedlog):
+				bot.send_message(get_fedlog, "*{}* telah mengganti aturan federasi *{}*".format(user.first_name, getfed['fname']), parse_mode="markdown")
 		update.effective_message.reply_text(f"Aturan telah di ganti menjadi:\n{rules}!")
 	else:
 		update.effective_message.reply_text("Please write rules to set it up!")
@@ -1052,11 +1055,12 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			if failed >= 1:
 				tekt += " {} gagal di impor.".format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
-			if eval(get_fedlog):
-				teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
-				if failed >= 1:
-					teks += " {} gagal di impor.".format(failed)
-				bot.send_message(get_fedlog, teks, parse_mode="markdown")
+			if get_fedlog:
+				if eval(get_fedlog):
+					teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
+					if failed >= 1:
+						teks += " {} gagal di impor.".format(failed)
+					bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		elif fileformat == 'csv':
 			file_info.download("fban_{}.csv".format(msg.reply_to_message.document.file_id))
 			with open("fban_{}.csv".format(msg.reply_to_message.document.file_id), 'r', encoding="utf8") as csvFile:
@@ -1099,11 +1103,12 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			if failed >= 1:
 				text += " {} gagal di impor.".format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
-			if eval(get_fedlog):
-				teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
-				if failed >= 1:
-					teks += " {} gagal di impor.".format(failed)
-				bot.send_message(get_fedlog, teks, parse_mode="markdown")
+			if get_fedlog:
+				if eval(get_fedlog):
+					teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
+					if failed >= 1:
+						teks += " {} gagal di impor.".format(failed)
+					bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		else:
 			update.effective_message.reply_text("File tidak di dukung.")
 			return
