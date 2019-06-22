@@ -179,6 +179,11 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	message = update.effective_message
 	administrators = chat.get_administrators()
 	fed_id = sql.get_fed_id(chat.id)
@@ -224,6 +229,11 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 	fed_info = sql.get_fed_info(fed_id)
 
@@ -250,6 +260,11 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 
 	if is_user_fed_owner(fed_id, user.id):
@@ -296,6 +311,11 @@ def user_demote_fed(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 
 	if is_user_fed_owner(fed_id, user.id):
@@ -387,6 +407,11 @@ def fed_admin(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
@@ -430,6 +455,11 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
@@ -603,6 +633,11 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message  # type: Optional[Message]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
@@ -688,6 +723,11 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
@@ -729,6 +769,11 @@ def get_frules(bot: Bot, update: Update, args: List[str]):
 		return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
 
 	chat = update.effective_chat  # type: Optional[Chat]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 	if not fed_id:
 		update.effective_message.reply_text("This chat is not in any federation!")
@@ -748,6 +793,11 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	if args:
 		chat = update.effective_chat  # type: Optional[Chat]
 		fed_id = sql.get_fed_id(chat.id)
@@ -787,6 +837,10 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
 
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
@@ -930,6 +984,11 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
 
@@ -970,6 +1029,10 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
 
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
@@ -1236,6 +1299,10 @@ def set_fed_log(bot, update, args):
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
 
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
+
 	if args:
 		fedinfo = sql.get_fed_info(args[0])
 		if not fedinfo:
@@ -1260,6 +1327,10 @@ def unset_fed_log(bot, update, args):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
+
+	if chat.type == 'private':
+		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		return
 
 	if args:
 		fedinfo = sql.get_fed_info(args[0])
