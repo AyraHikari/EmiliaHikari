@@ -367,6 +367,43 @@ def fban_user(fed_id, user_id, first_name, last_name, user_name, reason):
 		return r
 
 
+def multi_fban_user(multi_fed_id, multi_user_id, multi_first_name, multi_last_name, multi_user_name, multi_reason):
+	with FEDS_LOCK:
+		counter = 0
+		for x in range(len(multi_fed_id)):
+			fed_id = multi_fed_id[x]
+			user_id = multi_user_id[x]
+			first_name = multi_first_name[x]
+			last_name = multi_last_name[x]
+			user_name = multi_user_name[x]
+			reason = multi_reason[x]
+			r = SESSION.query(BansF).all()
+			for I in r:
+				if I.fed_id == fed_id:
+					if int(I.user_id) == int(user_id):
+						SESSION.delete(I)
+
+			r = BansF(str(fed_id), str(user_id), first_name, last_name, user_name, reason)
+
+			SESSION.add(r)
+			counter += 1
+			if str(str(counter)[-2:]) == "00":
+				print(user_id)
+				print(first_name)
+				print(reason)
+				print(counter)
+		try:
+			SESSION.commit()
+		except:
+			SESSION.rollback()
+			return False
+		finally:
+			SESSION.commit()
+		__load_all_feds_banned()
+		print("Done")
+		return counter
+
+
 def un_fban_user(fed_id, user_id):
 	with FEDS_LOCK:
 		r = SESSION.query(BansF).all()

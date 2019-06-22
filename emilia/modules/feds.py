@@ -1062,6 +1062,12 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 						teks += " {} gagal di impor.".format(failed)
 					bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		elif fileformat == 'csv':
+			multi_fed_id = []
+			multi_import_userid = []
+			multi_import_firstname = []
+			multi_import_lastname = []
+			multi_import_username = []
+			multi_import_reason = []
 			file_info.download("fban_{}.csv".format(msg.reply_to_message.document.file_id))
 			with open("fban_{}.csv".format(msg.reply_to_message.document.file_id), 'r', encoding="utf8") as csvFile:
 				reader = csv.reader(csvFile)
@@ -1094,18 +1100,24 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					if int(import_userid) in WHITELIST_USERS:
 						failed += 1
 						continue
-					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
-					if addtodb:
-						success += 1
+					multi_fed_id.append(fed_id)
+					multi_import_userid.append(str(import_userid))
+					multi_import_firstname.append(import_firstname)
+					multi_import_lastname.append(import_lastname)
+					multi_import_username.append(import_username)
+					multi_import_reason.append(import_reason)
+					# t = ThreadWithReturnValue(target=sql.fban_user, args=(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason,))
+					# t.start()
+				addtodb = sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason)
 			csvFile.close()
 			os.remove("fban_{}.csv".format(msg.reply_to_message.document.file_id))
-			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
+			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(addtodb)
 			if failed >= 1:
 				text += " {} gagal di impor.".format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
 			if get_fedlog:
 				if eval(get_fedlog):
-					teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
+					teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], addtodb)
 					if failed >= 1:
 						teks += " {} gagal di impor.".format(failed)
 					bot.send_message(get_fedlog, teks, parse_mode="markdown")
