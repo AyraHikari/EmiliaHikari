@@ -340,12 +340,15 @@ def fed_info(bot: Bot, update: Update, args: List[str]):
 
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	fed_id = sql.get_fed_id(chat.id)
-	info = sql.get_fed_info(fed_id)
-
-	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak dalam federasi apa pun!")
-		return
+	if args:
+		fed_id = args[0]
+		info = sql.get_fed_info(fed_id)
+	else:
+		fed_id = sql.get_fed_id(chat.id)
+		if not fed_id:
+			update.effective_message.reply_text("Grup ini tidak dalam federasi apa pun!")
+			return
+		info = sql.get_fed_info(fed_id)
 
 	if is_user_fed_admin(fed_id, user.id) == False:
 		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
