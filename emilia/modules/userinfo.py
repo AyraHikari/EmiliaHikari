@@ -14,6 +14,10 @@ from emilia.modules.helper_funcs.extraction import extract_user
 
 @run_async
 def about_me(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+
     message = update.effective_message  # type: Optional[Message]
     user_id = extract_user(message, args)
 
@@ -36,6 +40,10 @@ def about_me(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def set_about_me(bot: Bot, update: Update):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+
     message = update.effective_message  # type: Optional[Message]
     user_id = message.from_user.id
     text = message.text
@@ -51,6 +59,10 @@ def set_about_me(bot: Bot, update: Update):
 
 @run_async
 def about_bio(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+
     message = update.effective_message  # type: Optional[Message]
 
     user_id = extract_user(message, args)
@@ -73,6 +85,10 @@ def about_bio(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def set_about_bio(bot: Bot, update: Update):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+
     message = update.effective_message  # type: Optional[Message]
     sender = update.effective_user  # type: Optional[User]
     if message.reply_to_message:
