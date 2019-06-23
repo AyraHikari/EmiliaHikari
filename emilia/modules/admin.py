@@ -199,7 +199,11 @@ def pin(bot: Bot, update: Update, args: List[str]) -> str:
         chat = update.effective_chat
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
-        prev_message = update.effective_message.reply_to_message.message_id
+        if update.effective_message.reply_to_message:
+            prev_message = update.effective_message.reply_to_message.message_id
+        else:
+            update.effective_message.reply_text("Balas pesan untuk pin pesan tersebut pada grup ini")
+            return ""
 
     is_group = chat.type != "private" and chat.type != "channel"
 
