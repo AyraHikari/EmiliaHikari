@@ -15,9 +15,9 @@ from emilia.modules.connection import connected
 
 @run_async
 def get_rules(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
     chat_id = update.effective_chat.id
     send_rules(update, chat_id)
 
@@ -79,9 +79,9 @@ def send_rules(update, chat_id, from_pm=False):
 @run_async
 @user_admin
 def set_rules(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
     chat = update.effective_chat
     chat_id = update.effective_chat.id
     user = update.effective_user
@@ -117,9 +117,9 @@ def set_rules(bot: Bot, update: Update):
 @run_async
 @user_admin
 def clear_rules(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
     chat = update.effective_chat
     chat_id = update.effective_chat.id
     user = update.effective_user

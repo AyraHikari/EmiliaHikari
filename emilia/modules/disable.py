@@ -70,9 +70,9 @@ if is_module_loaded(FILENAME):
     def disable(bot: Bot, update: Update, args: List[str]):
         chat = update.effective_chat  # type: Optional[Chat]
         user = update.effective_user
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
 
         conn = connected(bot, update, chat, user.id, need_admin=True)
         if conn:
@@ -112,9 +112,9 @@ if is_module_loaded(FILENAME):
     def enable(bot: Bot, update: Update, args: List[str]):
         chat = update.effective_chat  # type: Optional[Chat]
         user = update.effective_user
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
 
         conn = connected(bot, update, chat, user.id, need_admin=True)
         if conn:
@@ -151,9 +151,9 @@ if is_module_loaded(FILENAME):
     @run_async
     @user_admin
     def list_cmds(bot: Bot, update: Update):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
 
         if DISABLE_CMDS + DISABLE_OTHER:
             result = ""
@@ -181,9 +181,9 @@ if is_module_loaded(FILENAME):
     def commands(bot: Bot, update: Update):
         chat = update.effective_chat
         user = update.effective_user
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
 
         conn = connected(bot, update, chat, user.id, need_admin=True)
         if conn:

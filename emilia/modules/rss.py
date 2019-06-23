@@ -12,9 +12,9 @@ from emilia.modules.sql import rss_sql as sql
 
 def show_url(bot, update, args):
     tg_chat_id = str(update.effective_chat.id)
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
 
     if len(args) >= 1:
         tg_feed_link = args[0]
@@ -55,9 +55,9 @@ def show_url(bot, update, args):
 
 
 def list_urls(bot, update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
     tg_chat_id = str(update.effective_chat.id)
 
     user_data = sql.get_urls(tg_chat_id)
@@ -79,9 +79,9 @@ def list_urls(bot, update):
 
 @user_admin
 def add_url(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
     if len(args) >= 1:
         chat = update.effective_chat
 
@@ -116,9 +116,9 @@ def add_url(bot, update, args):
 
 @user_admin
 def remove_url(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
-        return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+        return
     if len(args) >= 1:
         tg_chat_id = str(update.effective_chat.id)
 

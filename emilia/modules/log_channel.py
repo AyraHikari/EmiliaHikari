@@ -59,9 +59,9 @@ if is_module_loaded(FILENAME):
     @run_async
     @user_admin
     def logging(bot: Bot, update: Update):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
 
@@ -80,9 +80,9 @@ if is_module_loaded(FILENAME):
     @run_async
     @user_admin
     def setlog(bot: Bot, update: Update):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == chat.CHANNEL:
@@ -120,9 +120,9 @@ if is_module_loaded(FILENAME):
     @run_async
     @user_admin
     def unsetlog(bot: Bot, update: Update):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id)
+        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
-            return update.effective_message.reply_text("Saya kecewa dengan anda, saya tidak akan mendengar kata-kata anda sekarang!")
+            return
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
 
