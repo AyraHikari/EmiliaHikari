@@ -822,8 +822,15 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 			try:
 				bot.sendMessage(chat, text, parse_mode="markdown")
 			except TelegramError:
+				try:
+					dispatcher.bot.getChat(chat)
+				except Unauthorized:
+					failed += 1
+					sql.chat_leave_fed(chat)
+					LOGGER.info("Chat {} has leave fed {} because bot is kicked".format(chat, fedinfo['fname']))
+					continue
 				failed += 1
-				LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
+				LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))
 
 		send_text = "Siaran Federasi selesai."
 		if failed >= 1:
