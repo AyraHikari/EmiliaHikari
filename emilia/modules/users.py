@@ -12,6 +12,8 @@ import emilia.modules.sql.users_sql as sql
 from emilia import dispatcher, OWNER_ID, LOGGER
 from emilia.modules.helper_funcs.filters import CustomFilters
 
+import emilia.modules.sql.feds_sql as fedsql
+
 USERS_GROUP = 4
 
 
@@ -69,6 +71,17 @@ def broadcast(bot: Bot, update: Update):
 def log_user(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
+    fed_id = fedsql.get_fed_id(chat.id)
+    if fed_id:
+        user = update.effective_user
+        if user:
+            fban, fbanreason = fedsql.get_fban_user(fed_id, user.id)
+            if fban:
+                update.effective_message.reply_text("Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`".format(fbanreason), parse_mode="markdown")
+                try:
+                     bot.kick_chat_member(chat.id, user.id)
+                except:
+                	 print("Fban: cannot banned this user")
 
     sql.update_user(msg.from_user.id,
                     msg.from_user.username,

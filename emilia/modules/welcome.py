@@ -111,8 +111,11 @@ def new_member(bot: Bot, update: Update):
         for new_mem in new_members:
             fban, fbanreason = fedsql.get_fban_user(fed_id, new_mem.id)
             if fban:
-                update.effective_message.reply_text("Pengguna ini dilarang di federasi saat ini!\nAlasan: {}".format(fbanreason))
-                bot.kick_chat_member(chat.id, new_mem.id)
+                update.effective_message.reply_text("Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`".format(fbanreason), parse_mode="markdown")
+                try:
+                      bot.kick_chat_member(chat.id, new_mem.id)
+                except:
+                	  print("Fban: cannot banned this user")
                 return
     if should_welc:
         sent = None
