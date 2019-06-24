@@ -1,5 +1,7 @@
 import html, time
 import re
+import threading
+import requests
 from typing import Optional, List
 
 from telegram import Message, Chat, Update, Bot, User, CallbackQuery
@@ -262,6 +264,10 @@ def new_member(bot: Bot, update: Update):
 
             if sent:
                 sql.set_clean_welcome(chat.id, sent.message_id)
+
+            # CAS Security thread
+            t = threading.Thread(target=check_cas, args=(bot, new_mem.id, new_mem, update.effective_message,))
+            t.start()
 
 
 @run_async
@@ -965,6 +971,24 @@ def WELC_EDITBTN(bot: Bot, update: Update):
                                   reply_markup=InlineKeyboardMarkup(button))
         bot.answer_callback_query(query.id)
 
+
+CAS_URL = "https://combot.org/api/cas/check"
+
+def check_cas(bot: Bot, user_id, user, message):
+    json = requests.get(CAS_URL, params={"user_id": str(user_id)}).json()
+    if json.get("ok"):
+        if json["result"]["offenses"] > 0:
+            fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
+            if fed_id:
+                x = fedsql.fban_user("TeamNusantaraDevs", user_id, user.first_name, user.last_name, user.username, "CAS-Banned")
+                if not x:
+                    LOGGER.warning("Cannot fban spammer user!")
+            try:
+                bot.kickChatMember(message.chat.id, user_id)
+            except:
+                bot.sendMessage(message.chat.id, "*⚠️ Peringatan!*\n{} adalah spammer dari [CAS ban](https://combot.org/cas/query?u={}) dan dia telah masuk daftar fedban *Team Nusantara Disciplinary Circle*!\nDi rekomendasikan untuk membanned dia.".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
+                return
+            bot.sendMessage(message.chat.id, "{} telah di banned dan masuk daftar fedban *Team Nusantara Disciplinary Circle*!\nAlasan: [CAS ban](https://combot.org/cas/query?u={}).".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
 
 
 __help__ = """
