@@ -793,6 +793,7 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
+	chat = update.effective_chat  # type: Optional[Chat]
 
 	if chat.type == 'private':
 		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
@@ -821,8 +822,15 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 			try:
 				bot.sendMessage(chat, text, parse_mode="markdown")
 			except TelegramError:
+				try:
+					dispatcher.bot.getChat(chat)
+				except Unauthorized:
+					failed += 1
+					sql.chat_leave_fed(chat)
+					LOGGER.info("Chat {} has leave fed {} because bot is kicked".format(chat, fedinfo['fname']))
+					continue
 				failed += 1
-				LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
+				LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))
 
 		send_text = "Siaran Federasi selesai."
 		if failed >= 1:
@@ -1457,6 +1465,7 @@ Masih tahap percobaan, untuk membuat federasi hanya bisa di lakukan oleh pembuat
  - /leavefed <FedID>: meninggalkan federasi yang diberikan. Hanya pemilik obrolan yang dapat melakukan ini.
  - /fpromote <user>: mempromosikan pengguna untuk memberi fed admin. Pemilik fed saja.
  - /fdemote <user>: menurunkan pengguna dari admin federasi ke pengguna normal. Pemilik fed saja.
+ - /fbroadcast <teks>: Broadcast teks ke seluruh grup yang join federasi tsb.
  - /fban <user>: melarang pengguna dari semua federasi tempat obrolan ini berlangsung, dan eksekutor memiliki kendali atas.
  - /unfban <user>: batalkan pengguna dari semua federasi tempat obrolan ini berlangsung, dan bahwa pelaksana memiliki kendali atas.
  - /setfrules: Atur peraturan federasi.
