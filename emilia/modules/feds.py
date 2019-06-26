@@ -1338,7 +1338,7 @@ def fed_stat_user(bot, update, args):
 	if user_id:
 		if len(args) == 2 and args[0].isdigit():
 			fed_id = args[1]
-			user_name, reason = sql.get_user_fban(fed_id, user_id)
+			user_name, reason = sql.get_user_fban(fed_id, str(user_id))
 			if user_name == False:
 				update.effective_message.reply_text("Federasi {} tidak di temukan!".format(fed_id), parse_mode="markdown")
 				return
@@ -1350,13 +1350,12 @@ def fed_stat_user(bot, update, args):
 				teks = "{} di larang di federasi ini karena:\n`{}`".format(user_name, reason)
 				update.effective_message.reply_text(teks, parse_mode="markdown")
 			return
-		user_name, fbanlist = sql.get_user_fbanlist(user_id)
+		user_name, fbanlist = sql.get_user_fbanlist(str(user_id))
 		if user_name == "":
 			try:
 				user_name = bot.get_chat(user_id).first_name
 			except BadRequest:
-				update.effective_message.reply_text("Saya tidak bisa mengambil info pengguna ini")
-				return
+				user_name = "Dia"
 			if user_name == "":
 				user_name = "Dia"
 		if len(fbanlist) == 0:
