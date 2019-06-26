@@ -292,30 +292,30 @@ def del_blacklist(bot: Bot, update: Update):
 				elif getmode == 3:
 					message.delete()
 					bot.restrict_chat_member(chat.id, update.effective_user.id, can_send_messages=False)
-					update.effective_message.reply_text("{} di bisukan karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di bisukan karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 4:
 					message.delete()
 					res = chat.unban_member(update.effective_user.id)
 					if res:
-						update.effective_message.reply_text("{} di tendang karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+						bot.sendMessage(chat.id, "{} di tendang karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 5:
 					message.delete()
 					chat.kick_member(user.id)
-					update.effective_message.reply_text("{} di blokir karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di blokir karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 6:
 					message.delete()
 					bantime = extract_time(message, value)
 					chat.kick_member(user.id, until_date=bantime)
-					update.effective_message.reply_text("{} di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
 					return
 				elif getmode == 7:
 					message.delete()
 					mutetime = extract_time(message, value)
 					bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
-					update.effective_message.reply_text("{} di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
 					return
 			except BadRequest as excp:
 				if excp.message == "Message to delete not found":

@@ -7,7 +7,7 @@ from telegram import TelegramError
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
-from telegram.utils.helpers import mention_html
+from telegram.utils.helpers import mention_html, mention_markdown
 
 import emilia.modules.sql.blsticker_sql as sql
 from emilia import dispatcher, SUDO_USERS, LOGGER, spamfilters
@@ -299,6 +299,7 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
 def del_blackliststicker(bot: Bot, update: Update):
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
+	user = update.effective_user
 	to_match = message.sticker
 	if not to_match:
 		return
@@ -320,30 +321,30 @@ def del_blackliststicker(bot: Bot, update: Update):
 				elif getmode == 3:
 					message.delete()
 					bot.restrict_chat_member(chat.id, update.effective_user.id, can_send_messages=False)
-					update.effective_message.reply_text("{} di bisukan karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di bisukan karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 4:
 					message.delete()
 					res = chat.unban_member(update.effective_user.id)
 					if res:
-						update.effective_message.reply_text("{} di tendang karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+						bot.sendMessage(chat.id, "{} di tendang karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 5:
 					message.delete()
 					chat.kick_member(user.id)
-					update.effective_message.reply_text("{} di blokir karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di blokir karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 6:
 					message.delete()
 					bantime = extract_time(message, value)
 					chat.kick_member(user.id, until_date=bantime)
-					update.effective_message.reply_text("{} di blokir selama {} karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di blokir selama {} karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
 					return
 				elif getmode == 7:
 					message.delete()
 					mutetime = extract_time(message, value)
 					bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
-					update.effective_message.reply_text("{} di bisukan selama {} karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} di bisukan selama {} karena menggunakan stiker '{}' yang ada di daftar hitam stiker".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
 					return
 			except BadRequest as excp:
 				if excp.message == "Message to delete not found":

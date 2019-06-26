@@ -111,12 +111,14 @@ def set_blacklist_strength(chat_id, blacklist_type, value):
     # 6 = tban
     # 7 = tmute
     with STICKSET_FILTER_INSERTION_LOCK:
+        global CHAT_BLSTICK_BLACKLISTS
         curr_setting = SESSION.query(StickerSettings).get(str(chat_id))
         if not curr_setting:
             curr_setting = StickerSettings(chat_id, blacklist_type=int(blacklist_type), value=value)
 
         curr_setting.blacklist_type = int(blacklist_type)
         curr_setting.value = str(value)
+        CHAT_BLSTICK_BLACKLISTS[str(chat_id)] = {'blacklist_type': int(blacklist_type), 'value': value}
 
         SESSION.add(curr_setting)
         SESSION.commit()
