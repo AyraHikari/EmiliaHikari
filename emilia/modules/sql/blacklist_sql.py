@@ -123,9 +123,9 @@ def set_blacklist_strength(chat_id, blacklist_type, value):
 
 def get_blacklist_setting(chat_id):
     try:
-        setting = SESSION.query(BlacklistSettings).get(str(chat_id))
+        setting = CHAT_SETTINGS_BLACKLISTS.get(str(chat_id))
         if setting:
-            return setting.blacklist_type, setting.value
+            return setting['blacklist_type'], setting['value']
         else:
             return 1, "0"
 
