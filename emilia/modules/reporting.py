@@ -132,6 +132,47 @@ def report(bot: Bot, update: Update) -> str:
 
 	return ""
 
+@run_async
+@user_not_admin
+@loggable
+def report_alt(bot: Bot, update: Update) -> str:
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+	if spam == True:
+		return
+	message = update.effective_message  # type: Optional[Message]
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+
+	if chat and message.reply_to_message and sql.chat_should_report(chat.id):
+		reported_user = message.reply_to_message.from_user  # type: Optional[User]
+		chat_name = chat.title or chat.first or chat.username
+		admin_list = chat.get_administrators()
+
+		msg = "<b>{}:</b>" \
+			  "\n<b>Pengguna yang dilaporkan:</b> {} (<code>{}</code>)" \
+			  "\n<b>Dilaporkan oleh:</b> {} (<code>{}</code>)".format(html.escape(chat.title),
+																	  mention_html(
+																		  reported_user.id,
+																		  reported_user.first_name),
+																	  reported_user.id,
+																	  mention_html(user.id,
+																				   user.first_name),
+																	  user.id)
+		all_admins = []
+		for admin in admin_list:
+			if admin.user.is_bot:  # don't tag bot
+				continue
+
+			if sql.user_should_report(admin.user.id):
+				all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
+
+		bot.send_message(chat.id, "⚠️ {} <b>telah di laporkan ke admin!</b>{}".format(
+					mention_html(reported_user.id, reported_user.first_name),
+					"".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
+		return msg
+
+	return ""
+
 
 def button(bot, update):
 	query = update.callback_query
@@ -286,9 +327,9 @@ CATATAN: tidak satu pun dari ini akan dipicu jika digunakan oleh admin
    - Jika dalam obrolan, matikan status obrolan itu.
 """
 
-REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
+REPORT_HANDLER = CommandHandler("report", report_alt, filters=Filters.group)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
-ADMIN_REPORT_HANDLER = RegexHandler("(?i)@admin(s)?", report)
+ADMIN_REPORT_HANDLER = RegexHandler("(?i)@admin(s)?", report_alt)
 Callback_Report = CallbackQueryHandler(button, pattern=r"report_")
 Callback_ReportAsk = CallbackQueryHandler(buttonask, pattern=r"ask_")
 
