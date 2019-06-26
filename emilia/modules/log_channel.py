@@ -107,7 +107,9 @@ if is_module_loaded(FILENAME):
                                  chat.title or chat.first_name))
             except Unauthorized as excp:
                 if excp.message == "Forbidden: bot is not a member of the channel chat":
-                    bot.send_message(chat.id, "Successfully set log channel!")
+                    bot.send_message(chat.id, "Gagal menyetel saluran log!\nSaya mungkin bukan admin di channel tersebut.")
+                    sql.stop_chat_logging(chat.id)
+                    return
                 else:
                     LOGGER.exception("ERROR in setting the log channel.")
                     
