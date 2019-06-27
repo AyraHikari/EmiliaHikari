@@ -233,7 +233,6 @@ def button(bot, update):
 						  message_id=query.message.message_id)
 		"""
 
-
 def buttonask(bot, update):
 	query = update.callback_query
 	splitter = query.data.replace("ak_", "").split("+")
@@ -248,7 +247,6 @@ def buttonask(bot, update):
 	if isyes == "y":
 		if splitter[0] == "1":
 			try:
-				bot.kickChatMember(report_chat, report_target)
 				bot.unbanChatMember(report_chat, report_target)
 				bot.sendMessage(report_chat, text="{} telah di tendang!\nOleh: {}".format(\
 					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
