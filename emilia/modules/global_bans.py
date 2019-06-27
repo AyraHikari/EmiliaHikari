@@ -46,6 +46,7 @@ UNGBAN_ERRORS = {
 @run_async
 def gban(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
+    args = args.split()
 
     user_id, reason = extract_user_and_text(message, args)
 
@@ -130,6 +131,7 @@ def gban(bot: Bot, update: Update, args: List[str]):
 @run_async
 def ungban(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
+    args = args.split()
 
     user_id = extract_user(message, args)
     if not user_id:
@@ -239,6 +241,7 @@ def gbanstat(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     if len(args) > 0:
         if args[0].lower() in ["on", "yes"]:
             sql.enable_gbans(update.effective_chat.id)

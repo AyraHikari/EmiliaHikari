@@ -374,6 +374,7 @@ def security(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     chat = update.effective_chat  # type: Optional[Chat]
     getcur, cur_value, cust_text = sql.welcome_security(chat.id)
     if len(args) >= 1:
@@ -409,6 +410,7 @@ def security_mute(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     chat = update.effective_chat  # type: Optional[Chat]
     message = update.effective_message  # type: Optional[Message]
     getcur, cur_value, cust_text = sql.welcome_security(chat.id)
@@ -438,6 +440,7 @@ def security_text(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     chat = update.effective_chat  # type: Optional[Chat]
     message = update.effective_message  # type: Optional[Message]
     getcur, cur_value, cust_text = sql.welcome_security(chat.id)
@@ -469,6 +472,7 @@ def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     chat = update.effective_chat  # type: Optional[Chat]
     if chat.type != chat.PRIVATE:
         if len(args) >= 1:
@@ -496,6 +500,7 @@ def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
 @user_admin
 def welcome(bot: Bot, update: Update, args: List[str]):
     chat = update.effective_chat  # type: Optional[Chat]
+    args = args.split()
     # if no args, show current replies.
     if len(args) == 0 or args[0].lower() == "noformat":
         noformat = args and args[0].lower() == "noformat"
@@ -565,6 +570,7 @@ def welcome(bot: Bot, update: Update, args: List[str]):
 @user_admin
 def goodbye(bot: Bot, update: Update, args: List[str]):
     chat = update.effective_chat  # type: Optional[Chat]
+    args = args.split()
 
     if len(args) == 0 or args[0] == "noformat":
         noformat = args and args[0] == "noformat"
@@ -719,6 +725,7 @@ def clean_welcome(bot: Bot, update: Update, args: List[str]) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
 

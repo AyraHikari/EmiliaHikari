@@ -73,6 +73,7 @@ if is_module_loaded(FILENAME):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
+        args = args.split()
 
         conn = connected(bot, update, chat, user.id, need_admin=True)
         if conn:
@@ -115,6 +116,7 @@ if is_module_loaded(FILENAME):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
+        args = args.split()
 
         conn = connected(bot, update, chat, user.id, need_admin=True)
         if conn:

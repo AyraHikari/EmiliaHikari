@@ -185,6 +185,7 @@ def file(bot: Bot, update: Update):
 
 @run_async
 def getlink(bot: Bot, update: Update, args: List[int]):
+	args = args.split()
 	if args:
 		chat_id = int(args[0])
 	else:
@@ -200,6 +201,7 @@ def getlink(bot: Bot, update: Update, args: List[int]):
 	
 @run_async
 def leavechat(bot: Bot, update: Update, args: List[int]):
+	args = args.split()
 	if args:
 		chat_id = int(args[0])
 	else:

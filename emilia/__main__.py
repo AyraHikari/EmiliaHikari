@@ -8,6 +8,7 @@ from telegram import Message, Chat, Update, Bot, User
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, ChatMigrated, TelegramError
 from telegram.ext import CommandHandler, Filters, MessageHandler, CallbackQueryHandler
+from telegram.ext.callbackcontext import CallbackContext
 from telegram.ext.dispatcher import run_async, DispatcherHandlerStop, Dispatcher
 from telegram.utils.helpers import escape_markdown
 
@@ -126,6 +127,8 @@ def start(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
+
     if update.effective_chat.type == "private":
         if len(args) >= 1:
             if args[0].lower() == "help":
@@ -529,10 +532,20 @@ def process_update(self, update):
         return
 
     CHATS_CNT[update.effective_chat.id] = cnt
+    args = ['']
+    if update.effective_message:
+        if update.effective_message.text:
+            args = update.effective_message.text.split()
+    if len(args) == 1:
+        args = ['']
+    else:
+        args.pop(0)
+        args = [" ".join(args)]
+
     for group in self.groups:
         try:
             for handler in (x for x in self.handlers[group] if x.check_update(update)):
-                handler.handle_update(update, self)
+                handler.handle_update(update, self, args)
                 break
 
         # Stop processing with any other handler.

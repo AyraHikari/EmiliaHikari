@@ -15,6 +15,7 @@ def show_url(bot, update, args):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
 
     if len(args) >= 1:
         tg_feed_link = args[0]
@@ -82,6 +83,7 @@ def add_url(bot, update, args):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     if len(args) >= 1:
         chat = update.effective_chat
 
@@ -119,6 +121,7 @@ def remove_url(bot, update, args):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     if len(args) >= 1:
         tg_chat_id = str(update.effective_chat.id)
 
@@ -141,7 +144,7 @@ def remove_url(bot, update, args):
         update.effective_message.reply_text("URL hilang")
 
 
-def rss_update(bot, job):
+def rss_update(context):
     user_data = sql.get_all()
 
     # this loop checks for every row in the DB
@@ -203,7 +206,7 @@ def rss_update(bot, job):
                              .format(len(new_entry_links) - 5))
 
 
-def rss_set(bot, job):
+def rss_set(context):
     user_data = sql.get_all()
 
     # this loop checks for every row in the DB

@@ -24,7 +24,7 @@ from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 # Change language locale to Indonesia
 # Install language:
 # - sudo apt-get install language-pack-id language-pack-id-base manpages
-locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
+locale.setlocale(locale.LC_ALL, 'id_ID.UTF-8')
 
 RUN_STRINGS = (
     "Kemana Anda pikir Anda akan pergi?",
@@ -159,6 +159,7 @@ def slap(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     msg = update.effective_message  # type: Optional[Message]
 
     # reply to correct message
@@ -209,6 +210,7 @@ def get_id(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     user_id = extract_user(update.effective_message, args)
     if user_id:
         if update.effective_message.reply_to_message and update.effective_message.reply_to_message.forward_from:
@@ -241,6 +243,7 @@ def info(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user_id = extract_user(update.effective_message, args)
@@ -349,6 +352,7 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     if args:
         location = " ".join(args)
         if location.lower() == bot.first_name.lower():

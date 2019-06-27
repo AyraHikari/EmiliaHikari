@@ -117,6 +117,7 @@ supportcmd = """
 @run_async
 def allow_connections(bot: Bot, update: Update, args: List[str]) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
+    args = args.split()
     if chat.type != chat.PRIVATE:
         if len(args) >= 1:
             var = args[0]
@@ -168,6 +169,7 @@ def connection_chat(bot, update):
 def connect_chat(bot, update, args):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+    args = args.split()
 
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
@@ -233,6 +235,7 @@ def disconnect_chat(bot, update):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
 
     if update.effective_chat.type == 'private':
         disconnection_status = sql.disconnect(update.effective_message.from_user.id)
@@ -276,6 +279,7 @@ def connected(bot, update, chat, user_id, need_admin=True):
 def help_connect_chat(bot, update, args):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+    args = args.split()
 
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
@@ -299,11 +303,11 @@ Atur grup anda via PM dengan mudah.
 
 __mod_name__ = "Koneksi"
 
-CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, allow_edited=True, pass_args=True)
+CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, filters=Filters.update.edited_message, pass_args=True)
 CONNECTION_CHAT_HANDLER = CommandHandler("connection", connection_chat)
-DISCONNECT_CHAT_HANDLER = CommandHandler("disconnect", disconnect_chat, allow_edited=True)
-ALLOW_CONNECTIONS_HANDLER = CommandHandler("allowconnect", allow_connections, allow_edited=True, pass_args=True)
-HELP_CONNECT_CHAT_HANDLER = CommandHandler("helpconnect", help_connect_chat, allow_edited=True, pass_args=True)
+DISCONNECT_CHAT_HANDLER = CommandHandler("disconnect", disconnect_chat, filters=Filters.update.edited_message)
+ALLOW_CONNECTIONS_HANDLER = CommandHandler("allowconnect", allow_connections, filters=Filters.update.edited_message, pass_args=True)
+HELP_CONNECT_CHAT_HANDLER = CommandHandler("helpconnect", help_connect_chat, filters=Filters.update.edited_message, pass_args=True)
 
 dispatcher.add_handler(CONNECT_CHAT_HANDLER)
 dispatcher.add_handler(CONNECTION_CHAT_HANDLER)

@@ -14,6 +14,7 @@ def cuaca(bot, update, args):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     location = " ".join(args)
     if location.lower() == bot.first_name.lower():
         update.effective_message.reply_text("Saya akan terus mengawasi di saat senang maupun sedih!")
@@ -99,6 +100,7 @@ def accuweather(bot, update, args):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = args.split()
     if args == []:
         return update.effective_message.reply_text("Masukan nama lokasinya untuk mengecek cuacanya!")
     location = " ".join(args)
