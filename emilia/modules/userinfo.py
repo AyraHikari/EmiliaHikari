@@ -7,7 +7,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
 
 import emilia.modules.sql.userinfo_sql as sql
-from emilia import dispatcher, SUDO_USERS
+from emilia import dispatcher, SUDO_USERS, spamfilters
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 
