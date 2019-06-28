@@ -1,7 +1,9 @@
 import threading
 
 from sqlalchemy import Column, String, UnicodeText, func, distinct, Integer, Boolean
+from telegram.error import BadRequest, TelegramError, Unauthorized
 
+from emilia import dispatcher
 from emilia.modules.sql import SESSION, BASE
 
 
@@ -505,7 +507,20 @@ def get_fed_log(fed_id):
 	if fed_setting == None:
 		fed_setting = False
 		return fed_setting
-	return fed_setting.get('flog')
+	if fed_setting.get('flog') == None:
+		return False
+	elif fed_setting.get('flog'):
+		try:
+			dispatcher.bot.get_chat(fed_setting.get('flog'))
+		except BadRequest:
+			set_fed_log(fed_id, None)
+			return False
+		except Unauthorized:
+			set_fed_log(fed_id, None)
+			return False
+		return fed_setting.get('flog')
+	else:
+		return False
 
 
 def set_fed_log(fed_id, chat_id):
