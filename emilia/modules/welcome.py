@@ -340,7 +340,7 @@ def check_bot_button(bot: Bot, update: Update):
 			if welc_type != sql.Types.STICKER or welc_type != sql.Types.VOICE:
 				bot.editMessageCaption(chat.id, message_id=query.message.message_id, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown")
 		except BadRequest:
-			update.effective_message.reply_text("Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui.")
+			pass
 		query.answer(text="Kamu telah disuarakan!")
 		return
 	# else, move on
