@@ -36,15 +36,24 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
     else:
         warner_tag = "Filter peringatan otomatis."
 
-    limit, soft_warn = sql.get_warn_setting(chat.id)
+    limit, soft_warn, warn_mode = sql.get_warn_setting(chat.id)
     num_warns, reasons = sql.warn_user(user.id, chat.id, reason)
     if num_warns >= limit:
         sql.reset_warns(user.id, chat.id)
-        if soft_warn:  # kick
-            chat.unban_member(user.id)
-            reply = "{} peringatan, {} telah ditendang!".format(limit, mention_html(user.id, user.first_name))
-
-        else:  # ban
+        if not soft_warn:
+            if not warn_mode:
+                chat.unban_member(user.id)
+                reply = "{} peringatan, {} telah ditendang!".format(limit, mention_html(user.id, user.first_name))
+            elif warn_mode == 1:
+                chat.unban_member(user.id)
+                reply = "{} peringatan, {} telah ditendang!".format(limit, mention_html(user.id, user.first_name))
+            elif warn_mode == 2:
+                chat.kick_member(user.id)
+                reply = "{} peringatan, {} telah blokir!".format(limit, mention_html(user.id, user.first_name))
+            elif warn_mode == 3:
+                message.bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
+                reply = "{} peringatan, {} telah dibisukan!".format(limit, mention_html(user.id, user.first_name))
+        else:
             chat.kick_member(user.id)
             reply = "{} peringatan, {} telah diblokir!".format(limit, mention_html(user.id, user.first_name))
             
@@ -270,7 +279,7 @@ def warns(bot: Bot, update: Update, args: List[str]):
 
     if result and result[0] != 0:
         num_warns, reasons = result
-        limit, soft_warn = sql.get_warn_setting(chat.id)
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat.id)
 
         if reasons:
             if conn:
@@ -556,7 +565,7 @@ def set_warn_limit(bot: Bot, update: Update, args: List[str]) -> str:
         else:
             msg.reply_text("Beri aku angkanya!")
     else:
-        limit, soft_warn = sql.get_warn_setting(chat.id)
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat.id)
         if conn:
             text = "Batas peringatan saat ini adalah {} pada *{}*".format(limit, chat_name)
         else:
@@ -617,12 +626,111 @@ def set_warn_strength(bot: Bot, update: Update, args: List[str]):
         else:
             msg.reply_text("Saya hanya mengerti on/yes/no/off!")
     else:
-        limit, soft_warn = sql.get_warn_setting(chat.id)
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat.id)
         if soft_warn:
             if conn:
                 text = "Peringatan saat ini disetel ke *tendangan* pengguna saat melampaui batas pada *{}*.".format(chat_name)
             else:
                 text = "Peringatan saat ini disetel ke *tendangan* pengguna saat melampaui batas."
+            msg.reply_text(text,
+                           parse_mode=ParseMode.MARKDOWN)
+        else:
+            if conn:
+                text = "Peringatan saat ini disetel untuk *diblokir* pengguna saat melampaui batas pada *{}*.".format(chat_name)
+            else:
+                text = "Peringatan saat ini disetel untuk *diblokir* pengguna saat melampaui batas."
+            msg.reply_text(text,
+                           parse_mode=ParseMode.MARKDOWN)
+    return ""
+
+
+@run_async
+@user_admin
+def set_warn_mode(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    msg = update.effective_message  # type: Optional[Message]
+
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
+    if args:
+        if args[0].lower() in ("kick", "soft"):
+            sql.set_warn_mode(chat.id, 1)
+            if conn:
+                text = "Terlalu banyak peringatan sekarang akan menghasilkan tendangan pada *{}*! Pengguna akan dapat bergabung lagi.".format(chat_name)
+            else:
+                text = "Terlalu banyak peringatan sekarang akan menghasilkan tendangan! Pengguna akan dapat bergabung lagi."
+            msg.reply_text(text, parse_mode="markdown")
+            return "<b>{}:</b>\n" \
+                   "<b>Admin:</b> {}\n" \
+                   "Telah mengganti peringatan akhir ke tendangan.".format(html.escape(chat.title),
+                                                                            mention_html(user.id, user.first_name))
+
+        elif args[0].lower() in ("ban", "banned", "hard"):
+            sql.set_warn_mode(chat.id, 2)
+            if conn:
+                text = "Terlalu banyak peringatan akan menghasilkan blokir pada *{}*!".format(chat_name)
+            else:
+                text = "Terlalu banyak peringatan akan menghasilkan tendangan!"
+            msg.reply_text(text, parse_mode="markdown")
+            return "<b>{}:</b>\n" \
+                   "<b>Admin:</b> {}\n" \
+                   "Telah mengganti peringatan akhir ke blokir.".format(html.escape(chat.title),
+                                                                                  mention_html(user.id,
+                                                                                               user.first_name))
+
+        elif args[0].lower() in ("mute"):
+            sql.set_warn_mode(chat.id, 3)
+            if conn:
+                text = "Terlalu banyak peringatan akan menghasilkan bisukan pada *{}*!".format(chat_name)
+            else:
+                text = "Terlalu banyak peringatan akan menghasilkan bisukan!"
+            msg.reply_text(text, parse_mode="markdown")
+            return "<b>{}:</b>\n" \
+                   "<b>Admin:</b> {}\n" \
+                   "Telah mengganti peringatan akhir ke bisukan.".format(html.escape(chat.title),
+                                                                                  mention_html(user.id,
+                                                                                               user.first_name))
+
+        else:
+            msg.reply_text("Saya hanya mengerti kick/ban/mute!")
+    else:
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat.id)
+        if not soft_warn:
+            if not warn_mode:
+                if conn:
+                    text = "Peringatan saat ini disetel ke *tendangan* pengguna saat melampaui batas pada *{}*.".format(chat_name)
+                else:
+                    text = "Peringatan saat ini disetel ke *tendangan* pengguna saat melampaui batas."
+            elif warn_mode == 1:
+                if conn:
+                    text = "Peringatan saat ini disetel ke *tendangan* pengguna saat melampaui batas pada *{}*.".format(chat_name)
+                else:
+                    text = "Peringatan saat ini disetel ke *tendangan* pengguna saat melampaui batas."
+            elif warn_mode == 2:
+                if conn:
+                    text = "Peringatan saat ini disetel ke *blokir* pengguna saat melampaui batas pada *{}*.".format(chat_name)
+                else:
+                    text = "Peringatan saat ini disetel ke *blokir* pengguna saat melampaui batas."
+            elif warn_mode == 3:
+                if conn:
+                    text = "Peringatan saat ini disetel ke *bisukan* pengguna saat melampaui batas pada *{}*.".format(chat_name)
+                else:
+                    text = "Peringatan saat ini disetel ke *bisukan* pengguna saat melampaui batas."
             msg.reply_text(text,
                            parse_mode=ParseMode.MARKDOWN)
         else:
@@ -653,12 +761,12 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
     num_warn_filters = sql.num_warn_chat_filters(chat_id)
-    limit, soft_warn = sql.get_warn_setting(chat_id)
+    limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
     return "Obrolan ini mempunyai `{}` saringan peringatkan. Dibutuhkan `{}` peringatan " \
            "sebelum pengguna akan mendapatkan *{}*.".format(num_warn_filters, limit, "tendangan" if soft_warn else "pemblokiran")
 
 def __chat_settings_btn__(chat_id, user_id):
-    limit, soft_warn = sql.get_warn_setting(chat_id)
+    limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
     button = []
     button.append([InlineKeyboardButton(text="➖", callback_data="set_wlim=-|{}".format(chat_id)),
             InlineKeyboardButton(text="Limit {}".format(limit), callback_data="set_wlim=?|{}".format(chat_id)),
@@ -676,7 +784,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         bot.answerCallbackQuery(query.id, "Batas dari peringatan. Jika peringatan melewati batas maka akan di eksekusi.", show_alert=True)
     if qdata == "-":
         button = []
-        limit, soft_warn = sql.get_warn_setting(chat_id)
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
         limit = int(limit)-1
         if limit <= 2:
             bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 3", show_alert=True)
@@ -697,7 +805,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         bot.answer_callback_query(query.id)
     if qdata == "+":
         button = []
-        limit, soft_warn = sql.get_warn_setting(chat_id)
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
         limit = int(limit)+1
         if limit <= 0:
             bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 0", show_alert=True)
@@ -718,7 +826,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         bot.answer_callback_query(query.id)
     if qdata == "exec":
         button = []
-        limit, soft_warn = sql.get_warn_setting(chat_id)
+        limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
         if soft_warn:
             exc = "Blokir"
             sql.set_warn_strength(chat_id, False)
@@ -771,6 +879,7 @@ LIST_WARN_HANDLER = DisableAbleCommandHandler(["warnlist", "warnfilters"], list_
 WARN_FILTER_HANDLER = MessageHandler(CustomFilters.has_text & Filters.group, reply_filter)
 WARN_LIMIT_HANDLER = CommandHandler("warnlimit", set_warn_limit, pass_args=True)#, filters=Filters.group)
 WARN_STRENGTH_HANDLER = CommandHandler("strongwarn", set_warn_strength, pass_args=True)#, filters=Filters.group)
+WARN_MODE_HANDLER = CommandHandler("warnmode", set_warn_mode, pass_args=True)
 WARN_BTNSET_HANDLER = CallbackQueryHandler(WARN_EDITBTN, pattern=r"set_wlim")
 
 dispatcher.add_handler(WARN_HANDLER)
@@ -781,6 +890,6 @@ dispatcher.add_handler(ADD_WARN_HANDLER)
 dispatcher.add_handler(RM_WARN_HANDLER)
 dispatcher.add_handler(LIST_WARN_HANDLER)
 dispatcher.add_handler(WARN_LIMIT_HANDLER)
-dispatcher.add_handler(WARN_STRENGTH_HANDLER)
+dispatcher.add_handler(WARN_MODE_HANDLER)
 dispatcher.add_handler(WARN_FILTER_HANDLER, WARN_HANDLER_GROUP)
 dispatcher.add_handler(WARN_BTNSET_HANDLER)
