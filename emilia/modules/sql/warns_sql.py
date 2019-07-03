@@ -49,11 +49,13 @@ class WarnSettings(BASE):
     chat_id = Column(String(14), primary_key=True)
     warn_limit = Column(Integer, default=3)
     soft_warn = Column(Boolean, default=False)
+    warn_mode = Column(Integer, default=0)
 
-    def __init__(self, chat_id, warn_limit=3, soft_warn=False):
+    def __init__(self, chat_id, warn_limit=3, soft_warn=False, warn_mode=0):
         self.chat_id = str(chat_id)
         self.warn_limit = warn_limit
         self.soft_warn = soft_warn
+        self.warn_mode = warn_mode
 
     def __repr__(self):
         return "<{} has {} possible warns.>".format(self.chat_id, self.warn_limit)
@@ -201,7 +203,31 @@ def get_warn_setting(chat_id):
     try:
         setting = SESSION.query(WarnSettings).get(str(chat_id))
         if setting:
-            return setting.warn_limit, setting.soft_warn
+            return setting.warn_limit, setting.soft_warn, setting.warn_mode
+        else:
+            return 3, False
+
+    finally:
+        SESSION.close()
+
+
+def set_warn_mode(chat_id, warn_mode):
+    with WARN_SETTINGS_LOCK:
+        curr_setting = SESSION.query(WarnSettings).get(str(chat_id))
+        if not curr_setting:
+            curr_setting = WarnSettings(chat_id, warn_mode=warn_mode)
+
+        curr_setting.warn_mode = warn_mode
+
+        SESSION.add(curr_setting)
+        SESSION.commit()
+
+
+def get_warn_mode(chat_id):
+    try:
+        setting = SESSION.query(WarnSettings).get(str(chat_id))
+        if setting:
+            return setting.warn_mode, setting.warn_mode
         else:
             return 3, False
 

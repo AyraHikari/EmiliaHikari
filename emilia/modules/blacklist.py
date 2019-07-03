@@ -214,7 +214,13 @@ def blacklist_mode(bot: Bot, update: Update, args: List[str]):
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
 				msg.reply_text(teks, parse_mode="markdown")
-				return
+				return ""
+			restime = extract_time(msg, args[1])
+			if not restime:
+				teks = """Nilai waktu tidak valid!
+Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
+				msg.reply_text(teks, parse_mode="markdown")
+				return ""
 			settypeblacklist = 'di blokir sementara selama {}'.format(args[1])
 			sql.set_blacklist_strength(chat_id, 6, str(args[1]))
 		elif args[0].lower() == 'tmute':
@@ -223,12 +229,18 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
 				msg.reply_text(teks, parse_mode="markdown")
-				return
+				return ""
+			restime = extract_time(msg, args[1])
+			if not restime:
+				teks = """Nilai waktu tidak valid!
+Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu."""
+				msg.reply_text(teks, parse_mode="markdown")
+				return ""
 			settypeblacklist = 'di bisukan sementara selama {}'.format(args[1])
 			sql.set_blacklist_strength(chat_id, 7, str(args[1]))
 		else:
 			msg.reply_text("Saya hanya mengerti off/del/warn/ban/kick/mute/tban/tmute!")
-			return
+			return ""
 		if conn:
 			text = "Mode blacklist diubah, Pengguna akan `{}` pada *{}*!".format(settypeblacklist, chat_name)
 		else:

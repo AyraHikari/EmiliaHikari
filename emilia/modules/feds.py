@@ -125,7 +125,7 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
 		if getinfo == False:
 			update.effective_message.reply_text("Federasi ini tidak di temukan!")
 			return
-		if int(getinfo['owner']) == int(user.id):
+		if int(getinfo['owner']) == int(user.id) or int(user.id) == OWNER_ID:
 			fed_id = is_fed_id
 		else:
 			update.effective_message.reply_text("Hanya pemilik fedarasi yang dapat melakukan ini!")
@@ -1460,7 +1460,7 @@ def is_user_fed_admin(fed_id, user_id):
 	fed_admins = sql.all_fed_users(fed_id)
 	if fed_admins == False:
 		return False
-	if int(user_id) in fed_admins:
+	if int(user_id) in fed_admins or int(user_id) == OWNER_ID:
 		return True
 	else:
 		return False
@@ -1474,7 +1474,7 @@ def is_user_fed_owner(fed_id, user_id):
 	if getfedowner == None or getfedowner == False:
 		return False
 	getfedowner = getfedowner['owner']
-	if str(user_id) == getfedowner or user_id == 388576209:
+	if str(user_id) == getfedowner or int(user_id) == OWNER_ID:
 		return True
 	else:
 		return False
@@ -1578,16 +1578,16 @@ Masih tahap percobaan, untuk membuat federasi hanya bisa di lakukan oleh pembuat
  - /importfbans: Balas file pesan cadangan federasi untuk mengimpor list banned ke federasi sekarang.
 """
 
-NEW_FED_HANDLER = CommandHandler("newfed", new_fed, filters=Filters.user(OWNER_ID))
+NEW_FED_HANDLER = CommandHandler("newfed", new_fed)
 DEL_FED_HANDLER = CommandHandler("delfed", del_fed, pass_args=True)
 JOIN_FED_HANDLER = CommandHandler("joinfed", join_fed, pass_args=True)
 LEAVE_FED_HANDLER = CommandHandler("leavefed", leave_fed, pass_args=True)
-PROMOTE_FED_HANDLER = CommandHandler("fpromote", user_join_fed, pass_args=True, filters=Filters.user(OWNER_ID))
-DEMOTE_FED_HANDLER = CommandHandler("fdemote", user_demote_fed, pass_args=True, filters=Filters.user(OWNER_ID))
+PROMOTE_FED_HANDLER = CommandHandler("fpromote", user_join_fed, pass_args=True)
+DEMOTE_FED_HANDLER = CommandHandler("fdemote", user_demote_fed, pass_args=True)
 INFO_FED_HANDLER = CommandHandler("fedinfo", fed_info, pass_args=True)
 BAN_FED_HANDLER = DisableAbleCommandHandler(["fban", "fedban"], fed_ban, pass_args=True)
 UN_BAN_FED_HANDLER = CommandHandler("unfban", unfban, pass_args=True)
-FED_BROADCAST_HANDLER = CommandHandler("fbroadcast", fed_broadcast, pass_args=True, filters=Filters.user(OWNER_ID))
+FED_BROADCAST_HANDLER = CommandHandler("fbroadcast", fed_broadcast, pass_args=True)
 FED_SET_RULES_HANDLER = CommandHandler("setfrules", set_frules, pass_args=True)
 FED_GET_RULES_HANDLER = CommandHandler("frules", get_frules, pass_args=True)
 FED_CHAT_HANDLER = CommandHandler("chatfed", fed_chat, pass_args=True)
@@ -1595,7 +1595,7 @@ FED_ADMIN_HANDLER = CommandHandler("fedadmins", fed_admin, pass_args=True)
 FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True, pass_chat_data=True)
 FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
-FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True)
+FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True, filters=Filters.user(OWNER_ID))
 FEDSTAT_USER = DisableAbleCommandHandler("fedstat", fed_stat_user, pass_args=True)
 SET_FED_LOG = CommandHandler("setfedlog", set_fed_log, pass_args=True)
 UNSET_FED_LOG = CommandHandler("unsetfedlog", unset_fed_log, pass_args=True)
