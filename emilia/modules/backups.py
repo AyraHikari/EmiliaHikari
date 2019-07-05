@@ -84,6 +84,8 @@ def import_data(bot: Bot, update):
 			imp_disabled_count = 0
 			imp_filters_count = 0
 			imp_greet = False
+			imp_gdbye = False
+			imp_greet_pref = False
 			imp_notes = 0
 			imp_report = False
 			imp_rules = False
@@ -162,7 +164,38 @@ def import_data(bot: Bot, update):
 							note_data, buttons = button_markdown_parser(welctext.replace("\\", ""), entities=0)
 							welcsql.set_custom_welcome(chat_id, None, note_data, Types.TEXT, buttons)
 							imp_greet = True
-					# TODO for gbye
+					if data['data']['greetings'].get('goodbye'):
+						gdbytext = data['data']['greetings']['goodbye'].get('text')
+						if welctext:
+							note_data, buttons = button_markdown_parser(gdbytext.replace("\\", ""), entities=0)
+							welcsql.set_custom_gdbye(chat_id, None, note_data, Types.TEXT, buttons)
+							imp_gdbye = True
+					# Welcome config
+					if data['data']['greetings'].get('should_welcome'):
+						welcsql.set_welc_preference(str(chat_id), True)
+					else:
+						welcsql.set_welc_preference(str(chat_id), False)
+					# Goodbye config
+					if data['data']['greetings'].get('should_goodbye'):
+						welcsql.set_gdbye_preference(str(chat_id), True)
+					else:
+						welcsql.set_gdbye_preference(str(chat_id), False)
+					# clean service
+					if data['data']['greetings'].get('should_delete_service'):
+						welcsql.set_clean_service(chat.id, True)
+					else:
+						welcsql.set_clean_service(chat.id, False)
+					# clean old msg
+					if data['data']['greetings'].get('should_clean'):
+						welcsql.set_clean_service(str(chat.id), True)
+					else:
+						welcsql.set_clean_service(str(chat.id), False)
+					# custom mute btn
+					if data['data']['greetings'].get('mute_text'):
+						getcur, cur_value, cust_text = welcsql.welcome_security(chat.id)
+						welcsql.set_welcome_security(chat.id, getcur, cur_value, data['data']['greetings'].get('mute_text'))
+					imp_greet_pref = True
+					# TODO parsing unix time and import that
 				# TODO Locks
 				# Import notes
 				if data['data'].get('notes'):
@@ -222,8 +255,12 @@ def import_data(bot: Bot, update):
 					text += tl(update.effective_message, "- {} cmd disabled\n").format(imp_disabled_count)
 				if imp_filters_count:
 					text += tl(update.effective_message, "- {} filters\n").format(imp_filters_count)
+				if imp_greet_pref:
+					text += tl(update.effective_message, "- Pengaturan salam\n")
 				if imp_greet:
 					text += tl(update.effective_message, "- Pesan salam\n")
+				if imp_gdbye:
+					text += tl(update.effective_message, "- Pesan selamat tinggal\n")
 				if imp_notes:
 					text += tl(update.effective_message, "- {} catatan\n").format(imp_notes)
 				if imp_report:
