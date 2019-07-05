@@ -119,11 +119,7 @@ def start(bot: Bot, update: Update, args: List[str]):
                 getlang = langsql.get_lang(message)
                 if getlang == "id":
                     wikipedia.set_lang("id")
-                try:
-                    pagewiki = wikipedia.page(wiki)
-                except wikipedia.exceptions.PageError:
-                    wikipedia.set_lang("en")
-                    pagewiki = wikipedia.page(wiki)
+                pagewiki = wikipedia.page(wiki)
                 judul = pagewiki.title
                 summary = pagewiki.summary
                 if len(summary) >= 4096:
