@@ -203,7 +203,18 @@ def save(bot: Bot, update: Update):
 		text = "`" + note_name + "`"
 		
 	sql.add_note_to_db(chat_id, note_name, text, data_type, buttons=buttons, file=content)
-	msg.reply_text(tl(update.effective_message, "Ok, `{note_name}` ditambahkan di *{chat_name}*.\ndapatkan dengan `/get {note_name}`, atau `#{note_name}`").format(note_name=note_name, chat_name=chat_name), parse_mode=ParseMode.MARKDOWN)
+	if conn:
+		savedtext = tl(update.effective_message, "Ok, catatan `{note_name}` disimpan di *{chat_name}*.").format(note_name=note_name, chat_name=chat_name)
+	else:
+		savedtext = tl(update.effective_message, "Ok, catatan `{note_name}` disimpan.").format(note_name=note_name)
+	try:
+		msg.reply_text(savedtext, parse_mode=ParseMode.MARKDOWN)
+	except BadRequest:
+		if conn:
+			savedtext = tl(update.effective_message, "Ok, catatan <code>{note_name}</code> disimpan di <b>{chat_name}</b>.").format(note_name=note_name, chat_name=chat_name)
+		else:
+			savedtext = tl(update.effective_message, "Ok, catatan <code>{note_name}</code> disimpan.").format(note_name=note_name)
+		msg.reply_text(savedtext, parse_mode=ParseMode.HTML)
 
 	#if msg.reply_to_message and msg.reply_to_message.from_user.is_bot:
 	#    if text:
@@ -248,11 +259,45 @@ def clear(bot: Bot, update: Update, args: List[str]):
 			else:
 				catatangagal.append(notename)
 		if len(catatan) >= 1 and len(catatangagal) == 0:
-			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk `{}` berhasil dihapus 😁").format(chat_name, ", ".join(catatan)), parse_mode=ParseMode.MARKDOWN)
+			if conn:
+				rtext = tl(update.effective_message, "Catatan di *{chat_name}* untuk `{note_name}` dihapus 😁").format(chat_name=chat_name, note_name=", ".join(catatan))
+			else:
+				rtext = tl(update.effective_message, "Catatan `{note_name}` dihapus 😁").format(note_name=", ".join(catatan))
+			try:
+				update.effective_message.reply_text(rtext, parse_mode=ParseMode.MARKDOWN)
+			except BadRequest:
+				if conn:
+					rtext = tl(update.effective_message, "Catatan di <b>{chat_name}</b> untuk <code>{note_name}</code> dihapus 😁").format(chat_name=chat_name, note_name=", ".join(catatan))
+				else:
+					rtext = tl(update.effective_message, "Catatan <code>{note_name}</code> dihapus 😁").format(note_name=", ".join(catatan))
+				update.effective_message.reply_text(rtext, parse_mode=ParseMode.HTML)
 		elif len(catatangagal) >= 0 and len(catatan) == 0:
-			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk `{}` gagal dihapus!").format(chat_name, ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
+			if conn:
+				rtext = tl(update.effective_message, "Catatan di *{chat_name}* untuk `{fnote_name}` gagal dihapus!").format(chat_name=chat_name, fnote_name=", ".join(catatangagal))
+			else:
+				rtext = tl(update.effective_message, "Catatan `{fnote_name}` gagal dihapus!").format(fnote_name=", ".join(catatangagal))
+			try:
+				update.effective_message.reply_text(rtext, parse_mode=ParseMode.MARKDOWN)
+			except BadRequest:
+				if conn:
+					rtext = tl(update.effective_message, "Catatan di <b>{chat_name}</b> untuk <code>{fnote_name}</code> gagal dihapus!").format(chat_name=chat_name, fnote_name=", ".join(catatangagal))
+				else:
+					rtext = tl(update.effective_message, "Catatan <code>{fnote_name}</code> gagal dihapus!").format(fnote_name=", ".join(catatangagal))
+				update.effective_message.reply_text(tl(update.effective_message, rtext), parse_mode=ParseMode.HTML)
 		else:
-			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk `{}` berhasil dihapus 😁\nCatatan {} gagal dihapus!").format(chat_name, ", ".join(catatan), ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
+			if conn:
+				rtext = tl(update.effective_message, "Catatan di *{chat_name}* untuk `{note_name}` dihapus 😁\nCatatan `{fnote_name}` gagal dihapus!").format(chat_name=chat_name, note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+			else:
+				rtext = tl(update.effective_message, "Catatan `{note_name}` dihapus 😁\nCatatan `{fnote_name}` gagal dihapus!").format(note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+			try:
+				update.effective_message.reply_text(rtext, parse_mode=ParseMode.MARKDOWN)
+			except BadRequest:
+				if conn:
+					rtext = tl(update.effective_message, "Catatan di <b>{chat_name}</b> untuk <code>{note_name}</code> dihapus 😁\nCatatan <code>{fnote_name}</code> gagal dihapus!").format(chat_name=chat_name, note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+				else:
+					rtext = tl(update.effective_message, "Catatan <code>{note_name}</code> dihapus 😁\nCatatan <code>{fnote_name}</code> gagal dihapus!").format(note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+				update.effective_message.reply_text(tl(update.effective_message, rtext), parse_mode=ParseMode.HTML)
+
 	else:
 		update.effective_message.reply_text(tl(update.effective_message, "Apa yang ingin dihapus?"))
 
@@ -294,7 +339,23 @@ def list_notes(bot: Bot, update: Update):
 
 	elif len(msg) != 0:
 		msg += tl(update.effective_message, "\nAnda dapat mengambil catatan ini dengan menggunakan `/get notename`, atau `#notename`")
-		update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+		try:
+			update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+		except BadRequest:
+			if chat.type == "private":
+				chat_name = ""
+				msg = tl(update.effective_message, "<b>Catatan lokal:</b>\n")
+			else:
+				chat_name = chat.title
+				msg = tl(update.effective_message, "<b>Catatan di {}:</b>\n").format(chat_name)
+			for note in note_list:
+				note_name = " - <code>{}</code>\n".format(note.name)
+				if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
+					update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+					msg = ""
+				msg += note_name
+			msg += tl(update.effective_message, "\nAnda dapat mengambil catatan ini dengan menggunakan <code>/get notename</code>, atau <code>#notename</code>")
+			update.effective_message.reply_text(msg, parse_mode=ParseMode.HTML)
 
 
 def __import_data__(chat_id, data):
