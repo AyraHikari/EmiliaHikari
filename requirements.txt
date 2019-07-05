@@ -11,3 +11,4 @@ wikipedia
 kbbi
 Pillow
 alphabet_detector
+urbandict

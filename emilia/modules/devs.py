@@ -38,8 +38,8 @@ def executor(bot: Bot, update: Update):
 			bot.send_message(chat, "<b>Gagal:</b> {}".format(error), parse_mode=ParseMode.HTML, reply_to_message_id=msg.message_id)
 
 
-REBOOT_HANDLER = DisableAbleCommandHandler("emreboot", reboot, filters=Filters.user(OWNER_ID))
-EXEC_HANDLER = DisableAbleCommandHandler("emil", executor, filters=Filters.user(OWNER_ID))
+REBOOT_HANDLER = CommandHandler("emreboot", reboot, filters=Filters.user(OWNER_ID))
+EXEC_HANDLER = CommandHandler("emil", executor, filters=Filters.user(OWNER_ID))
 
 #dispatcher.add_handler(REBOOT_HANDLER)
 dispatcher.add_handler(EXEC_HANDLER)

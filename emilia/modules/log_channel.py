@@ -1,8 +1,10 @@
 from functools import wraps
 from typing import Optional
 
-from emilia import spamfilters
+from emilia import spamfilters, OWNER_ID
 from emilia.modules.helper_funcs.misc import is_module_loaded
+
+from emilia.modules.languages import tl
 
 FILENAME = __name__.rsplit(".", 1)[-1]
 
@@ -49,14 +51,14 @@ if is_module_loaded(FILENAME):
             bot.send_message(log_chat_id, result, parse_mode=ParseMode.HTML)
         except BadRequest as excp:
             if excp.message == "Chat not found":
-                bot.send_message(orig_chat_id, "Saluran log ini telah dihapus - tidak bisa dibuka.")
+                bot.send_message(orig_chat_id, tl(update.effective_message, "Saluran log ini telah dihapus - tidak bisa dibuka."))
                 sql.stop_chat_logging(orig_chat_id)
             else:
                 LOGGER.warning(excp.message)
                 LOGGER.warning(result)
                 LOGGER.exception("Could not parse")
 
-                bot.send_message(log_chat_id, result + "\n\nMemformat telah dinonaktifkan karena kesalahan tak terduga.")
+                bot.send_message(log_chat_id, result + tl(update.effective_message, "\n\nMemformat telah dinonaktifkan karena kesalahan tak terduga."))
 
 
     @run_async
@@ -72,12 +74,12 @@ if is_module_loaded(FILENAME):
         if log_channel:
             log_channel_info = bot.get_chat(log_channel)
             message.reply_text(
-                "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)".format(escape_markdown(log_channel_info.title),
+                tl(update.effective_message, "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)").format(escape_markdown(log_channel_info.title),
                                                                          log_channel),
                 parse_mode=ParseMode.MARKDOWN)
 
         else:
-            message.reply_text("Tidak ada saluran log yang telah ditetapkan untuk grup ini!")
+            message.reply_text(tl(update.effective_message, "Tidak ada saluran log yang telah ditetapkan untuk grup ini!"))
 
 
     @run_async
@@ -89,7 +91,7 @@ if is_module_loaded(FILENAME):
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == chat.CHANNEL:
-            message.reply_text("Sekarang, teruskan /setlog ke grup yang Anda ingin ikat saluran ini!")
+            message.reply_text(tl(update.effective_message, "Sekarang, teruskan /setlog ke grup yang Anda ingin ikat saluran ini!"))
 
         elif message.forward_from_chat:
             sql.set_chat_log_channel(chat.id, message.forward_from_chat.id)
@@ -103,23 +105,23 @@ if is_module_loaded(FILENAME):
                     
             try:
                 bot.send_message(message.forward_from_chat.id,
-                             "Saluran ini telah ditetapkan sebagai saluran log untuk {}.".format(
+                             tl(update.effective_message, "Saluran ini telah ditetapkan sebagai saluran log untuk {}.").format(
                                  chat.title or chat.first_name))
             except Unauthorized as excp:
                 if excp.message == "Forbidden: bot is not a member of the channel chat":
-                    bot.send_message(chat.id, "Gagal menyetel saluran log!\nSaya mungkin bukan admin di channel tersebut.")
+                    bot.send_message(chat.id, tl(update.effective_message, "Gagal menyetel saluran log!\nSaya mungkin bukan admin di channel tersebut."))
                     sql.stop_chat_logging(chat.id)
                     return
                 else:
                     LOGGER.exception("ERROR in setting the log channel.")
                     
-            bot.send_message(chat.id, "Berhasil mengatur saluran log!")
+            bot.send_message(chat.id, tl(update.effective_message, "Berhasil mengatur saluran log!"))
 
         else:
-            message.reply_text("Langkah-langkah untuk mengatur saluran log adalah:\n"
+            message.reply_text(tl(update.effective_message, "Langkah-langkah untuk mengatur saluran log adalah:\n"
                                " - tambahkan bot ke saluran yang diinginkan\n"
                                " - Kirimkan /setlog ke saluran\n"
-                               " - Teruskan /setlog ke grup\n")
+                               " - Teruskan /setlog ke grup\n"))
 
 
     @run_async
@@ -133,15 +135,15 @@ if is_module_loaded(FILENAME):
 
         log_channel = sql.stop_chat_logging(chat.id)
         if log_channel:
-            bot.send_message(log_channel, "Channel telah dibatalkan tautannya {}".format(chat.title))
-            message.reply_text("Log saluran telah dinonaktifkan.")
+            bot.send_message(log_channel, tl(update.effective_message, "Channel telah dibatalkan tautannya {}").format(chat.title))
+            message.reply_text(tl(update.effective_message, "Log saluran telah dinonaktifkan."))
 
         else:
-            message.reply_text("Belum ada saluran log yang ditetapkan!")
+            message.reply_text(tl(update.effective_message, "Belum ada saluran log yang ditetapkan!"))
 
 
     def __stats__():
-        return "{} saluran log ditetapkan.".format(sql.num_logchannels())
+        return tl(OWNER_ID, "{} saluran log ditetapkan.").format(sql.num_logchannels())
 
 
     def __migrate__(old_chat_id, new_chat_id):
@@ -152,22 +154,12 @@ if is_module_loaded(FILENAME):
         log_channel = sql.get_chat_log_channel(chat_id)
         if log_channel:
             log_channel_info = dispatcher.bot.get_chat(log_channel)
-            return "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)".format(escape_markdown(log_channel_info.title),
+            return tl(user_id, "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)").format(escape_markdown(log_channel_info.title),
                                                                             log_channel)
-        return "Tidak ada saluran masuk yang ditetapkan untuk grup ini!"
+        return tl(user_id, "Tidak ada saluran masuk yang ditetapkan untuk grup ini!")
 
 
-    __help__ = """
-*Hanya admin:*
-- /logchannel: dapatkan info saluran log
-- /setlog: mengatur saluran log.
-- /unsetlog: menonaktifkan saluran log.
-
-Mengatur saluran log dilakukan dengan:
-- menambahkan bot ke saluran yang diinginkan (sebagai admin!)
-- Kirimkan /setlog di saluran
-- Teruskan /setlog ke grup
-"""
+    __help__ = "logchannel_help"
 
     __mod_name__ = "Channel Log"
 

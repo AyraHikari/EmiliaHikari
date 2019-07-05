@@ -11,7 +11,7 @@ from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity, InlineKeyboardMarkup
 from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
-from telegram.utils.helpers import escape_markdown, mention_html
+from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamfilters, MAPS_API
 from emilia.__main__ import STATS, USER_INFO
@@ -20,6 +20,8 @@ from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.helper_funcs.msg_types import get_message_type
 from emilia.modules.helper_funcs.misc import build_keyboard_alternate
+
+from emilia.modules.languages import tl
 
 # Change language locale to Indonesia
 # Install language:
@@ -76,10 +78,6 @@ RUN_STRINGS = (
     "Han menembak lebih dulu. Begitu juga saya.",
     "Apa yang kamu kejar? kelinci putih?",
     "Sepertinya dokter akan mengatakan... LARI!",
-    "Lari lari lari - Tsubatsa",
-    "Ngapain lari-lari? Lagi lomba lari?",
-    "Lari mulu, mau jadi atletik?",
-    "Kejar saya kalau bisa 😜"
 )
 
 SLAP_TEMPLATES = (
@@ -152,7 +150,7 @@ def runs(bot: Bot, update: Update):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
-    update.effective_message.reply_text(random.choice(RUN_STRINGS))
+    update.effective_message.reply_text(random.choice(tl(update.effective_message, "RUN_STRINGS")))
 
 @run_async
 def slap(bot: Bot, update: Update, args: List[str]):
@@ -168,7 +166,7 @@ def slap(bot: Bot, update: Update, args: List[str]):
     #if msg.from_user.username:
     #    curr_user = "@" + escape_markdown(msg.from_user.username)
     #else:
-    curr_user = "[{}](tg://user?id={})".format(msg.from_user.first_name, msg.from_user.id)
+    curr_user = "{}".format(mention_markdown(msg.from_user.id, msg.from_user.first_name))
 
     user_id = extract_user(update.effective_message, args)
     if user_id:
@@ -177,18 +175,17 @@ def slap(bot: Bot, update: Update, args: List[str]):
         #if slapped_user.username:
         #    user2 = "@" + escape_markdown(slapped_user.username)
         #else:
-        user2 = "[{}](tg://user?id={})".format(slapped_user.first_name,
-                                                   slapped_user.id)
+        user2 = "{}".format(mention_markdown(slapped_user.id, slapped_user.first_name))
 
     # if no target found, bot targets the sender
     else:
-        user1 = "[{}](tg://user?id={})".format(bot.first_name, bot.id)
+        user1 = "{}".format(mention_markdown(bot.id, bot.first_name))
         user2 = curr_user
 
-    temp = random.choice(SLAP_TEMPLATES)
-    item = random.choice(ITEMS)
-    hit = random.choice(HIT)
-    throw = random.choice(THROW)
+    temp = random.choice(tl(update.effective_message, "SLAP_TEMPLATES"))
+    item = random.choice(tl(update.effective_message, "ITEMS"))
+    hit = random.choice(tl(update.effective_message, "HIT"))
+    throw = random.choice(tl(update.effective_message, "THROW"))
 
     repl = temp.format(user1=user1, user2=user2, item=item, hits=hit, throws=throw)
 
@@ -215,7 +212,7 @@ def get_id(bot: Bot, update: Update, args: List[str]):
             user1 = update.effective_message.reply_to_message.from_user
             user2 = update.effective_message.reply_to_message.forward_from
             update.effective_message.reply_text(
-                "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.".format(
+                tl(update.effective_message, "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.").format(
                     escape_markdown(user2.first_name),
                     user2.id,
                     escape_markdown(user1.first_name),
@@ -223,16 +220,16 @@ def get_id(bot: Bot, update: Update, args: List[str]):
                 parse_mode=ParseMode.MARKDOWN)
         else:
             user = bot.get_chat(user_id)
-            update.effective_message.reply_text("Id {} adalah `{}`.".format(escape_markdown(user.first_name), user.id),
+            update.effective_message.reply_text(tl(update.effective_message, "Id {} adalah `{}`.").format(escape_markdown(user.first_name), user.id),
                                                 parse_mode=ParseMode.MARKDOWN)
     else:
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == "private":
-            update.effective_message.reply_text("Id Anda adalah `{}`.".format(chat.id),
+            update.effective_message.reply_text(tl(update.effective_message, "Id Anda adalah `{}`.").format(chat.id),
                                                 parse_mode=ParseMode.MARKDOWN)
 
         else:
-            update.effective_message.reply_text("Id grup ini adalah `{}`.".format(chat.id),
+            update.effective_message.reply_text(tl(update.effective_message, "Id grup ini adalah `{}`.").format(chat.id),
                                                 parse_mode=ParseMode.MARKDOWN)
 
 
@@ -254,44 +251,41 @@ def info(bot: Bot, update: Update, args: List[str]):
     elif not msg.reply_to_message and (not args or (
             len(args) >= 1 and not args[0].startswith("@") and not args[0].isdigit() and not msg.parse_entities(
         [MessageEntity.TEXT_MENTION]))):
-        msg.reply_text("Saya tidak dapat mengekstrak pengguna dari ini.")
+        msg.reply_text(tl(update.effective_message, "Saya tidak dapat mengekstrak pengguna dari ini."))
         return
 
     else:
         return
 
-    text = "<b>Info Pengguna</b>:" \
-           "\nID: <code>{}</code>" \
-           "\nNama depan: {}".format(user.id, html.escape(user.first_name))
+    text = tl(update.effective_message, "<b>Info Pengguna</b>:") \
+           + "\nID: <code>{}</code>".format(user.id) + \
+           tl(update.effective_message, "\nNama depan: {}").format(html.escape(user.first_name))
 
     if user.last_name:
-        text += "\nNama belakang: {}".format(html.escape(user.last_name))
+        text += tl(update.effective_message, "\nNama belakang: {}").format(html.escape(user.last_name))
 
     if user.username:
-        text += "\nNama pengguna: @{}".format(html.escape(user.username))
+        text += tl(update.effective_message, "\nNama pengguna: @{}").format(html.escape(user.username))
 
-    text += "\nTautan pengguna permanen: {}".format(mention_html(user.id, "link"))
+    text += tl(update.effective_message, "\nTautan pengguna permanen: {}").format(mention_html(user.id, "link"))
 
     if user.id == OWNER_ID:
-        text += "\n\nOrang ini adalah pemilik saya - saya tidak akan pernah melakukan apa pun terhadap mereka!"
+        text += tl(update.effective_message, "\n\nOrang ini adalah pemilik saya - saya tidak akan pernah melakukan apa pun terhadap mereka!")
     else:
         if user.id in SUDO_USERS:
-            text += "\nOrang ini adalah salah satu pengguna sudo saya! " \
-                    "Hampir sama kuatnya dengan pemilik saya - jadi tontonlah."
+            text += tl(update.effective_message, "\n\nOrang ini adalah salah satu pengguna sudo saya! " \
+                    "Hampir sama kuatnya dengan pemilik saya - jadi tontonlah.")
         else:
             if user.id in SUPPORT_USERS:
-                text += "\nOrang ini adalah salah satu pengguna dukungan saya! " \
-                        "Tidak sekuat pengguna sudo, tetapi masih dapat menyingkirkan Anda dari peta."
+                text += tl(update.effective_message, "\n\nOrang ini adalah salah satu pengguna dukungan saya! " \
+                        "Tidak sekuat pengguna sudo, tetapi masih dapat menyingkirkan Anda dari peta.")
 
             if user.id in WHITELIST_USERS:
-                text += "\nOrang ini telah dimasukkan dalam daftar putih! " \
-                        "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka."
+                text += tl(update.effective_message, "\n\nOrang ini telah dimasukkan dalam daftar putih! " \
+                        "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka.")
 
     for mod in USER_INFO:
-        try:
-            mod_info = mod.__user_info__(user.id).strip()
-        except TypeError:
-            mod_info = mod.__user_info__(user.id, chat.id).strip()
+        mod_info = mod.__user_info__(user.id, chat.id).strip()
         if mod_info:
             text += "\n\n" + mod_info
 
@@ -305,7 +299,7 @@ def get_time(bot: Bot, update: Update, args: List[str]):
         return
     location = " ".join(args)
     if location.lower() == bot.first_name.lower():
-        update.effective_message.reply_text("Selalu ada waktu banned untukku!")
+        update.effective_message.reply_text(tl(update.effective_message, "Selalu ada waktu banned untukku!"))
         bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
@@ -366,9 +360,9 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
             placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
             localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
             time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
-            update.message.reply_text("Sekarang pukul `{}` di `{}`".format(time, placename), parse_mode="markdown")
+            update.message.reply_text(tl(update.effective_message, "Sekarang pukul `{}` di `{}`").format(time, placename), parse_mode="markdown")
     else:
-        update.message.reply_text("Gunakan `/time nama daerah`\nMisal: `/time jakarta`", parse_mode="markdown")
+        update.message.reply_text(tl(update.effective_message, "Gunakan `/time nama daerah`\nMisal: `/time jakarta`"), parse_mode="markdown")
 
 
 @run_async
@@ -389,34 +383,8 @@ def echo(bot: Bot, update: Update):
             else:
                 bot.send_message(chat_id, text, quote=False, disable_web_page_preview=True, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(tombol))
         except BadRequest:
-            bot.send_message(chat_id, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.", parse_mode="markdown")
+            bot.send_message(chat_id, tl(update.effective_message, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM."), parse_mode="markdown")
             return
-        
-
-
-MARKDOWN_HELP = """
-Markdown adalah alat pemformatan yang sangat kuat yang didukung oleh telegram. {} memiliki beberapa penyempurnaan, untuk memastikan \
-pesan yang disimpan diurai dengan benar, dan memungkinkan Anda membuat tombol.
-
-- <code>_miring_</code>: membungkus teks dengan '_' akan menghasilkan teks miring
-- <code>*tebal*</code>: membungkus teks dengan '*' akan menghasilkan teks tebal
-- <code>`kode`</code>: membungkus teks dengan '`' akan menghasilkan teks monospace, juga dikenal sebagai 'kode'
-- <code>[teks](URL)</code>: ini akan membuat tautan - pesan hanya akan menampilkan <code>teks</code>, \
-dan mengetuknya akan membuka halaman di <code>URL</code>.
-Contoh: <code>[test](contoh.com)</code>
-
-- <code>[TombolTeks](buttonurl:URL)</code>: ini adalah perangkat tambahan khusus yang memungkinkan pengguna memiliki \
-tombol di markdown mereka. <code>TombolTeks</code> akan menjadi apa yang ditampilkan pada tombol, dan <code>URL</code> \
-akan menjadi url yang dibuka.
-Contoh: <code>[Ini sebuah tombol](buttonurl:contoh.com)</code>
-
-Jika Anda ingin beberapa tombol pada baris yang sama, gunakan :same, seperti :
-<code>[satu](buttonurl://contoh.com)
-[dua](buttonurl://google.com:same)</code>
-Ini akan membuat dua tombol pada satu baris, bukan satu tombol per baris.
-
-Perlu diingat bahwa pesan Anda <b>HARUS</b> berisi beberapa teks selain hanya sebuah tombol!
-""".format(dispatcher.bot.first_name)
 
 
 @run_async
@@ -424,33 +392,22 @@ def markdown_help(bot: Bot, update: Update):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
-    update.effective_message.reply_text(MARKDOWN_HELP, parse_mode=ParseMode.HTML)
-    update.effective_message.reply_text("Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!")
-    update.effective_message.reply_text("/save Tes Ini adalah tes markdown. _miring_, *tebal*, `kode`, "
+    update.effective_message.reply_text(tl(update.effective_message, "MARKDOWN_HELP").format(dispatcher.bot.first_name), parse_mode=ParseMode.HTML)
+    update.effective_message.reply_text(tl(update.effective_message, "Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!"))
+    update.effective_message.reply_text(tl(update.effective_message, "/save test Ini adalah tes markdown. _miring_, *tebal*, `kode`, "
                                         "[URL](contoh.com) [tombol](buttonurl:github.com) "
-                                        "[tombol2](buttonurl://google.com:same)")
+                                        "[tombol2](buttonurl:google.com:same)"))
 
 
 @run_async
 def stats(bot: Bot, update: Update):
-    update.effective_message.reply_text("Statistik saat ini:\n" + "\n".join([mod.__stats__() for mod in STATS]))
+    update.effective_message.reply_text(tl(update.effective_message, "Statistik saat ini:\n") + "\n".join([mod.__stats__() for mod in STATS]))
 
 
 # /ip is for private use
-__help__ = """
- - /id: dapatkan ID grup saat ini. Jika digunakan dengan membalas pesan, dapatkan id pengguna itu.
- - /runs: balas string acak dari larik balasan.
- - /lari: sama seperti runs.
- - /slap: menampar pengguna, atau ditampar jika bukan balasan.
- - /time <tempat>: memberi waktu lokal di tempat yang ditentukan.
- - /info: mendapatkan informasi tentang seorang pengguna.
- - /stickerid: balas pesan stiker untuk mendapatkan id stiker
- - /ping: mengecek kecepatan bot
+__help__ = "misc_help"
 
- - /markdownhelp: ringkasan singkat tentang cara kerja markdown di telegram - hanya dapat dipanggil dalam obrolan pribadi.
-"""
-
-__mod_name__ = "Lainnya"
+__mod_name__ = "Misc"
 
 ID_HANDLER = DisableAbleCommandHandler("id", get_id, pass_args=True)
 IP_HANDLER = CommandHandler("ip", get_bot_ip, filters=Filters.chat(OWNER_ID))
