@@ -44,19 +44,19 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
         if not soft_warn:
             if not warn_mode:
                 chat.unban_member(user.id)
-                reply = tl(update.effective_message, "{} peringatan, {} telah ditendang!").format(limit, mention_html(user.id, user.first_name))
+                reply = tl(chat.id, "{} peringatan, {} telah ditendang!").format(limit, mention_html(user.id, user.first_name))
             elif warn_mode == 1:
                 chat.unban_member(user.id)
-                reply = tl(update.effective_message, "{} peringatan, {} telah ditendang!").format(limit, mention_html(user.id, user.first_name))
+                reply = tl(chat.id, "{} peringatan, {} telah ditendang!").format(limit, mention_html(user.id, user.first_name))
             elif warn_mode == 2:
                 chat.kick_member(user.id)
-                reply = tl(update.effective_message, "{} peringatan, {} telah diblokir!").format(limit, mention_html(user.id, user.first_name))
+                reply = tl(chat.id, "{} peringatan, {} telah diblokir!").format(limit, mention_html(user.id, user.first_name))
             elif warn_mode == 3:
                 message.bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
-                reply = tl(update.effective_message, "{} peringatan, {} telah dibisukan!").format(limit, mention_html(user.id, user.first_name))
+                reply = tl(chat.id, "{} peringatan, {} telah dibisukan!").format(limit, mention_html(user.id, user.first_name))
         else:
             chat.kick_member(user.id)
-            reply = tl(update.effective_message, "{} peringatan, {} telah diblokir!").format(limit, mention_html(user.id, user.first_name))
+            reply = tl(chat.id, "{} peringatan, {} telah diblokir!").format(limit, mention_html(user.id, user.first_name))
             
         for warn_reason in reasons:
             reply += "\n - {}".format(html.escape(warn_reason))
@@ -75,12 +75,12 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
     else:
         keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(tl(update.effective_message, "Hapus peringatan"), callback_data="rm_warn({})".format(user.id))]])
+            [[InlineKeyboardButton(tl(chat.id, "Hapus peringatan"), callback_data="rm_warn({})".format(user.id))]])
 
-        reply = tl(update.effective_message, "{} punya {}/{} peringatan... Hati-hati!").format(mention_html(user.id, user.first_name), num_warns,
+        reply = tl(chat.id, "{} punya {}/{} peringatan... Hati-hati!").format(mention_html(user.id, user.first_name), num_warns,
                                                              limit)
         if reason:
-            reply += tl(update.effective_message, "\nAlasan pada peringatan terakhir:\n{}").format(html.escape(reason))
+            reply += tl(chat.id, "\nAlasan pada peringatan terakhir:\n{}").format(html.escape(reason))
 
         log_reason = "<b>{}:</b>" \
                      "\n#WARN" \

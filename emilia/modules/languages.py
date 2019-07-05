@@ -28,7 +28,6 @@ for x in os.listdir('emilia/modules/langs'):
 
 LOGGER.info("{} languages loaded: {}".format(len(LOADED_LANGS_ID), LOADED_LANGS_ID))
 
-
 def tl(message, text):
 	if type(message) == int or type(message) == str and message[1:].isdigit():
 		getlang = sql.get_lang(message)
@@ -86,6 +85,17 @@ def set_language(bot, update):
 		return
 
 	getlang = sql.get_lang(chat.id)
+	if getlang == 'None' or not getlang:
+		if msg.from_user.language_code:
+			sql.set_lang(msg.chat.id, msg.from_user.language_code)
+			getlang = msg.from_user.language_code
+		else:
+			if msg.chat.type == "private":
+				sql.set_lang(msg.chat.id, 'en')
+				getlang = 'en'
+			else:
+				sql.set_lang(msg.chat.id, 'id')
+				getlang = 'id'
 	loaded_langs = []
 	counter = 0
 
@@ -122,6 +132,10 @@ def button(bot, update):
 		sql.set_lang(chat.id, set_lang)
 		update.effective_message.edit_text(tl(query.message, "Bahasa telah di ubah ke {}!").format(LANGS_TEXT.get(set_lang)))
 
+
+__help__ = "language_help"
+
+__mod_name__ = "Languages"
 
 SETLANG_HANDLER = DisableAbleCommandHandler("setlang", set_language)
 CALLBACK_QUERY_HANDLER = CallbackQueryHandler(button, pattern=r"set_lang")

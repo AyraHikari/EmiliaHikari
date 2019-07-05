@@ -41,6 +41,17 @@ Dia hanya orang biasa, jadi akan sangat membantu dia!
 Jika anda memang berminat untuk donate, silahkan kunjungi paypal.me/AyraHikari, Terima kasih 😁""",
 	
 # Help modules
+	"language_help": """Tidak semua grup berbicara bahasa Indonesia; beberapa grup lebih suka Emilia menanggapi dalam bahasa mereka sendiri.
+
+Di sinilah terjemahan masuk; Anda dapat mengubah sebagian besar balasan Emilia menjadi bahasa pilihan Anda!
+
+Bahasa yang tersedia adalah:
+- 🇮🇩 Indonesia
+- 🇺🇸 English
+
+Perintah yang tersedia adalah:
+ - /setlang: atur bahasa pilihan Anda.""",
+
 	"admin_help": """
  - /adminlist | /admins: daftar admin dalam obrolan
 
