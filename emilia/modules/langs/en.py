@@ -1244,6 +1244,7 @@ This also works with /goodbye.
 	"Hasil tidak ditemukan": "Results not found",
 	"Tulis pesan untuk mencari dari sumber wikipedia": "Write a message to search from the wikipedia source",
 	"Hasil dari {} adalah:\n\n<b>{}</b>\n{}": "Results of {} is:\n\n<b>{}</b>\n{}",
+	"Baca di Wikipedia": "Read on Wikipedia",
 	"Baca Lebih Lengkap": "Read More",
 	"exclusive_help": """
  - /stickerid: reply message sticker at PM to get ID sticker
@@ -1254,7 +1255,7 @@ This also works with /goodbye.
  - /wiki <text>: search for text written from the wikipedia source
  - /ud <text>: search from urban dictionary
 """
-	}
+}
 
 
 RUN_STRINGS = (
