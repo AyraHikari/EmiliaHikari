@@ -487,10 +487,10 @@ def urbandictionary(bot: Bot, update: Update, args):
 			teks = ""
 			if len(mean) >= 3:
 				for x in range(3):
-					teks = "*Result of {}*\n\n*{}*\n*Meaning:*\n`{}`\n\n*Example:*\n`{}`\n\n".format(text, mean[x].get("word")[:-8], mean[x].get("def"), mean[x].get("example"))
+					teks = "*Result of {}*\n\n*{}*\n*Meaning:*\n`{}`\n\n*Example:*\n`{}`\n\n".format(text, mean[x].get("word")[:-7], mean[x].get("def"), mean[x].get("example"))
 			else:
 				for x in range(len(mean)):
-					teks = "*Result of {}*\n\n*{}*\n**Meaning:*\n`{}`\n\n*Example:*\n`{}`\n\n".format(text, mean[x].get("word")[:-8], mean[x].get("def"), mean[x].get("example"))
+					teks = "*Result of {}*\n\n*{}*\n**Meaning:*\n`{}`\n\n*Example:*\n`{}`\n\n".format(text, mean[x].get("word")[:-7], mean[x].get("def"), mean[x].get("example"))
 			message.reply_text(teks, parse_mode=ParseMode.MARKDOWN)
 		else:
 			message.reply_text("{} couldn't be found in urban dictionary!".format(text), parse_mode=ParseMode.MARKDOWN)
