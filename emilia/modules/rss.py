@@ -185,7 +185,7 @@ def rss_update(bot, job):
                         print("Cannot send msg bcz bot is kicked")
                 else:
                     try:
-                        bot.send_message(chat_id=tg_chat_id, text=tl(update.effective_message, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
+                        bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
                                      parse_mode=ParseMode.HTML)
                     except error.Unauthorized:
                         print("Cannot send msg bcz bot is kicked")
@@ -196,11 +196,11 @@ def rss_update(bot, job):
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
                     bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
                 else:
-                    bot.send_message(chat_id=tg_chat_id, text=tl(update.effective_message, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
+                    bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
                                      parse_mode=ParseMode.HTML)
 
             bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
-                             text=tl(update.effective_message, "<b>Peringatan: </b>{} kejadian telah ditinggalkan untuk mencegah spam")
+                             text=tl(tg_chat_id, "<b>Peringatan: </b>{} kejadian telah ditinggalkan untuk mencegah spam")
                              .format(len(new_entry_links) - 5))
 
 
