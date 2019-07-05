@@ -200,7 +200,7 @@ def save(bot: Bot, update: Update):
 		return
 	
 	if len(text.strip()) == 0:
-		text = note_name
+		text = "`" + note_name + "`"
 		
 	sql.add_note_to_db(chat_id, note_name, text, data_type, buttons=buttons, file=content)
 	msg.reply_text(tl(update.effective_message, "Ok, `{note_name}` ditambahkan di *{chat_name}*.\ndapatkan dengan `/get {note_name}`, atau `#{note_name}`").format(note_name=note_name, chat_name=chat_name), parse_mode=ParseMode.MARKDOWN)
@@ -248,11 +248,11 @@ def clear(bot: Bot, update: Update, args: List[str]):
 			else:
 				catatangagal.append(notename)
 		if len(catatan) >= 1 and len(catatangagal) == 0:
-			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk {} berhasil dihapus 😁").format(chat_name, ", ".join(catatan)), parse_mode=ParseMode.MARKDOWN)
+			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk `{}` berhasil dihapus 😁").format(chat_name, ", ".join(catatan)), parse_mode=ParseMode.MARKDOWN)
 		elif len(catatangagal) >= 0 and len(catatan) == 0:
-			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk {} gagal dihapus!").format(chat_name, ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
+			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk `{}` gagal dihapus!").format(chat_name, ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
 		else:
-			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk {} berhasil dihapus 😁\nCatatan {} gagal dihapus!").format(chat_name, ", ".join(catatan), ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
+			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk `{}` berhasil dihapus 😁\nCatatan {} gagal dihapus!").format(chat_name, ", ".join(catatan), ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
 	else:
 		update.effective_message.reply_text(tl(update.effective_message, "Apa yang ingin dihapus?"))
 
