@@ -312,7 +312,7 @@ Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.
 	"{} di blokir karena mengatakan kata '{}' yang ada di daftar hitam": "{} banned because say '{}' which in blacklist words",
 	"{} di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam": "{} banned for {} because say '{}' which in blacklist words",
 	"{} di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam": "{} muted for {} because say '{}' which in blacklist words",
-	"Ada {} kata daftar hitam.": "There are {} blacklisted words.",
+	"Ada `{}` kata daftar hitam.": "There are `{}` blacklisted words.",
 	"{} pemicu daftar hitam, di seluruh {} obrolan.": "{} blacklist triggers, across {} chats.",
 	"blacklist_help": """
 Blacklists are used to stop certain triggers from being said in a group. Any time the trigger is mentioned, \
@@ -362,7 +362,7 @@ Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.
 	"{} di blokir karena menggunakan stiker '{}' yang ada di daftar hitam stiker": "{} banned because using '{}' which in blacklist stickers",
 	"{} di blokir selama {} karena menggunakan stiker '{}' yang ada di daftar hitam stiker": "{} banned for {} because using '{}' which in blacklist stickers",
 	"{} di bisukan selama {} karena menggunakan stiker '{}' yang ada di daftar hitam stiker": "{} muted for {} because using '{}' which in blacklist stickers",
-	"Ada {} daftar hitam stiker.": "There are {} blacklisted stickers.",
+	"Ada `{}` daftar hitam stiker.": "There are `{} `blacklisted stickers.",
 	"{} pemicu daftar hitam stiker, di seluruh {} obrolan.": "{} blacklist stickers, across {} chats.",
 	"blstickers_help": """
 Blacklist sticker is used to stop certain stickers. Whenever a sticker is sent, the message will be deleted immediately.
