@@ -11,6 +11,8 @@ from emilia import dispatcher, LOGGER, spamfilters
 from emilia.modules.helper_funcs.chat_status import user_admin, can_delete
 from emilia.modules.log_channel import loggable
 
+from emilia.modules.languages import tl
+
 
 @run_async
 @user_admin
@@ -34,8 +36,8 @@ def purge(bot: Bot, update: Update, args: List[str]) -> str:
                     bot.deleteMessage(chat.id, m_id)
                 except BadRequest as err:
                     if err.message == "Message can't be deleted":
-                        bot.send_message(chat.id, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
-                                                  "tidak memiliki hak menghapus, atau ini mungkin bukan supergrup.")
+                        bot.send_message(chat.id, tl(update.effective_message, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
+                                                  "tidak memiliki hak menghapus, atau ini mungkin bukan supergrup."))
 
                     elif err.message != "Message to delete not found":
                         LOGGER.exception("Error while purging chat messages.")
@@ -44,22 +46,22 @@ def purge(bot: Bot, update: Update, args: List[str]) -> str:
                 msg.delete()
             except BadRequest as err:
                 if err.message == "Message can't be deleted":
-                    bot.send_message(chat.id, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
-                                              "tidak memiliki hak menghapus, atau ini mungkin bukan supergrup.")
+                    bot.send_message(chat.id, tl(update.effective_message, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
+                                              "tidak memiliki hak menghapus, atau ini mungkin bukan supergrup."))
 
                 elif err.message != "Message to delete not found":
                     LOGGER.exception("Error while purging chat messages.")
 
-            bot.send_message(chat.id, "Pembersihan selesai.")
+            bot.send_message(chat.id, tl(update.effective_message, "Pembersihan selesai."))
             return "<b>{}:</b>" \
                    "\n#PURGE" \
                    "\n<b>Admin:</b> {}" \
-                   "\nDibersihkan <code>{}</code> pesan.".format(html.escape(chat.title),
+                   "\nPurged <code>{}</code> messages.".format(html.escape(chat.title),
                                                                mention_html(user.id, user.first_name),
                                                                delete_to - message_id)
 
     else:
-        msg.reply_text("Balas pesan untuk memilih tempat mulai membersihkan.")
+        msg.reply_text(tl(update.effective_message, "Balas pesan untuk memilih tempat mulai membersihkan."))
 
     return ""
 
@@ -80,22 +82,17 @@ def del_message(bot: Bot, update: Update) -> str:
             return "<b>{}:</b>" \
                    "\n#DEL" \
                    "\n<b>Admin:</b> {}" \
-                   "\nPesan dihapus.".format(html.escape(chat.title),
+                   "\nMessage deleted.".format(html.escape(chat.title),
                                                mention_html(user.id, user.first_name))
     else:
-        update.effective_message.reply_text("Apa yang ingin di hapus?")
+        update.effective_message.reply_text(tl(update.effective_message, "Apa yang ingin di hapus?"))
 
     return ""
 
 
-__help__ = """
-*Hanya admin:*
- - /del: menghapus pesan yang Anda balas
- - /purge: menghapus semua pesan antara ini dan membalas pesan.
- - /purge <integer X>: menghapus pesan yang dijawab, dan pesan X yang mengikutinya.
-"""
+__help__ = "msgdel_help"
 
-__mod_name__ = "Membersihkan"
+__mod_name__ = "Purges"
 
 DELETE_HANDLER = CommandHandler("del", del_message, filters=Filters.group)
 PURGE_HANDLER = CommandHandler("purge", purge, filters=Filters.group, pass_args=True)

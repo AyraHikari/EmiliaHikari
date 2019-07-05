@@ -10,6 +10,8 @@ from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleRegexHa
 from emilia.modules.sql import afk_sql as sql
 from emilia.modules.users import get_user_id
 
+from emilia.modules.languages import tl
+
 AFK_GROUP = 7
 AFK_REPLY_GROUP = 8
 
@@ -27,7 +29,7 @@ def afk(bot: Bot, update: Update):
         reason = ""
 
     sql.set_afk(update.effective_user.id, reason)
-    update.effective_message.reply_text("{} sekarang AFK!".format(update.effective_user.first_name))
+    update.effective_message.reply_text(tl(update.effective_message, "{} sekarang AFK!").format(update.effective_user.first_name))
 
 
 @run_async
@@ -39,7 +41,7 @@ def no_longer_afk(bot: Bot, update: Update):
 
     res = sql.rm_afk(user.id)
     if res:
-        update.effective_message.reply_text("{} sudah tidak AFK!".format(update.effective_user.first_name))
+        update.effective_message.reply_text(tl(update.effective_message, "{} sudah tidak AFK!").format(update.effective_user.first_name))
 
 
 @run_async
@@ -72,18 +74,13 @@ def reply_afk(bot: Bot, update: Update):
                 valid, reason = sql.check_afk_status(user_id)
                 if valid:
                     if not reason:
-                        res = "{} sedang AFK!".format(fst_name)
+                        res = tl(update.effective_message, "{} sedang AFK!").format(fst_name)
                     else:
-                        res = "{} sedang AFK!\nKarena : {}".format(fst_name, reason)
+                        res = tl(update.effective_message, "{} sedang AFK!\nKarena : {}").format(fst_name, reason)
                     message.reply_text(res)
 
 
-__help__ = """
- - /afk <alasan>: tandai dirimu sebagai AFK.
- - brb <alasan>: sama dengan perintah afk - tetapi bukan perintah.
-
-Ketika ditandai sebagai AFK, sebutan apa pun akan dibalas dengan pesan untuk mengatakan Anda tidak tersedia!
-"""
+__help__ = "afk_help"
 
 __mod_name__ = "AFK"
 

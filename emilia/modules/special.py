@@ -7,6 +7,7 @@ import urllib
 import datetime
 from typing import Optional, List
 import time
+import urbandict
 
 import pyowm
 from pyowm import timeutils, exceptions
@@ -22,77 +23,16 @@ from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, run_async, Filters
-from telegram.utils.helpers import escape_markdown, mention_html
+from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamfilters
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleRegexHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
+from emilia.modules.sql import languages_sql as langsql
 
-RAMALAN_STRINGS = (
-	"Tertawalah sepuasnya sebelum hal itu dilarang 😆",
-	"Bila Anda membahagiakan seseorang, Anda sendiri akan merasa bahagia\nBegitulah dunia bekerja 😊",
-	"Nostalgia masa muda hari ini akan membuat Anda tersenyum 🌸",
-	"Lanjutkan terus pekerjaan Anda, niscaya akan selesai juga\nOke, saya akui ramalan hari ini agak jayus 😝",
-	"Mengetahui bahwa ilusi bukanlah kenyataan tidak membuat keindahannya berkurang 💖",
-	"Anda akan mengalami kejadian aneh hari ini\nDan itu tidak termasuk mendapatkan ramalan dari Emilia Hikari 😜",
-	"Akhirnya ada kesempatan untuk beristirahat...\ndan mendengar ramalan dari Emilia 😉",
-	"Pencarian Anda sudah selesai\nAnda telah menemukan sahabat sejati (saya) 😀",
-	"Anda akan menunjukkan bahwa Anda kuat melewati tantangan demi tantangan",
-	"Anda hanyalah setitik air di tengah lautan luas\nTapi setitik air pun bisa bikin gadget rusak 😱 💦",
-	"Anda akan mencoba hal baru hari ini\nTapi maaf, mencoba makanan gratis di supermarket tidak termasuk 🍦🚫",
-	"Kirimlah pesan ke seorang teman lama hari ini",
-	"Akan ada sesuatu yang baru di lingkungan sekitar Anda 🏡",
-	"Traktirlah diri sendiri 🍭",
-	"Semua hal ada solusinya, kalau Anda terbuka untuk berubah",
-	"Karma baik menghampiri Anda minggu ini\nTapi hati-hati, karma itu rapuh seperti barang pecah belah",
-	"Habiskanlah waktu di luar rumah hari ini\nSepertinya di luar sana indah... kalau tidak hujan",
-	"Jika Anda mendengarkan dengan sungguh-sungguh, angin akan memberikan semua jawaban atas pertanyaan Anda 💨",
-	"Pergilah ke tempat yang belum pernah Anda kunjungi, walaupun tempat itu hanya sepelemparan batu dari rumah Anda",
-	"Anda akan menerima kabar baik, tapi mungkin Anda harus mencari dari apa yang tersirat",
-	"Anda akan segera menemukan apa yang Anda cari\nKalau Anda bisa menemukan kacamata Anda",
-	"Pergilah ke suatu tempat baru\nApa yang akan Anda temukan pasti akan mengesankan",
-	"Kesempatan akan muncul bila Anda tahu ke mana harus melihat 👀",
-	"Hari ini Anda akan menjadi keren 😎\nYah, nggak terlalu beda dengan hari-hari lain 😉",
-	"Hal-hal positif akan muncul di hidup Anda hari ini\nTapi jangan lupa, di dalam komposisi sebuah atom selalu ada atom negatif 🔬😀",
-	"Penuhilah diri hanya dengan kebaikan, baik dalam pikiran, perkataan, perbuatan, maupun pertwitteran 🐥",
-	"Bersiaplah untuk menerima hal-hal menyenangkan hari ini 😎",
-	"Waktunya belajar keterampilan dan topik baru",
-	"Video YouTube favorit Anda masih belum dibuat",
-	"Ketika ragu, Google dulu 😉",
-	"Dua hari dari sekarang, besok akan jadi kemarin 😌",
-	"Perhatikan detail-detail\nPasti banyak hal menarik yang Anda bisa temukan",
-	"Wah, Anda belum beruntung\nSilakan coba lagi 😉",
-	"Buatlah keputusan dengan mendengarkan dan menyelaraskan hati maupun pikiran Anda",
-	"Biasanya maling akan teriak maling",
-	"Anda tidak akan diberi kalau tidak meminta 👐",
-	"Nostalgia masa muda hari ini akan membuat Anda tersenyum 🌸",
-	"Sahabat sejati Anda berada dalam jangkauan\nSebenarnya, Anda sedang membaca ramalan darinya 😊",
-	"Masa depan Anda akan dipenuhi kesuksesan 💎\nTapi hati-hati, keserakahan bisa menghancurkan semuanya 💰",
-	"Hari ini adalah hari esok yang Anda nantikan kemarin",
-	"Bersyukur akan membuat kita bahagia\nKatakan terima kasih pada seseorang hari ini",
-	"Hari ini Anda akan menjadi keren 😎\nYah, nggak terlalu beda dengan hari-hari lain 😉",
-	"Hari ini, dunia akan jadi milik Anda 🌍\nJangan lupa menjadikannya indah untuk orang lain 😊",
-	"Petualangan baru akan segera menghampiri Anda",
-	"Semakin banyak yang Anda katakan, semakin sedikit yang akan mereka ingat",
-	"Hari ini, jadilah superhero untuk seorang anak kecil",
-	"Makanan yang kelihatannya aneh itu mungkin sebenarnya enak banget",
-	"Hari ini, ambillah rute yang lain dari biasanya",
-	"Waktunya mengekspresikan kreativitas Anda",
-	"Jodoh Anda lebih dekat dari yang Anda kira 💞",
-	"Waktunya belajar keterampilan dan topik baru",
-	"Hal-hal positif akan muncul di hidup Anda hari ini\nTapi jangan lupa, di dalam komposisi sebuah atom selalu ada atom negatif 🔬😀",
-	"Waktunya berlibur bersama orang-orang kesayangan Anda ✈️",
-	"Besok akan menjadi hari yang lebih menyenangkan daripada hari Anda yang paling menyebalkan",
-	"Jangan cari peruntungan di situs abal-abal atau SMS mencurigakan",
-	"Kejadian yang tak terduga akan menghampiri hidup Anda",
-	"Hadiah berharga tengah menanti Anda\nTapi tampaknya hadiah tersebut sangat sabar menanti",
-	"Keluarga Anda sangat kangen pada Anda\nTeleponlah mereka, jangan kasih tahu ini ide saya 😉",
-	"Hari yang baik untuk memperjuangkan kebenaran",
-	"Semua hal ada solusinya, kalau Anda terbuka untuk berubah",
-	"Hewan peliharaan akan menambah kebahagiaan Anda 🐱🐹🐔"
-)
+from emilia.modules.languages import tl
 
 @run_async
 def stickerid(bot: Bot, update: Update):
@@ -101,31 +41,10 @@ def stickerid(bot: Bot, update: Update):
 		return
 	msg = update.effective_message
 	if msg.reply_to_message and msg.reply_to_message.sticker:
-		update.effective_message.reply_text("Hai " +
-											"[{}](tg://user?id={})".format(msg.from_user.first_name, msg.from_user.id)
-											+ ", Id stiker yang anda balas adalah :\n" +
-											"```{}```".format(msg.reply_to_message.sticker.file_id),
+		update.effective_message.reply_text(tl(update.effective_message, "Hai {}, Id stiker yang anda balas adalah :\n```{}```").format(mention_markdown(msg.from_user.id, msg.from_user.first_name), msg.reply_to_message.sticker.file_id),
 											parse_mode=ParseMode.MARKDOWN)
 	else:
-		update.effective_message.reply_text("Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
-											msg.from_user.id) + ", Tolong balas pesan stiker untuk mendapatkan id stiker",
-											parse_mode=ParseMode.MARKDOWN)
-
-@run_async
-def fileid(bot: Bot, update: Update):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-	msg = update.effective_message
-	if msg.reply_to_message and msg.reply_to_message.document:
-		update.effective_message.reply_text("Hai " +
-											"[{}](tg://user?id={})".format(msg.from_user.first_name, msg.from_user.id)
-											+ ", Id file yang anda balas adalah :\n" +
-											"```{}```".format(msg.reply_to_message.document.file_id),
-											parse_mode=ParseMode.MARKDOWN)
-	else:
-		update.effective_message.reply_text("Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
-											msg.from_user.id) + ", Tolong balas pesan file untuk mendapatkan id file",
+		update.effective_message.reply_text(tl(update.effective_message, "Tolong balas pesan stiker untuk mendapatkan id stiker"),
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
@@ -136,7 +55,6 @@ def getsticker(bot: Bot, update: Update):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	if msg.reply_to_message and msg.reply_to_message.sticker:
-		bot.sendChatAction(chat_id, "typing")
 		update.effective_message.reply_text("Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
 											msg.from_user.id) + ", Silahkan cek file yang anda minta dibawah ini."
 											"\nTolong gunakan fitur ini dengan bijak!",
@@ -150,7 +68,6 @@ def getsticker(bot: Bot, update: Update):
 		bot.send_photo(chat_id, photo=open('sticker.png', 'rb'))
 		
 	else:
-		bot.sendChatAction(chat_id, "typing")
 		update.effective_message.reply_text("Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
 											msg.from_user.id) + ", Tolong balas pesan stiker untuk mendapatkan gambar stiker",
 											parse_mode=ParseMode.MARKDOWN)
@@ -188,32 +105,32 @@ def getlink(bot: Bot, update: Update, args: List[int]):
 	if args:
 		chat_id = int(args[0])
 	else:
-		update.effective_message.reply_text("Anda sepertinya tidak mengacu pada obrolan")
+		update.effective_message.reply_text(tl(update.effective_message, "Anda sepertinya tidak mengacu pada obrolan"))
 	chat = bot.getChat(chat_id)
 	bot_member = chat.get_member(bot.id)
 	if bot_member.can_invite_users:
 		titlechat = bot.get_chat(chat_id).title
 		invitelink = bot.get_chat(chat_id).invite_link
-		update.effective_message.reply_text("Sukses mengambil link invite di grup {}. \nInvite link : {}".format(titlechat, invitelink))
+		update.effective_message.reply_text(tl(update.effective_message, "Sukses mengambil link invite di grup {}. \nInvite link : {}").format(titlechat, invitelink))
 	else:
-		update.effective_message.reply_text("Saya tidak memiliki akses ke tautan undangan!")
+		update.effective_message.reply_text(tl(update.effective_message, "Saya tidak memiliki akses ke tautan undangan!"))
 	
 @run_async
 def leavechat(bot: Bot, update: Update, args: List[int]):
 	if args:
 		chat_id = int(args[0])
 	else:
-		update.effective_message.reply_text("Anda sepertinya tidak mengacu pada obrolan")
+		update.effective_message.reply_text(tl(update.effective_message, "Anda sepertinya tidak mengacu pada obrolan"))
 	try:
 		chat = bot.getChat(chat_id)
 		titlechat = bot.get_chat(chat_id).title
-		bot.sendMessage(chat_id, "Selamat tinggal semua 😁")
+		bot.sendMessage(chat_id, tl(update.effective_message, "Selamat tinggal semua 😁"))
 		bot.leaveChat(chat_id)
-		update.effective_message.reply_text("Saya telah keluar dari grup {}".format(titlechat))
+		update.effective_message.reply_text(tl(update.effective_message, "Saya telah keluar dari grup {}").format(titlechat))
 
 	except BadRequest as excp:
 		if excp.message == "Chat not found":
-			update.effective_message.reply_text("Sepertinya saya sudah keluar atau di tendang di grup tersebut")
+			update.effective_message.reply_text(tl(update.effective_message, "Sepertinya saya sudah keluar atau di tendang di grup tersebut"))
 		else:
 			return
 
@@ -227,14 +144,18 @@ def ping(bot: Bot, update: Update):
 	end_time = time.time()
 	ping_time = float(end_time - start_time)
 	bot.editMessageText(chat_id=update.effective_chat.id, message_id=test.message_id,
-						text="Pong!\nKecepatannya : {0:.2f} detik".format(round(ping_time, 2) % 60))
+						text=tl(update.effective_message, "Pong!\nKecepatannya: {0:.2f} detik").format(round(ping_time, 2) % 60))
 
 @run_async
 def ramalan(bot: Bot, update: Update):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
-	update.effective_message.reply_text(random.choice(RAMALAN_STRINGS))    
+	text = ""
+	if random.randint(1,10) >= 7:
+		text += random.choice(tl(update.effective_message, "RAMALAN_FIRST"))
+	text += random.choice(tl(update.effective_message, "RAMALAN_STRINGS"))
+	update.effective_message.reply_text(text)    
 
 @run_async
 def terjemah(bot: Bot, update: Update):
@@ -331,15 +252,15 @@ def terjemah(bot: Bot, update: Update):
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
 				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
 				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 			
 		else:
 			args = update.effective_message.text.split(None, 2)
@@ -359,26 +280,26 @@ def terjemah(bot: Bot, update: Update):
 			if target2 == None:
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
-				return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 				#if tekstr.pronunciation == None:
 				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 				#else:
 				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
-				message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 				#if tekstr.pronunciation == None:
 				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 				#else:
 				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 				
 	except IndexError:
-		update.effective_message.reply_text("Balas pesan atau tulis pesan dari bahasa lain untuk "
+		update.effective_message.reply_text(tl(update.effective_message, "Balas pesan atau tulis pesan dari bahasa lain untuk "
 											"diterjemahkan kedalam bahasa yang di dituju\n\n"
 											"Contoh: `/tr en-id` untuk menerjemahkan dari Bahasa inggris ke Bahasa Indonesia\n"
-											"Atau gunakan: `/tr id` untuk deteksi otomatis dan menerjemahkannya kedalam bahasa indonesia", parse_mode="markdown")
+											"Atau gunakan: `/tr id` untuk deteksi otomatis dan menerjemahkannya kedalam bahasa indonesia"), parse_mode="markdown")
 	except ValueError:
-		update.effective_message.reply_text("Bahasa yang di tuju tidak ditemukan!")
+		update.effective_message.reply_text(tl(update.effective_message, "Bahasa yang di tuju tidak ditemukan!"))
 	else:
 		return
 
@@ -393,16 +314,32 @@ def wiki(bot: Bot, update: Update):
 	args = update.effective_message.text.split(None, 1)
 	teks = args[1]
 	message = update.effective_message
-	wikipedia.set_lang("id")
-	try:
-		pagewiki = wikipedia.page(teks)
-	except wikipedia.exceptions.PageError:
-		wikipedia.set_lang("en")
+	getlang = langsql.get_lang(message)
+	if getlang == "id":
+		wikipedia.set_lang("id")
 		try:
 			pagewiki = wikipedia.page(teks)
 		except wikipedia.exceptions.PageError:
-			update.effective_message.reply_text("Hasil tidak ditemukan")
-			return
+			wikipedia.set_lang("en")
+			try:
+				pagewiki = wikipedia.page(teks)
+			except wikipedia.exceptions.PageError:
+				update.effective_message.reply_text(tl(update.effective_message, "Hasil tidak ditemukan"))
+				return
+			except wikipedia.exceptions.DisambiguationError as refer:
+				rujuk = str(refer).split("\n")
+				if len(rujuk) >= 6:
+					batas = 6
+				else:
+					batas = len(rujuk)
+				teks = ""
+				for x in range(batas):
+					if x == 0:
+						teks += rujuk[x].replace('may refer to', 'dapat merujuk ke')+"\n"
+					else:
+						teks += "- `"+rujuk[x]+"`\n"
+				update.effective_message.reply_text(teks, parse_mode="markdown")
+				return
 		except wikipedia.exceptions.DisambiguationError as refer:
 			rujuk = str(refer).split("\n")
 			if len(rujuk) >= 6:
@@ -417,35 +354,43 @@ def wiki(bot: Bot, update: Update):
 					teks += "- `"+rujuk[x]+"`\n"
 			update.effective_message.reply_text(teks, parse_mode="markdown")
 			return
-	except wikipedia.exceptions.DisambiguationError as refer:
-		rujuk = str(refer).split("\n")
-		if len(rujuk) >= 6:
-			batas = 6
-		else:
-			batas = len(rujuk)
-		teks = ""
-		for x in range(batas):
-			if x == 0:
-				teks += rujuk[x].replace('may refer to', 'dapat merujuk ke')+"\n"
+		except IndexError:
+			update.effective_message.reply_text("Tulis pesan untuk mencari dari sumber wikipedia")
+			return
+	else:
+		try:
+			pagewiki = wikipedia.page(teks)
+		except wikipedia.exceptions.PageError:
+			update.effective_message.reply_text(tl(update.effective_message, "Hasil tidak ditemukan"))
+		except wikipedia.exceptions.DisambiguationError as refer:
+			rujuk = str(refer).split("\n")
+			if len(rujuk) >= 6:
+				batas = 6
 			else:
-				teks += "- `"+rujuk[x]+"`\n"
-		update.effective_message.reply_text(teks, parse_mode="markdown")
-		return
-	except IndexError:
-		update.effective_message.reply_text("Tulis pesan untuk mencari dari sumber wikipedia")
-		return
+				batas = len(rujuk)
+			teks = ""
+			for x in range(batas):
+				if x == 0:
+					teks += rujuk[x]+"\n"
+				else:
+					teks += "- `"+rujuk[x]+"`\n"
+			update.effective_message.reply_text(teks, parse_mode="markdown")
+			return
+		except IndexError:
+			update.effective_message.reply_text(tl(update.effective_message, "Tulis pesan untuk mencari dari sumber wikipedia"))
+			return
 	judul = pagewiki.title
 	summary = pagewiki.summary
 	if update.effective_message.chat.type == "private":
-		message.reply_text("Hasil dari {} adalah:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML)
+		message.reply_text(tl(update.effective_message, "Hasil dari {} adalah:\n\n<b>{}</b>\n{}").format(teks, judul, summary), parse_mode=ParseMode.HTML)
 	else:
 		if len(summary) >= 200:
 			judul = pagewiki.title
 			summary = summary[:200]+"..."
-			button = InlineKeyboardMarkup([[InlineKeyboardButton(text="Baca Lebih Lengkap", url="t.me/{}?start=wiki-{}".format(bot.username, teks.replace(' ', '_')))]])
+			button = InlineKeyboardMarkup([[InlineKeyboardButton(text=tl(update.effective_message, "Baca Lebih Lengkap"), url="t.me/{}?start=wiki-{}".format(bot.username, teks.replace(' ', '_')))]])
 		else:
 			button = None
-		message.reply_text("Hasil dari {} adalah:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
+		message.reply_text(tl(update.effective_message, "Hasil dari {} adalah:\n\n<b>{}</b>\n{}").format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
 
 
 @run_async
@@ -524,6 +469,35 @@ def kitabgaul(bot: Bot, update: Update):
 	message.reply_text(balas, parse_mode=ParseMode.MARKDOWN)
 
 @run_async
+def urbandictionary(bot: Bot, update: Update, args):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+	if spam == True:
+		return
+	msg = update.effective_message
+	chat_id = update.effective_chat.id
+	message = update.effective_message
+	if args:
+		text = " ".join(args)
+		try:
+			mean = urbandict.define(text)
+		except Exception as err:
+			message.reply_text("Error: " + str(err))
+			return
+		if len(mean) >= 0:
+			teks = ""
+			if len(mean) >= 3:
+				for x in range(3):
+					teks = "*Result of {}*\n\n*{}*\n*Meaning:*\n`{}`\n\n*Example:*\n`{}`\n\n".format(text, mean[x].get("word")[:-8], mean[x].get("def"), mean[x].get("example"))
+			else:
+				for x in range(len(mean)):
+					teks = "*Result of {}*\n\n*{}*\n**Meaning:*\n`{}`\n\n*Example:*\n`{}`\n\n".format(text, mean[x].get("word")[:-8], mean[x].get("def"), mean[x].get("example"))
+			message.reply_text(teks, parse_mode=ParseMode.MARKDOWN)
+		else:
+			message.reply_text("{} couldn't be found in urban dictionary!".format(text), parse_mode=ParseMode.MARKDOWN)
+	else:
+		message.reply_text("Use `/ud <text` for search meaning from urban dictionary.", parse_mode=ParseMode.MARKDOWN)
+
+@run_async
 def log(bot: Bot, update: Update):
 	message = update.effective_message
 	eventdict = message.to_dict()
@@ -534,40 +508,27 @@ def deEmojify(inputString):
     return inputString.encode('ascii', 'ignore').decode('ascii')
 
 
-__help__ = """
- - /stickerid: balas pesan stiker di PM untuk mendapatkan id stiker
- - /ping: mengecek kecepatan bot
- - /ramalan: cek ramalan kamu hari ini
- - /tr <dari>-<ke> <teks>: terjemahkan teks yang ditulis atau di balas untuk bahasa apa saja ke bahasa yang dituju
- atau bisa juga dengan
- - /tr <ke> <teks>: terjemahkan teks yang ditulis atau di balas untuk bahasa apa saja ke bahasa yang dituju
- - /wiki <teks>: mencari teks yang ditulis dari sumber wikipedia
- - /kbbi <teks>: mencari teks yang ditulis dari kamus besar bahasa indonesia
- - /kbgaul <teks>: mencari arti dan definisi yang ditulis dari kitab gaul, tulis `/kbgaul` untuk mendapatkan kata trending dan terbaik
+__help__ = "exclusive_help"
 
- Note : teks untuk di terjemah tidak bisa dicampur emoticon
-"""
-
-__mod_name__ = "💖 Eksklusif Emilia 💖"
+__mod_name__ = "💖 Exclusive Emilia 💖"
 
 STICKERID_HANDLER = DisableAbleCommandHandler("stickerid", stickerid)
-FILEID_HANDLER = DisableAbleCommandHandler("fileid", fileid)
 #GETSTICKER_HANDLER = DisableAbleCommandHandler("getsticker", getsticker)
 PING_HANDLER = DisableAbleCommandHandler("ping", ping)
 STIKER_HANDLER = CommandHandler("stiker", stiker, filters=Filters.user(OWNER_ID))
 FILE_HANDLER = CommandHandler("file", file, filters=Filters.user(OWNER_ID))
 GETLINK_HANDLER = CommandHandler("getlink", getlink, pass_args=True, filters=Filters.user(OWNER_ID))
 LEAVECHAT_HANDLER = CommandHandler("leavechat", leavechat, pass_args=True, filters=Filters.user(OWNER_ID))
-RAMALAN_HANDLER = DisableAbleCommandHandler("ramalan", ramalan)
+RAMALAN_HANDLER = DisableAbleCommandHandler(["ramalan", "forecast"], ramalan)
 TERJEMAH_HANDLER = DisableAbleCommandHandler("tr", terjemah)
 WIKIPEDIA_HANDLER = DisableAbleCommandHandler("wiki", wiki)
 KBBI_HANDLER = DisableAbleCommandHandler("kbbi", kamusbesarbahasaindonesia)
 KBGAUL_HANDLER = DisableAbleCommandHandler("kbgaul", kitabgaul)
+UD_HANDLER = DisableAbleCommandHandler("ud", urbandictionary, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 
 dispatcher.add_handler(PING_HANDLER)
 dispatcher.add_handler(STICKERID_HANDLER)
-dispatcher.add_handler(FILEID_HANDLER)
 #dispatcher.add_handler(GETSTICKER_HANDLER)
 dispatcher.add_handler(STIKER_HANDLER)
 dispatcher.add_handler(FILE_HANDLER)
@@ -578,4 +539,5 @@ dispatcher.add_handler(TERJEMAH_HANDLER)
 dispatcher.add_handler(WIKIPEDIA_HANDLER)
 dispatcher.add_handler(KBBI_HANDLER)
 dispatcher.add_handler(KBGAUL_HANDLER)
+dispatcher.add_handler(UD_HANDLER)
 dispatcher.add_handler(LOG_HANDLER)

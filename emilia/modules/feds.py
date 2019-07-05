@@ -25,6 +25,7 @@ from emilia.modules.helper_funcs.string_handling import markdown_parser
 from emilia.modules.disable import DisableAbleCommandHandler
 
 import emilia.modules.sql.feds_sql as sql
+from emilia.modules.languages import tl
 
 from emilia.modules.connection import connected
 
@@ -78,7 +79,7 @@ def new_fed(bot: Bot, update: Update):
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message
 	if chat.type != "private":
-		update.effective_message.reply_text("Buat federasi Anda di PM saya, bukan dalam grup.")
+		update.effective_message.reply_text(tl(update.effective_message, "Buat federasi Anda di PM saya, bukan dalam grup."))
 		return
 	fednam = message.text.split(None, 1)[1]
 	if not fednam == '':
@@ -92,21 +93,21 @@ def new_fed(bot: Bot, update: Update):
 
 		x = sql.new_fed(user.id, fed_name, fed_id)
 		if not x:
-			update.effective_message.reply_text("Tidak dapat membuat federasi! Tolong hubungi pembuat saya jika masalah masih berlanjut.")
+			update.effective_message.reply_text(tl(update.effective_message, "Tidak dapat membuat federasi! Tolong hubungi pembuat saya jika masalah masih berlanjut."))
 			return
 
-		update.effective_message.reply_text("*Anda telah berhasil membuat federasi baru!*"\
+		update.effective_message.reply_text(tl(update.effective_message, "*Anda telah berhasil membuat federasi baru!*"\
 											"\nNama: `{}`"\
 											"\nID: `{}`"
 											"\n\nGunakan perintah di bawah ini untuk bergabung dengan federasi:"
-											"\n`/joinfed {}`".format(fed_name, fed_id, fed_id), parse_mode=ParseMode.MARKDOWN)
+											"\n`/joinfed {}`").format(fed_name, fed_id, fed_id), parse_mode=ParseMode.MARKDOWN)
 		try:
 			bot.send_message(TEMPORARY_DATA,
 				"Federasi <b>{}</b> telah di buat dengan ID: <pre>{}</pre>".format(fed_name, fed_id), parse_mode=ParseMode.HTML)
 		except:
 			LOGGER.warning("Cannot send a message to TEMPORARY_DATA")
 	else:
-		update.effective_message.reply_text("Tolong tulis nama federasinya!")
+		update.effective_message.reply_text(tl(update.effective_message, "Tolong tulis nama federasinya!"))
 
 @run_async
 def del_fed(bot: Bot, update: Update, args: List[str]):
@@ -117,31 +118,31 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	if chat.type != "private":
-		update.effective_message.reply_text("Hapus federasi Anda di PM saya, bukan dalam grup.")
+		update.effective_message.reply_text(tl(update.effective_message, "Hapus federasi Anda di PM saya, bukan dalam grup."))
 		return
 	if args:
 		is_fed_id = args[0]
 		getinfo = sql.get_fed_info(is_fed_id)
 		if getinfo == False:
-			update.effective_message.reply_text("Federasi ini tidak di temukan!")
+			update.effective_message.reply_text(tl(update.effective_message, "Federasi ini tidak di temukan!"))
 			return
 		if int(getinfo['owner']) == int(user.id) or int(user.id) == OWNER_ID:
 			fed_id = is_fed_id
 		else:
-			update.effective_message.reply_text("Hanya pemilik fedarasi yang dapat melakukan ini!")
+			update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik fedarasi yang dapat melakukan ini!"))
 			return
 	else:
-		update.effective_message.reply_text("Apa yang harus saya hapus?")
+		update.effective_message.reply_text(tl(update.effective_message, "Apa yang harus saya hapus?"))
 		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya pemilik fedarasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik fedarasi yang dapat melakukan ini!"))
 		return
 
-	update.effective_message.reply_text("Anda yakin ingin menghapus federasi Anda? Tindakan ini tidak bisa dibatalkan, Anda akan kehilangan seluruh daftar larangan Anda, dan '{}' akan hilang secara permanen.".format(getinfo['fname']),
+	update.effective_message.reply_text(tl(update.effective_message, "Anda yakin ingin menghapus federasi Anda? Tindakan ini tidak bisa dibatalkan, Anda akan kehilangan seluruh daftar larangan Anda, dan '{}' akan hilang secara permanen.").format(getinfo['fname']),
 			reply_markup=InlineKeyboardMarkup(
-						[[InlineKeyboardButton(text="⚠️ Hapus Federasi ⚠️", callback_data="rmfed_{}".format(fed_id))],
-						[InlineKeyboardButton(text="Batalkan", callback_data="rmfed_cancel")]]))
+						[[InlineKeyboardButton(text=tl(update.effective_message, "⚠️ Hapus Federasi ⚠️"), callback_data="rmfed_{}".format(fed_id))],
+						[InlineKeyboardButton(text=tl(update.effective_message, "Batalkan"), callback_data="rmfed_cancel")]]))
 
 @run_async
 def fed_chat(bot: Bot, update: Update, args: List[str]):
@@ -155,18 +156,18 @@ def fed_chat(bot: Bot, update: Update, args: List[str]):
 
 	user_id = update.effective_message.from_user.id
 	if not is_user_admin(update.effective_chat, user_id):
-		update.effective_message.reply_text("Anda harus menjadi admin untuk menjalankan perintah ini")
+		update.effective_message.reply_text(tl(update.effective_message, "Anda harus menjadi admin untuk menjalankan perintah ini"))
 		return
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	user = update.effective_user  # type: Optional[Chat]
 	chat = update.effective_chat  # type: Optional[Chat]
 	info = sql.get_fed_info(fed_id)
 
-	text = "Obrolan ini adalah bagian dari federasi berikut:"
+	text = tl(update.effective_message, "Obrolan ini adalah bagian dari federasi berikut:")
 	text += "\n{} (ID: <code>{}</code>)".format(info['fname'], fed_id)
 
 	update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
@@ -181,7 +182,7 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	message = update.effective_message
@@ -197,29 +198,29 @@ def join_fed(bot: Bot, update: Update, args: List[str]):
 				if str(admin.user.id) == str(user.id):
 					pass
 				else:
-					update.effective_message.reply_text("Hanya pembuat grup yang dapat melakukannya!")
+					update.effective_message.reply_text(tl(update.effective_message, "Hanya pembuat grup yang dapat melakukannya!"))
 					return
 	if fed_id:
-		message.reply_text("Anda tidak bisa bergabung dua federasi dalam satu obrolan")
+		message.reply_text(tl(update.effective_message, "Anda tidak bisa bergabung dua federasi dalam satu obrolan"))
 		return
 
 	if len(args) >= 1:
 		getfed = sql.search_fed_by_id(args[0])
 		if getfed == False:
-			message.reply_text("Silakan masukkan id federasi yang valid.")
+			message.reply_text(tl(update.effective_message, "Silakan masukkan id federasi yang valid."))
 			return
 
 		x = sql.chat_join_fed(args[0], chat.title, chat.id)
 		if not x:
-			message.reply_text("Gagal bergabung dengan federasi! Tolong hubungi pembuat saya jika masalah ini masih berlanjut.")
+			message.reply_text(tl(update.effective_message, "Gagal bergabung dengan federasi! Tolong hubungi pembuat saya jika masalah ini masih berlanjut."))
 			return
 
 		get_fedlog = sql.get_fed_log(args[0])
 		if get_fedlog:
 			if eval(get_fedlog):
-				bot.send_message(get_fedlog, "Obrolan *{}* telah bergabung ke federasi *{}*".format(chat.title, getfed['fname']), parse_mode="markdown")
+				bot.send_message(get_fedlog, tl(update.effective_message, "Obrolan *{}* telah bergabung ke federasi *{}*").format(chat.title, getfed['fname']), parse_mode="markdown")
 
-		message.reply_text("Obrolan ini telah bergabung dengan federasi {}!".format(getfed['fname']))
+		message.reply_text(tl(update.effective_message, "Obrolan ini telah bergabung dengan federasi {}!").format(getfed['fname']))
 
 @run_async
 def leave_fed(bot: Bot, update: Update, args: List[str]):
@@ -231,7 +232,7 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
@@ -244,12 +245,12 @@ def leave_fed(bot: Bot, update: Update, args: List[str]):
 			get_fedlog = sql.get_fed_log(fed_id)
 			if get_fedlog:
 				if eval(get_fedlog):
-					bot.send_message(get_fedlog, "Obrolan *{}* telah keluar ke federasi *{}*".format(chat.title, fed_info['fname']), parse_mode="markdown")
-			update.effective_message.reply_text("Obrolan ini telah keluar dari federasi {}!".format(fed_info['fname']))
+					bot.send_message(get_fedlog, tl(update.effective_message, "Obrolan *{}* telah keluar ke federasi *{}*").format(chat.title, fed_info['fname']), parse_mode="markdown")
+			update.effective_message.reply_text(tl(update.effective_message, "Obrolan ini telah keluar dari federasi {}!").format(fed_info['fname']))
 		else:
-			update.effective_message.reply_text("Mengapa Anda meninggalkan federasi ketika Anda belum bergabung?!")
+			update.effective_message.reply_text(tl(update.effective_message, "Mengapa Anda meninggalkan federasi ketika Anda belum bergabung?!"))
 	else:
-		update.effective_message.reply_text("Hanya pembuat grup yang dapat melakukannya!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pembuat grup yang dapat melakukannya!"))
 
 @run_async
 def user_join_fed(bot: Bot, update: Update, args: List[str]):
@@ -262,7 +263,7 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 	msg = update.effective_message  # type: Optional[Message]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
@@ -276,7 +277,7 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 		elif not msg.reply_to_message and (not args or (
 			len(args) >= 1 and not args[0].startswith("@") and not args[0].isdigit() and not msg.parse_entities(
 			[MessageEntity.TEXT_MENTION]))):
-			msg.reply_text("Saya tidak dapat mengekstrak pengguna dari ini.")
+			msg.reply_text(tl(update.effective_message, "Saya tidak dapat mengekstrak pengguna dari ini."))
 			return
 		else:
 			LOGGER.warning('error')
@@ -286,21 +287,21 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 		get_owner = eval(info['fusers'])['owner']
 		get_owner = bot.get_chat(get_owner).id
 		if user_id == get_owner:
-			update.effective_message.reply_text("Mengapa Anda mencoba mempromosikan pemilik federasi!?")
+			update.effective_message.reply_text(tl(update.effective_message, "Mengapa Anda mencoba mempromosikan pemilik federasi!?"))
 			return
 		if getuser:
-			update.effective_message.reply_text("Saya tidak dapat mempromosikan pengguna yang sudah menjadi admin federasi! Tapi saya bisa menurunkannya.")
+			update.effective_message.reply_text(tl(update.effective_message, "Saya tidak dapat mempromosikan pengguna yang sudah menjadi admin federasi! Tapi saya bisa menurunkannya."))
 			return
 		if user_id == bot.id:
-			update.effective_message.reply_text("Saya sudah menjadi admin federasi dan yang mengelolanya!")
+			update.effective_message.reply_text(tl(update.effective_message, "Saya sudah menjadi admin federasi dan yang mengelolanya!"))
 			return
 		res = sql.user_join_fed(fed_id, user_id)
 		if res:
-			update.effective_message.reply_text("💖 Berhasil Dipromosikan!")
+			update.effective_message.reply_text(tl(update.effective_message, "💖 Berhasil Dipromosikan!"))
 		else:
-			update.effective_message.reply_text("Gagal dipromosikan!")
+			update.effective_message.reply_text(tl(update.effective_message, "Gagal dipromosikan!"))
 	else:
-		update.effective_message.reply_text("Hanya pemilik federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik federasi yang dapat melakukan ini!"))
 
 
 @run_async
@@ -313,7 +314,7 @@ def user_demote_fed(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
@@ -330,26 +331,26 @@ def user_demote_fed(bot: Bot, update: Update, args: List[str]):
 		elif not msg.reply_to_message and (not args or (
 			len(args) >= 1 and not args[0].startswith("@") and not args[0].isdigit() and not msg.parse_entities(
 			[MessageEntity.TEXT_MENTION]))):
-			msg.reply_text("Saya tidak dapat mengekstrak pengguna dari ini.")
+			msg.reply_text(tl(update.effective_message, "Saya tidak dapat mengekstrak pengguna dari ini."))
 			return
 		else:
 			LOGGER.warning('error')
 
 		if user_id == bot.id:
-			update.effective_message.reply_text("Apa yang sedang Anda coba lakukan? Menurunkan saya dari federasi Anda?")
+			update.effective_message.reply_text(tl(update.effective_message, "Apa yang sedang Anda coba lakukan? Menurunkan saya dari federasi Anda?"))
 			return
 
 		if sql.search_user_in_fed(fed_id, user_id) == False:
-			update.effective_message.reply_text("Saya tidak dapat mendemosikan pengguna yang bukan merupakan admin federasi! Jika Anda ingin membuatnya menangis, promosikan dia terlebih dahulu!")
+			update.effective_message.reply_text(tl(update.effective_message, "Saya tidak dapat mendemosikan pengguna yang bukan merupakan admin federasi! Jika Anda ingin membuatnya menangis, promosikan dia terlebih dahulu!"))
 			return
 
 		res = sql.user_demote_fed(fed_id, user_id)
 		if res == True:
-			update.effective_message.reply_text("Keluar dari sini!")
+			update.effective_message.reply_text(tl(update.effective_message, "💔 Dia telah di keluarkan dari federasi anda!"))
 		else:
-			update.effective_message.reply_text("Saya tidak bisa mengusirnya, Saya tidak berdaya!")
+			update.effective_message.reply_text(tl(update.effective_message, "Saya tidak bisa mengusirnya, Saya tidak berdaya!"))
 	else:
-		update.effective_message.reply_text("Hanya pemilik federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik federasi yang dapat melakukan ini!"))
 		return
 
 @run_async
@@ -366,12 +367,12 @@ def fed_info(bot: Bot, update: Update, args: List[str]):
 	else:
 		fed_id = sql.get_fed_id(chat.id)
 		if not fed_id:
-			update.effective_message.reply_text("Grup ini tidak dalam federasi apa pun!")
+			update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 			return
 		info = sql.get_fed_info(fed_id)
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
 	owner = bot.get_chat(info['owner'])
@@ -387,15 +388,15 @@ def fed_info(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 	info = sql.get_fed_info(fed_id)
 
-	text = "<b>ℹ️ Info federasi:</b>"
+	text = tl(update.effective_message, "<b>ℹ️ Info federasi:</b>")
 	text += "\nFedID: <code>{}</code>".format(fed_id)
-	text += "\nName: {}".format(info['fname'])
-	text += "\nPembuat: {}".format(mention_html(owner.id, owner_name))
-	text += "\nSeluruh admin: <code>{}</code>".format(TotalAdminFed)
+	text += tl(update.effective_message, "\nNama: {}").format(info['fname'])
+	text += tl(update.effective_message, "\nPembuat: {}").format(mention_html(owner.id, owner_name))
+	text += tl(update.effective_message, "\nSeluruh admin: <code>{}</code>").format(TotalAdminFed)
 	getfban = sql.get_all_fban_users(fed_id)
-	text += "\nTotal yang di banned: <code>{}</code>".format(len(getfban))
+	text += tl(update.effective_message, "\nTotal yang di banned: <code>{}</code>").format(len(getfban))
 	getfchat = sql.all_fed_chats(fed_id)
-	text += "\nTotal grup yang terkoneksi: <code>{}</code>".format(len(getfchat))
+	text += tl(update.effective_message, "\nTotal grup yang terkoneksi: <code>{}</code>").format(len(getfchat))
 
 	update.effective_message.reply_text(text, parse_mode=ParseMode.HTML)
 
@@ -409,24 +410,24 @@ def fed_admin(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
 	user = update.effective_user  # type: Optional[Chat]
 	chat = update.effective_chat  # type: Optional[Chat]
 	info = sql.get_fed_info(fed_id)
 
-	text = "<b>Admin Federasi {}:</b>\n\n".format(info['fname'])
+	text = tl(update.effective_message, "<b>Admin Federasi {}:</b>\n\n").format(info['fname'])
 	text += "👑 Owner:\n"
 	owner = bot.get_chat(info['owner'])
 	try:
@@ -437,9 +438,9 @@ def fed_admin(bot: Bot, update: Update, args: List[str]):
 
 	members = sql.all_fed_members(fed_id)
 	if len(members) == 0:
-		text += "\n🔱 Tidak ada admin di federasi ini"
+		text += tl(update.effective_message, "\n🔱 Tidak ada admin di federasi ini")
 	else:
-		text += "\n🔱 Admin:\n"
+		text += "\n🔱 Admins:\n"
 		for x in members:
 			user = bot.get_chat(x) 
 			text += " • {}\n".format(mention_html(user.id, user.first_name))
@@ -457,20 +458,20 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	info = sql.get_fed_info(fed_id)
 	getfednotif = sql.user_feds_report(info['owner'])
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
 	message = update.effective_message  # type: Optional[Message]
@@ -480,31 +481,31 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 	fban, fbanreason = sql.get_fban_user(fed_id, user_id)
 
 	if not user_id:
-		message.reply_text("Anda sepertinya tidak merujuk ke pengguna.")
+		message.reply_text(tl(update.effective_message, "Anda sepertinya tidak merujuk ke pengguna."))
 		return
 
 	if user_id == bot.id:
-		message.reply_text("Apa yang lebih lucu dari menendang creator grup? Fban diri saya sendiri.")
+		message.reply_text(tl(update.effective_message, "Apa yang lebih lucu dari menendang creator grup? Fban diri saya sendiri."))
 		return
 
 	if is_user_fed_owner(fed_id, user_id) == True:
-		message.reply_text("Mengapa Anda mencoba fban pemilik federasi?")
+		message.reply_text(tl(update.effective_message, "Mengapa Anda mencoba fban pemilik federasi?"))
 		return
 
 	if is_user_fed_admin(fed_id, user_id) == True:
-		message.reply_text("Dia adalah admin dari federasi, saya tidak bisa fban dia.")
+		message.reply_text(tl(update.effective_message, "Dia adalah admin dari federasi, saya tidak bisa fban dia."))
 		return
 
 	if user_id == OWNER_ID:
-		message.reply_text("Aku tidak ingin memblokir tuanku, itu ide yang sangat bodoh!")
+		message.reply_text(tl(update.effective_message, "Aku tidak ingin memblokir tuanku, itu ide yang sangat bodoh!"))
 		return
 
 	if int(user_id) in SUDO_USERS:
-		message.reply_text("Saya tidak akan fban pengguna sudo!")
+		message.reply_text(tl(update.effective_message, "Saya tidak akan fban pengguna sudo!"))
 		return
 
 	if int(user_id) in WHITELIST_USERS:
-		message.reply_text("Orang ini masuk daftar putih, jadi tidak bisa di fban!")
+		message.reply_text(tl(update.effective_message, "Orang ini masuk daftar putih, jadi tidak bisa di fban!"))
 		return
 
 	try:
@@ -514,57 +515,57 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 		return
 
 	if user_chat.type != 'private':
-		message.reply_text("Itu bukan pengguna!")
+		message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
 		return
 
 	if fban:
 		user_target = mention_html(user_chat.id, user_chat.first_name)
 		fed_name = info['fname']
-		starting = "Alasan fban di ganti untuk {} pada Federasi <b>{}</b>.".format(user_target, fed_name)
+		starting = tl(update.effective_message, "Alasan fban di ganti untuk {} pada Federasi <b>{}</b>.").format(user_target, fed_name)
 		update.effective_message.reply_text(starting, parse_mode=ParseMode.HTML)
 
 		if reason == "":
-			reason = "Tidak ada alasan."
+			reason = tl(update.effective_message, "Tidak ada alasan.")
 
 		temp = sql.un_fban_user(fed_id, user_id)
 		if not temp:
-			message.reply_text("Gagal mengupdate alasan fedban!")
+			message.reply_text(tl(update.effective_message, "Gagal mengupdate alasan fedban!"))
 			return
 		x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason)
 		if not x:
-			message.reply_text("Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya.")
+			message.reply_text(tl(update.effective_message, "Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya."))
 			return
 
 		fed_chats = sql.all_fed_chats(fed_id)
 		# Will send to current chat
-		bot.send_message(chat.id, "<b>Alasan FedBan Diperbarui</b>" \
+		bot.send_message(chat.id, tl(update.effective_message, "<b>Alasan FedBan Diperbarui</b>" \
 							 	  "\n<b>Federasi:</b> {}" \
 							 	  "\n<b>Federasi Admin:</b> {}" \
 								  "\n<b>Pengguna:</b> {}" \
 							 	  "\n<b>Pengguna ID:</b> <code>{}</code>" \
-							 	  "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+							 	  "\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
 												   mention_html(user_chat.id, user_chat.first_name),
 																user_chat.id, reason), parse_mode="HTML")
 		# Send message to owner if fednotif is enabled
 		if getfednotif:
-			bot.send_message(info['owner'], "<b>Alasan FedBan Diperbarui</b>" \
+			bot.send_message(info['owner'], tl(update.effective_message, "<b>Alasan FedBan Diperbarui</b>" \
 							 	  			"\n<b>Federasi:</b> {}" \
 							 	  			"\n<b>Federasi Admin:</b> {}" \
 								  			"\n<b>Pengguna:</b> {}" \
 							 	  			"\n<b>Pengguna ID:</b> <code>{}</code>" \
-							 	  			"\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+							 	  			"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
 												   mention_html(user_chat.id, user_chat.first_name),
 																user_chat.id, reason), parse_mode="HTML")
 		# If fedlog is set, then send message, except fedlog is current chat
 		get_fedlog = sql.get_fed_log(fed_id)
 		if get_fedlog:
 			if int(get_fedlog) != int(chat.id):
-				bot.send_message(get_fedlog, "<b>Alasan FedBan Diperbarui</b>" \
+				bot.send_message(get_fedlog, tl(update.effective_message, "<b>Alasan FedBan Diperbarui</b>" \
 							 	  			"\n<b>Federasi:</b> {}" \
 							 	  			"\n<b>Federasi Admin:</b> {}" \
 								  			"\n<b>Pengguna:</b> {}" \
 							 	  			"\n<b>Pengguna ID:</b> <code>{}</code>" \
-							 	  			"\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+							 	  			"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
 												   mention_html(user_chat.id, user_chat.first_name),
 																user_chat.id, reason), parse_mode="HTML")
 		for fedschat in fed_chats:
@@ -607,53 +608,53 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 													user_chat.id, reason), 
 				html=True)
 		"""
-		message.reply_text("Alasan fedban telah di perbarui.")
+		message.reply_text(tl(update.effective_message, "Alasan fedban telah di perbarui."))
 		return
 
 	user_target = mention_html(user_chat.id, user_chat.first_name)
 	fed_name = info['fname']
 
-	starting = "Memulai larangan federasi untuk {} pada Federasi <b>{}</b>.".format(user_target, fed_name)
+	starting = tl(update.effective_message, "Memulai larangan federasi untuk {} pada Federasi <b>{}</b>.").format(user_target, fed_name)
 	update.effective_message.reply_text(starting, parse_mode=ParseMode.HTML)
 
 	if reason == "":
-		reason = "Tidak ada alasan."
+		reason = tl(update.effective_message, "Tidak ada alasan.")
 
 	x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason)
 	if not x:
-		message.reply_text("Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya.")
+		message.reply_text(tl(update.effective_message, "Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya."))
 		return
 
 	fed_chats = sql.all_fed_chats(fed_id)
 	# Will send to current chat
-	bot.send_message(chat.id, "<b>FedBan baru</b>" \
+	bot.send_message(chat.id, tl(update.effective_message, "<b>FedBan baru</b>" \
 							  "\n<b>Federasi:</b> {}" \
 							  "\n<b>Federasi Admin:</b> {}" \
 							  "\n<b>Pengguna:</b> {}" \
 							  "\n<b>Pengguna ID:</b> <code>{}</code>" \
-							  "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+							  "\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
 											   mention_html(user_chat.id, user_chat.first_name),
 															user_chat.id, reason), parse_mode="HTML")
 	# Send message to owner if fednotif is enabled
 	if getfednotif:
-		bot.send_message(info['owner'], "<b>FedBan baru</b>" \
+		bot.send_message(info['owner'], tl(update.effective_message, "<b>FedBan baru</b>" \
 										"\n<b>Federasi:</b> {}" \
 										"\n<b>Federasi Admin:</b> {}" \
 										"\n<b>Pengguna:</b> {}" \
 										"\n<b>Pengguna ID:</b> <code>{}</code>" \
-										"\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+										"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
 											   mention_html(user_chat.id, user_chat.first_name),
 															user_chat.id, reason), parse_mode="HTML")
 	# If fedlog is set, then send message, except fedlog is current chat
 	get_fedlog = sql.get_fed_log(fed_id)
 	if get_fedlog:
 		if int(get_fedlog) != int(chat.id):
-			bot.send_message(get_fedlog, "<b>FedBan baru</b>" \
+			bot.send_message(get_fedlog, tl(update.effective_message, "<b>FedBan baru</b>" \
 										"\n<b>Federasi:</b> {}" \
 										"\n<b>Federasi Admin:</b> {}" \
 										"\n<b>Pengguna:</b> {}" \
 										"\n<b>Pengguna ID:</b> <code>{}</code>" \
-										"\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
+										"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
 											   mention_html(user_chat.id, user_chat.first_name),
 															user_chat.id, reason), parse_mode="HTML")
 	for fedschat in fed_chats:
@@ -691,7 +692,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 												user_chat.id, reason), 
 			html=True)
 	"""
-	message.reply_text("Orang ini telah di fbanned.")
+	message.reply_text(tl(update.effective_message, "Orang ini telah di fbanned."))
 
 
 @run_async
@@ -705,66 +706,66 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 	message = update.effective_message  # type: Optional[Message]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	info = sql.get_fed_info(fed_id)
 	getfednotif = sql.user_feds_report(info['owner'])
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
 	user_id = extract_user(message, args)
 	if not user_id:
-		message.reply_text("Anda sepertinya tidak merujuk ke pengguna.")
+		message.reply_text(tl(update.effective_message, "Anda sepertinya tidak merujuk ke pengguna."))
 		return
 
 	user_chat = bot.get_chat(user_id)
 	if user_chat.type != 'private':
-		message.reply_text("Itu bukan pengguna!")
+		message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
 		return
 
 	fban, fbanreason = sql.get_fban_user(fed_id, user_id)
 	if fban == False:
-		message.reply_text("Pengguna ini tidak di fbanned!")
+		message.reply_text(tl(update.effective_message, "Pengguna ini tidak di fbanned!"))
 		return
 
 	banner = update.effective_user  # type: Optional[User]
 
-	message.reply_text("Saya akan memberi {} kesempatan kedua dalam federasi ini.".format(user_chat.first_name))
+	message.reply_text(tl(update.effective_message, "Saya akan memberi {} kesempatan kedua dalam federasi ini.").format(user_chat.first_name))
 
 	chat_list = sql.all_fed_chats(fed_id)
 	# Will send to current chat
-	bot.send_message(chat.id, "<b>Un-FedBan</b>" \
+	bot.send_message(chat.id, tl(update.effective_message, "<b>Un-FedBan</b>" \
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
+						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
 															user_chat.id), parse_mode="HTML")
 	# Send message to owner if fednotif is enabled
 	if getfednotif:
-		bot.send_message(info['owner'], "<b>Un-FedBan</b>" \
+		bot.send_message(info['owner'], tl(update.effective_message, "<b>Un-FedBan</b>" \
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
+						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
 															user_chat.id), parse_mode="HTML")
 	# If fedlog is set, then send message, except fedlog is current chat
 	get_fedlog = sql.get_fed_log(fed_id)
 	if get_fedlog:
 		if int(get_fedlog) != int(chat.id):
-			bot.send_message(get_fedlog, "<b>Un-FedBan</b>" \
+			bot.send_message(get_fedlog, tl(update.effective_message, "<b>Un-FedBan</b>" \
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
+						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
 															user_chat.id), parse_mode="HTML")
 	for fedchats in chat_list:
 		try:
@@ -791,12 +792,12 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 		try:
 			x = sql.un_fban_user(fed_id, user_id)
 			if not x:
-				message.reply_text("Gagal fban, Pengguna ini mungkin sudah di un-fedbanned!")
+				message.reply_text(tl(update.effective_message, "Gagal fban, Pengguna ini mungkin sudah di un-fedbanned!"))
 				return
 		except:
 			pass
 
-	message.reply_text("Orang ini telah di un-fbanned.")
+	message.reply_text(tl(update.effective_message, "Orang ini telah di un-fbanned."))
 	# Also do not spamming all fed admins
 	"""
 	FEDADMIN = sql.all_fed_users(fed_id)
@@ -826,17 +827,17 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Obrolan ini tidak ada di federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Obrolan ini tidak ada di federasi apa pun!"))
 		return
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
 	if len(args) >= 1:
@@ -857,10 +858,10 @@ def set_frules(bot: Bot, update: Update, args: List[str]):
 		get_fedlog = sql.get_fed_log(fed_id)
 		if get_fedlog:
 			if eval(get_fedlog):
-				bot.send_message(get_fedlog, "*{}* telah mengganti aturan federasi *{}*".format(user.first_name, getfed['fname']), parse_mode="markdown")
-		update.effective_message.reply_text(f"Aturan telah di ganti menjadi:\n{rules}!")
+				bot.send_message(get_fedlog, tl(update.effective_message, "*{}* telah mengganti aturan federasi *{}*").format(user.first_name, getfed['fname']), parse_mode="markdown")
+		update.effective_message.reply_text(tl(update.effective_message, "Aturan telah di ganti menjadi:\n{}!").format(rules))
 	else:
-		update.effective_message.reply_text("Please write rules to set it up!")
+		update.effective_message.reply_text(tl(update.effective_message, "Silakan tulis aturan untuk mengaturnya!"))
 
 
 @run_async
@@ -872,16 +873,16 @@ def get_frules(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 	if not fed_id:
-		update.effective_message.reply_text("This chat is not in any federation!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	rules = sql.get_frules(fed_id)
-	text = "*Rules in this fed:*\n"
+	text = tl(update.effective_message, "*Peraturan di fed ini:*\n")
 	text += rules
 	update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
 
@@ -897,21 +898,20 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 	chat = update.effective_chat  # type: Optional[Chat]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	if args:
 		chat = update.effective_chat  # type: Optional[Chat]
 		fed_id = sql.get_fed_id(chat.id)
 		fedinfo = sql.get_fed_info(fed_id)
-		text = "*Siaran baru dari Federasi {}*\n".format(fedinfo['fname'])
 		# Parsing md
 		raw_text = msg.text
 		args = raw_text.split(None, 1)  # use python's maxsplit to separate cmd and args
 		txt = args[1]
 		offset = len(txt) - len(raw_text)  # set correct offset relative to command
 		text_parser = markdown_parser(txt, entities=msg.parse_entities(), offset=offset)
-		text += text_parser
+		text = text_parser
 		try:
 			broadcaster = user.first_name
 		except:
@@ -920,8 +920,9 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 		chat_list = sql.all_fed_chats(fed_id)
 		failed = 0
 		for chat in chat_list:
+			title = tl(chat, "*Siaran baru dari Federasi {}*\n").format(fedinfo['fname'])
 			try:
-				bot.sendMessage(chat, text, parse_mode="markdown")
+				bot.sendMessage(chat, title + text, parse_mode="markdown")
 			except TelegramError:
 				try:
 					dispatcher.bot.getChat(chat)
@@ -933,9 +934,9 @@ def fed_broadcast(bot: Bot, update: Update, args: List[str]):
 				failed += 1
 				LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))
 
-		send_text = "Siaran Federasi selesai."
+		send_text = tl(update.effective_message, "Siaran Federasi selesai.")
 		if failed >= 1:
-			send_text += "{} grup gagal menerima pesan, mungkin karena meninggalkan federasi.".format(failed)
+			send_text += tl(update.effective_message, "{} grup gagal menerima pesan, mungkin karena meninggalkan federasi.").format(failed)
 		update.effective_message.reply_text(send_text)
 
 @run_async
@@ -948,25 +949,25 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya pemilik federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik federasi yang dapat melakukan ini!"))
 		return
 
 	user = update.effective_user  # type: Optional[Chat]
 	chat = update.effective_chat  # type: Optional[Chat]
 	getfban = sql.get_all_fban_users(fed_id)
 	if len(getfban) == 0:
-		update.effective_message.reply_text("Tidak ada pengguna yang di fban di federasi {}".format(info['fname']), parse_mode=ParseMode.HTML)
+		update.effective_message.reply_text(tl(update.effective_message, "Tidak ada pengguna yang di fban di federasi {}").format(info['fname']), parse_mode=ParseMode.HTML)
 		return
 
 	if args:
@@ -977,7 +978,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 			if cek.get('status'):
 				if jam <= int(cek.get('value')):
 					waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
-					update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+					update.effective_message.reply_text(tl(update.effective_message, "Anda dapat mendapatkan data 30 menit sekali!\nAnda dapat mendapatkan data ini lagi pada `{}`").format(waktu), parse_mode=ParseMode.MARKDOWN)
 					return
 				else:
 					if user.id not in SUDO_USERS:
@@ -994,7 +995,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 			with BytesIO(str.encode(backups)) as output:
 				output.name = "emilia_fbanned_users.json"
 				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.json",
-													caption="Total {} pengguna terkena blokir federasi {}.".format(len(getfban), info['fname']))
+													caption=tl(update.effective_message, "Total {} pengguna terkena blokir federasi {}.").format(len(getfban), info['fname']))
 			return
 		elif args[0] == 'csv':
 			jam = time.time()
@@ -1003,7 +1004,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 			if cek.get('status'):
 				if jam <= int(cek.get('value')):
 					waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
-					update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+					update.effective_message.reply_text(tl(update.effective_message, "Anda dapat mendapatkan data 30 menit sekali!\nAnda dapat mendapatkan data ini lagi pada `{}`").format(waktu), parse_mode=ParseMode.MARKDOWN)
 					return
 				else:
 					if user.id not in SUDO_USERS:
@@ -1019,14 +1020,14 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 			with BytesIO(str.encode(backups)) as output:
 				output.name = "emilia_fbanned_users.csv"
 				update.effective_message.reply_document(document=output, filename="emilia_fbanned_users.csv",
-													caption="Total {} pengguna terkena blokir federasi {}.".format(len(getfban), info['fname']))
+													caption=tl(update.effective_message, "Total {} pengguna terkena blokir federasi {}.").format(len(getfban), info['fname']))
 			return
 
-	text = "<b>Ada {} pengguna yang di fban pada federasi {}:</b>\n".format(len(getfban), info['fname'])
+	text = tl(update.effective_message, "<b>Ada {} pengguna yang di fban pada federasi {}:</b>\n").format(len(getfban), info['fname'])
 	for users in getfban:
 		getuserinfo = sql.get_all_fban_users_target(fed_id, users)
 		if getuserinfo == False:
-			text = "Tidak ada pengguna yang di fban di federasi {}".format(info['fname'])
+			text = tl(update.effective_message, "Tidak ada pengguna yang di fban di federasi {}").format(info['fname'])
 			break
 		user_name = getuserinfo['first_name']
 		if getuserinfo['last_name']:
@@ -1042,7 +1043,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 		if cek.get('status'):
 			if jam <= int(cek.get('value')):
 				waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
-				update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+				update.effective_message.reply_text(tl(update.effective_message, "Anda dapat mendapatkan data 30 menit sekali!\nAnda dapat mendapatkan data ini lagi pada `{}`").format(waktu), parse_mode=ParseMode.MARKDOWN)
 				return
 			else:
 				if user.id not in SUDO_USERS:
@@ -1055,7 +1056,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 		with BytesIO(str.encode(cleantext)) as output:
 			output.name = "fbanlist.txt"
 			update.effective_message.reply_document(document=output, filename="fbanlist.txt",
-													caption="Berikut adalah daftar pengguna yang saat ini difban pada federasi {}.".format(info['fname']))
+													caption=tl(update.effective_message, "Berikut adalah daftar pengguna yang saat ini difban pada federasi {}.").format(info['fname']))
 
 @run_async
 def fed_notif(bot: Bot, update: Update, args: List[str]):
@@ -1069,21 +1070,21 @@ def fed_notif(bot: Bot, update: Update, args: List[str]):
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	if args:
 		if args[0] in ("yes", "on", "ya"):
 			sql.set_feds_setting(user.id, True)
-			msg.reply_text("Pelaporan federasi hidup! Setiap ada pengguna yang di fban/unfban anda akan di beritahu via PM.")
+			msg.reply_text(tl(update.effective_message, "Pelaporan federasi hidup! Setiap ada pengguna yang di fban/unfban anda akan di beritahu via PM."))
 		elif args[0] in ("no", "off", "ga"):
 			sql.set_feds_setting(user.id, False)
-			msg.reply_text("Pelaporan federasi mati! Setiap ada pengguna yang di fban/unfban anda tidak akan di beritahu via PM.")
+			msg.reply_text(tl(update.effective_message, "Pelaporan federasi mati! Setiap ada pengguna yang di fban/unfban anda tidak akan di beritahu via PM."))
 		else:
-			msg.reply_text("Tolong masukan `ya`/`on`/`ga`/`off`", parse_mode="markdown")
+			msg.reply_text(tl(update.effective_message, "Tolong masukan `ya`/`on`/`ga`/`off`"), parse_mode="markdown")
 	else:
 		getreport = sql.user_feds_report(user.id)
-		msg.reply_text("Preferensi laporan federasi anda saat ini: `{}`".format(getreport), parse_mode="markdown")
+		msg.reply_text(tl(update.effective_message, "Preferensi laporan federasi anda saat ini: `{}`").format(getreport), parse_mode="markdown")
 
 @run_async
 def fed_chats(bot: Bot, update: Update, args: List[str]):
@@ -1095,26 +1096,26 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 	user = update.effective_user  # type: Optional[User]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
 	info = sql.get_fed_info(fed_id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_admin(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya admin federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
 	getlist = sql.all_fed_chats(fed_id)
 	if len(getlist) == 0:
-		update.effective_message.reply_text("Tidak ada pengguna yang di fban di federasi {}".format(info['fname']), parse_mode=ParseMode.HTML)
+		update.effective_message.reply_text(tl(update.effective_message, "Tidak ada obrolan yang bergabung pada federasi {}").format(info['fname']), parse_mode=ParseMode.HTML)
 		return
 
-	text = "<b>Obrolan yang bergabung pada federasi {}:</b>\n".format(info['fname'])
+	text = tl(update.effective_message, "<b>Obrolan yang bergabung pada federasi {}:</b>\n").format(info['fname'])
 	for chats in getlist:
 		chat_name = sql.get_fed_name(chats)
 		text += " • {} (<code>{}</code>)\n".format(chat_name, chats)
@@ -1125,9 +1126,9 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 		cleanr = re.compile('<.*?>')
 		cleantext = re.sub(cleanr, '', text)
 		with BytesIO(str.encode(cleantext)) as output:
-			output.name = "fbanlist.txt"
-			update.effective_message.reply_document(document=output, filename="fbanlist.txt",
-													caption="Berikut adalah daftar obrolan yang bergabung federasi {}.".format(info['fname']))
+			output.name = "fedchats.txt"
+			update.effective_message.reply_document(document=output, filename="fedchats.txt",
+													caption=tl(update.effective_message, "Berikut adalah daftar obrolan yang bergabung federasi {}.").format(info['fname']))
 
 @run_async
 def fed_import_bans(bot: Bot, update: Update, chat_data):
@@ -1140,7 +1141,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 	msg = update.effective_message  # type: Optional[Message]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
@@ -1148,11 +1149,11 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 	getfed = sql.get_fed_info(fed_id)
 
 	if not fed_id:
-		update.effective_message.reply_text("Grup ini tidak ada dalam federasi apa pun!")
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
-		update.effective_message.reply_text("Hanya pemilik federasi yang dapat melakukan ini!")
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik federasi yang dapat melakukan ini!"))
 		return
 
 	if msg.reply_to_message and msg.reply_to_message.document:
@@ -1162,7 +1163,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 		if cek.get('status'):
 			if jam <= int(cek.get('value')):
 				waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
-				update.effective_message.reply_text("Anda dapat mencadangan data 30 menit sekali!\nAnda dapat mencadangan data lagi pada `{}`".format(waktu), parse_mode=ParseMode.MARKDOWN)
+				update.effective_message.reply_text(tl(update.effective_message, "Anda dapat mendapatkan data 30 menit sekali!\nAnda dapat mendapatkan data ini lagi pada `{}`").format(waktu), parse_mode=ParseMode.MARKDOWN)
 				return
 			else:
 				if user.id not in SUDO_USERS:
@@ -1178,7 +1179,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 		try:
 			file_info = bot.get_file(msg.reply_to_message.document.file_id)
 		except BadRequest:
-			msg.reply_text("Coba unduh dan unggah ulang filenya, yang ini sepertinya rusak!")
+			msg.reply_text(tl(update.effective_message, "Coba unduh dan unggah ulang filenya, yang ini sepertinya rusak!"))
 			return
 		fileformat = msg.reply_to_message.document.file_name.split('.')[-1]
 		if fileformat == 'json':
@@ -1226,15 +1227,15 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
 					if addtodb:
 						success += 1
-			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(success)
+			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(success)
 			if failed >= 1:
-				tekt += " {} gagal di impor.".format(failed)
+				tekt += tl(update.effective_message, " {} gagal di impor.").format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
 			if get_fedlog:
 				if eval(get_fedlog):
-					teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], success)
+					teks = tl(update.effective_message, "Federasi *{}* telah berhasil mengimpor data. {} di blokir").format(getfed['fname'], success)
 					if failed >= 1:
-						teks += " {} gagal di impor.".format(failed)
+						teks += tl(update.effective_message, " {} gagal di impor.").format(failed)
 					bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		elif fileformat == 'csv':
 			multi_fed_id = []
@@ -1286,18 +1287,18 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 				addtodb = sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason)
 			csvFile.close()
 			os.remove("fban_{}.csv".format(msg.reply_to_message.document.file_id))
-			text = "Berkas blokir berhasil diimpor. {} orang diblokir.".format(addtodb)
+			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(addtodb)
 			if failed >= 1:
-				text += " {} gagal di impor.".format(failed)
+				text += tl(update.effective_message, " {} gagal di impor.").format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
 			if get_fedlog:
 				if eval(get_fedlog):
-					teks = "Federasi *{}* telah berhasil mengimpor data. {} di blokir".format(getfed['fname'], addtodb)
+					teks = tl(update.effective_message, "Federasi *{}* telah berhasil mengimpor data. {} di blokir").format(getfed['fname'], addtodb)
 					if failed >= 1:
-						teks += " {} gagal di impor.".format(failed)
+						teks += tl(update.effective_message, " {} gagal di impor.").format(failed)
 					bot.send_message(get_fedlog, teks, parse_mode="markdown")
 		else:
-			update.effective_message.reply_text("File tidak di dukung.")
+			update.effective_message.reply_text(tl(update.effective_message, "File tidak di dukung."))
 			return
 		update.effective_message.reply_text(text)
 
@@ -1308,14 +1309,14 @@ def del_fed_button(bot, update):
 	fed_id = query.data.split("_")[1]
 
 	if fed_id == 'cancel':
-		query.message.edit_text("Penghapusan federasi dibatalkan")
+		query.message.edit_text(tl(update.effective_message, "Penghapusan federasi dibatalkan"))
 		return
 
 	getfed = sql.get_fed_info(fed_id)
 	if getfed:
 		delete = sql.del_fed(fed_id)
 		if delete:
-			query.message.edit_text("Anda telah menghapus federasi Anda! Sekarang semua Grup yang terhubung dengan `{}` tidak memiliki federasi.".format(getfed['fname']), parse_mode='markdown')
+			query.message.edit_text(tl(update.effective_message, "Anda telah menghapus federasi Anda! Sekarang semua Grup yang terhubung dengan `{}` sekarang tidak memiliki federasi.").format(getfed['fname']), parse_mode='markdown')
 
 @run_async
 def fed_stat_user(bot, update, args):
@@ -1340,14 +1341,14 @@ def fed_stat_user(bot, update, args):
 			fed_id = args[1]
 			user_name, reason = sql.get_user_fban(fed_id, str(user_id))
 			if user_name == False:
-				update.effective_message.reply_text("Federasi {} tidak di temukan!".format(fed_id), parse_mode="markdown")
+				update.effective_message.reply_text(tl(update.effective_message, "Federasi {} tidak di temukan!").format(fed_id), parse_mode="markdown")
 				return
 			if user_name == "":
-				user_name = "Dia"
+				user_name = tl(update.effective_message, "Dia")
 			if not reason:
-				update.effective_message.reply_text("{} belum di larang di federasi ini!".format(user_name))
+				update.effective_message.reply_text(tl(update.effective_message, "{} belum di larang di federasi ini!").format(user_name))
 			else:
-				teks = "{} di larang di federasi ini karena:\n`{}`".format(user_name, reason)
+				teks = tl(update.effective_message, "{} di larang di federasi ini karena:\n`{}`").format(user_name, reason)
 				update.effective_message.reply_text(teks, parse_mode="markdown")
 			return
 		user_name, fbanlist = sql.get_user_fbanlist(str(user_id))
@@ -1355,17 +1356,17 @@ def fed_stat_user(bot, update, args):
 			try:
 				user_name = bot.get_chat(user_id).first_name
 			except BadRequest:
-				user_name = "Dia"
+				user_name = tl(update.effective_message, "Dia")
 			if user_name == "":
-				user_name = "Dia"
+				user_name = tl(update.effective_message, "Dia")
 		if len(fbanlist) == 0:
-			update.effective_message.reply_text("{} belum di larang di federasi mana pun!".format(user_name))
+			update.effective_message.reply_text(tl(update.effective_message, "{} belum di larang di federasi mana pun!").format(user_name))
 			return
 		else:
-			teks = "{} sudah di larang di federasi ini:\n".format(user_name)
+			teks = tl(update.effective_message, "{} sudah di larang di federasi ini:\n").format(user_name)
 			for x in fbanlist:
 				teks += "- `{}`: {}\n".format(x[0], x[1][:20])
-			teks += "\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>"
+			teks += tl(update.effective_message, "\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>")
 			update.effective_message.reply_text(teks, parse_mode="markdown")
 
 	elif not msg.reply_to_message and not args:
@@ -1374,27 +1375,27 @@ def fed_stat_user(bot, update, args):
 		if user_name == "":
 			user_name = msg.from_user.first_name
 		if len(fbanlist) == 0:
-			update.effective_message.reply_text("{} belum di larang di federasi mana pun!".format(user_name))
+			update.effective_message.reply_text(tl(update.effective_message, "{} belum di larang di federasi mana pun!").format(user_name))
 		else:
-			teks = "{} sudah di larang di federasi ini:\n".format(user_name)
+			teks = tl(update.effective_message, "{} sudah di larang di federasi ini:\n").format(user_name)
 			for x in fbanlist:
 				teks += "- `{}`: {}\n".format(x[0], x[1][:20])
-			teks += "\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>"
+			teks += tl(update.effective_message, "\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>")
 			update.effective_message.reply_text(teks, parse_mode="markdown")
 
 	else:
 		fed_id = args[0]
 		fedinfo = sql.get_fed_info(fed_id)
 		if not fedinfo:
-			update.effective_message.reply_text("Federasi {} tidak di temukan!".format(fed_id))
+			update.effective_message.reply_text(tl(update.effective_message, "Federasi {} tidak di temukan!").format(fed_id))
 			return
 		name, reason = sql.get_user_fban(fed_id, msg.from_user.id)
 		if not name:
 			name = msg.from_user.first_name
 		if not reason:
-			update.effective_message.reply_text("{} tidak di larang di federasi ini".format(name))
+			update.effective_message.reply_text(tl(update.effective_message, "{} tidak di larang di federasi ini").format(name))
 			return
-		update.effective_message.reply_text("{} di larang di federasi ini karena:\n`{}`".format(name, reason), parse_mode="markdown")
+		update.effective_message.reply_text(tl(update.effective_message, "{} di larang di federasi ini karena:\n`{}`").format(name, reason), parse_mode="markdown")
 
 
 @run_async
@@ -1408,23 +1409,23 @@ def set_fed_log(bot, update, args):
 	msg = update.effective_message  # type: Optional[Message]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	if args:
 		fedinfo = sql.get_fed_info(args[0])
 		if not fedinfo:
-			update.effective_message.reply_text("Federasi ini tidak ada!")
+			update.effective_message.reply_text(tl(update.effective_message, "Federasi ini tidak ada!"))
 			return
 		isowner = is_user_fed_owner(args[0], user.id)
 		if not isowner:
-			update.effective_message.reply_text("Hanya pencipta federasi yang bisa menetapkan log federasi.")
+			update.effective_message.reply_text(tl(update.effective_message, "Hanya pencipta federasi yang bisa menetapkan log federasi."))
 			return
 		setlog = sql.set_fed_log(args[0], chat.id)
 		if setlog:
-			update.effective_message.reply_text("Log federasi `{}` di setel pada {}".format(fedinfo['fname'], chat.title), parse_mode="markdown")
+			update.effective_message.reply_text(tl(update.effective_message, "Log federasi `{}` telah di setel pada {}").format(fedinfo['fname'], chat.title), parse_mode="markdown")
 	else:
-		update.effective_message.reply_text("Anda belum memberikan ID federasinya!")
+		update.effective_message.reply_text(tl(update.effective_message, "Anda belum memberikan ID federasinya!"))
 
 @run_async
 def unset_fed_log(bot, update, args):
@@ -1437,23 +1438,23 @@ def unset_fed_log(bot, update, args):
 	msg = update.effective_message  # type: Optional[Message]
 
 	if chat.type == 'private':
-		update.effective_message.reply_text("Perintah ini di khususkan untuk grup, bukan pada PM!")
+		update.effective_message.reply_text(tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
 		return
 
 	if args:
 		fedinfo = sql.get_fed_info(args[0])
 		if not fedinfo:
-			update.effective_message.reply_text("Federasi ini tidak ada!")
+			update.effective_message.reply_text(tl(update.effective_message, "Federasi ini tidak ada!"))
 			return
 		isowner = is_user_fed_owner(args[0], user.id)
 		if not isowner:
-			update.effective_message.reply_text("Hanya pencipta federasi yang bisa menetapkan log federasi.")
+			update.effective_message.reply_text(tl(update.effective_message, "Hanya pencipta federasi yang bisa menetapkan log federasi."))
 			return
 		setlog = sql.set_fed_log(args[0], None)
 		if setlog:
-			update.effective_message.reply_text("Log federasi `{}` telah di cabut pada {}".format(fedinfo['fname'], chat.title), parse_mode="markdown")
+			update.effective_message.reply_text(tl(update.effective_message, "Log federasi `{}` telah di cabut pada {}").format(fedinfo['fname'], chat.title), parse_mode="markdown")
 	else:
-		update.effective_message.reply_text("Anda belum memberikan ID federasinya!")
+		update.effective_message.reply_text(tl(update.effective_message, "Anda belum memberikan ID federasinya!"))
 
 
 def is_user_fed_admin(fed_id, user_id):
@@ -1498,7 +1499,7 @@ def welcome_fed(bot, update):
 def __stats__():
 	all_fbanned = sql.get_all_fban_users_global()
 	all_feds = sql.get_all_feds_users_global()
-	return "{} pengguna di fbanned, pada {} federasi".format(len(all_fbanned), len(all_feds))
+	return tl(OWNER_ID).format(len(all_fbanned), len(all_feds))
 
 
 def __user_info__(user_id, chat_id):
@@ -1509,15 +1510,15 @@ def __user_info__(user_id, chat_id):
 		infoname = info['fname']
 
 		if int(info['owner']) == user_id:
-			text = "Pengguna ini adalah owner di federasi saat ini: <b>{}</b>.".format(infoname)
+			text = tl(chat_id, "Pengguna ini adalah owner di federasi saat ini: <b>{}</b>.").format(infoname)
 		elif is_user_fed_admin(fed_id, user_id):
-			text = "Pengguna ini adalah admin di federasi saat ini: <b>{}</b>.".format(infoname)
+			text = tl(chat_id, "Pengguna ini adalah admin di federasi saat ini: <b>{}</b>.").format(infoname)
 
 		elif fban:
-			text = "Dilarang di federasi saat ini: <b>Ya</b>"
-			text += "\n<b>Alasan:</b> {}".format(fbanreason)
+			text = tl(chat_id, "Dilarang di federasi saat ini: <b>Ya</b>")
+			text += tl(chat_id, "\n<b>Alasan:</b> {}").format(fbanreason)
 		else:
-			text = "Dilarang di federasi saat ini: <b>Tidak</b>"
+			text = tl(chat_id, "Dilarang di federasi saat ini: <b>Tidak</b>")
 	else:
 		text = ""
 	return text
@@ -1541,42 +1542,9 @@ def get_chat(chat_id, chat_data):
 		return {"status": False, "value": False}
 
 
-__mod_name__ = "Federasi"
+__mod_name__ = "Federations"
 
-__help__ = """
-Ah, manajemen grup. Semuanya menyenangkan, sampai mulai spammer masuk grup anda, dan Anda harus mencekalnya. Maka Anda perlu mulai melarang lebih banyak, dan lebih banyak lagi, dan itu terasa menyakitkan.
-Tetapi kemudian Anda memiliki banyak grup, dan Anda tidak ingin spammer ini ada di salah satu grup Anda - bagaimana kamu bisa berurusan? Apakah Anda harus mencekalnya secara manual, di semua grup Anda?
-
-Tidak lagi! Dengan federasi, Anda dapat membuat larangan dalam satu obrolan tumpang tindih dengan semua obrolan lainnya.
-Anda bahkan dapat menunjuk admin federasi, sehingga admin tepercaya Anda dapat melarang semua obrolan yang ingin Anda lindungi.
-
-Masih tahap percobaan, untuk membuat federasi hanya bisa di lakukan oleh pembuat saya
-
-*Perintah:*
- - /fedstat: Daftarkan semua federasi yang telah dilarang dari Anda.
- - /fedstat <user ID>: Dapatkan info federasi banned yang telah ditentukan oleh pengguna (bisa juga menyebut nama pengguna, mention, dan balasan).
- - /fedstat <user ID> <Fed ID>: Memberikan informasi tentang alasan larangan pengguna yang ditentukan dalam federasi itu. Jika tidak ada pengguna yang ditentukan, periksa pengirimnya.
-
-*Hanya admin federasi:*
- - /newfed <fedname>: membuat federasi baru dengan nama yang diberikan. Pengguna hanya diperbolehkan memiliki satu federasi. Metode ini juga dapat digunakan untuk mengubah nama federasi. (maks. 64 karakter)
- - /delfed: menghapus federasi Anda, dan informasi apa pun yang berkaitan dengannya. Tidak akan membatalkan pencekalan pengguna yang diblokir.
- - /fedinfo <FedID>: informasi tentang federasi yang ditentukan.
- - /joinfed <FedID>: bergabung dengan obrolan saat ini ke federasi. Hanya pemilik obrolan yang dapat melakukan ini. Setiap obrolan hanya bisa dalam satu federasi.
- - /leavefed <FedID>: meninggalkan federasi yang diberikan. Hanya pemilik obrolan yang dapat melakukan ini.
- - /fpromote <user>: mempromosikan pengguna untuk memberi fed admin. Pemilik fed saja.
- - /fdemote <user>: menurunkan pengguna dari admin federasi ke pengguna normal. Pemilik fed saja.
- - /fbroadcast <teks>: Broadcast teks ke seluruh grup yang join federasi tsb.
- - /fban <user>: melarang pengguna dari semua federasi tempat obrolan ini berlangsung, dan eksekutor memiliki kendali atas.
- - /unfban <user>: batalkan pengguna dari semua federasi tempat obrolan ini berlangsung, dan bahwa pelaksana memiliki kendali atas.
- - /setfrules: Atur peraturan federasi.
- - /frules: Lihat peraturan federasi.
- - /chatfed: Lihat federasi pada obrolan saat ini.
- - /fedadmins: Tampilkan admin federasi.
- - /fbanlist: Menampilkan semua pengguna yang di fban pada federasi saat ini.
- - /fednotif <on/off>: Atur federasi notif di PM ketika ada pengguna yang di fban/unfban.
- - /fedchats: Dapatkan semua chat yang terhubung di federasi.
- - /importfbans: Balas file pesan cadangan federasi untuk mengimpor list banned ke federasi sekarang.
-"""
+__help__ = "feds_help"
 
 NEW_FED_HANDLER = CommandHandler("newfed", new_fed)
 DEL_FED_HANDLER = CommandHandler("delfed", del_fed, pass_args=True)

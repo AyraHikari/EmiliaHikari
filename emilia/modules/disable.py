@@ -5,10 +5,12 @@ from telegram import ParseMode, Update, Bot, Chat, User
 from telegram.ext import CommandHandler, RegexHandler, Filters
 from telegram.utils.helpers import escape_markdown
 
-from emilia import dispatcher, spamfilters
+from emilia import dispatcher, spamfilters, OWNER_ID
 from emilia.modules.helper_funcs.handlers import CMD_STARTERS
 from emilia.modules.helper_funcs.misc import is_module_loaded
 from emilia.modules.connection import connected
+
+from emilia.modules import languages
 
 FILENAME = __name__.rsplit(".", 1)[-1]
 
@@ -81,7 +83,7 @@ if is_module_loaded(FILENAME):
             chat_name = dispatcher.bot.getChat(conn).title
         else:
             if update.effective_message.chat.type == "private":
-                update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
                 return ""
             chat = update.effective_chat
             chat_id = update.effective_chat.id
@@ -95,16 +97,16 @@ if is_module_loaded(FILENAME):
             if disable_cmd in set(DISABLE_CMDS + DISABLE_OTHER):
                 sql.disable_command(chat.id, disable_cmd)
                 if conn:
-                    text = "Menonaktifkan penggunaan `{}` pada *{}*".format(disable_cmd, chat_name)
+                    text = languages.tl(update.effective_message, "Menonaktifkan penggunaan `{}` pada *{}*").format(disable_cmd, chat_name)
                 else:
-                    text = "Menonaktifkan penggunaan `{}`".format(disable_cmd)
+                    text = languages.tl(update.effective_message, "Menonaktifkan penggunaan `{}`").format(disable_cmd)
                 update.effective_message.reply_text(text,
                                                     parse_mode=ParseMode.MARKDOWN)
             else:
-                update.effective_message.reply_text("Perintah itu tidak bisa dinonaktifkan")
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Perintah itu tidak bisa dinonaktifkan"))
 
         else:
-            update.effective_message.reply_text("Apa yang harus saya nonaktifkan?")
+            update.effective_message.reply_text(languages.tl(update.effective_message, "Apa yang harus saya nonaktifkan?"))
 
 
     @run_async
@@ -123,7 +125,7 @@ if is_module_loaded(FILENAME):
             chat_name = dispatcher.bot.getChat(conn).title
         else:
             if update.effective_message.chat.type == "private":
-                update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
                 return ""
             chat = update.effective_chat
             chat_id = update.effective_chat.id
@@ -136,16 +138,16 @@ if is_module_loaded(FILENAME):
 
             if sql.enable_command(chat.id, enable_cmd):
                 if conn:
-                    text = "Diaktifkan penggunaan `{}` pada *{}*".format(enable_cmd, chat_name)
+                    text = languages.tl(update.effective_message, "Diaktifkan penggunaan `{}` pada *{}*").format(enable_cmd, chat_name)
                 else:
-                    text = "Diaktifkan penggunaan `{}`".format(enable_cmd)
+                    text = languages.tl(update.effective_message, "Diaktifkan penggunaan `{}`").format(enable_cmd)
                 update.effective_message.reply_text(text,
                                                     parse_mode=ParseMode.MARKDOWN)
             else:
-                update.effective_message.reply_text("Apakah itu bahkan dinonaktifkan?")
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Apakah itu bahkan dinonaktifkan?"))
 
         else:
-            update.effective_message.reply_text("Apa yang harus saya aktifkan?")
+            update.effective_message.reply_text(languages.tl(update.effective_message, "Apa yang harus saya aktifkan?"))
 
 
     @run_async
@@ -159,22 +161,22 @@ if is_module_loaded(FILENAME):
             result = ""
             for cmd in set(DISABLE_CMDS + DISABLE_OTHER):
                 result += " - `{}`\n".format(escape_markdown(cmd))
-            update.effective_message.reply_text("Perintah berikut dapat diubah:\n{}".format(result),
+            update.effective_message.reply_text(languages.tl(update.effective_message, "Perintah berikut dapat diubah:\n{}").format(result),
                                                 parse_mode=ParseMode.MARKDOWN)
         else:
-            update.effective_message.reply_text("Tidak ada perintah yang dapat dinonaktifkan.")
+            update.effective_message.reply_text(languages.tl(update.effective_message, "Tidak ada perintah yang dapat dinonaktifkan."))
 
 
     # do not async
     def build_curr_disabled(chat_id: Union[str, int]) -> str:
         disabled = sql.get_all_disabled(chat_id)
         if not disabled:
-            return "Tidak ada perintah yang dinonaktifkan!"
+            return languages.tl(update.effective_message, "Tidak ada perintah yang dinonaktifkan!")
 
         result = ""
         for cmd in disabled:
             result += " - `{}`\n".format(escape_markdown(cmd))
-        return "Perintah-perintah berikut saat ini dibatasi:\n{}".format(result)
+        return languages.tl(update.effective_message, "Perintah-perintah berikut saat ini dibatasi:\n{}").format(result)
 
 
     @run_async
@@ -192,7 +194,7 @@ if is_module_loaded(FILENAME):
             chat_name = dispatcher.bot.getChat(conn).title
         else:
             if update.effective_message.chat.type == "private":
-                update.effective_message.reply_text("Anda bisa lakukan command ini pada grup, bukan pada PM")
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
                 return ""
             chat = update.effective_chat
             chat_id = update.effective_chat.id
@@ -203,7 +205,7 @@ if is_module_loaded(FILENAME):
 
 
     def __stats__():
-        return "{} item yang dinonaktifkan, pada {} obrolan.".format(sql.num_disabled(), sql.num_chats())
+        return languages.tl(OWNER_ID, "{} item yang dinonaktifkan, pada {} obrolan.").format(sql.num_disabled(), sql.num_chats())
 
 
     def __import_data__(chat_id, data):
@@ -220,16 +222,9 @@ if is_module_loaded(FILENAME):
         return build_curr_disabled(chat_id)
 
 
-    __mod_name__ = "Penonaktifan perintah"
+    __mod_name__ = "Command disabling"
 
-    __help__ = """
- - /cmds: periksa status perintah yang dinonaktifkan saat ini
-
-*Hanya admin:*
- - /enable <cmd name>: aktifkan perintah itu
- - /disable <cmd name>: nonaktifkan perintah itu
- - /listcmds: daftar semua perintah toggleable yang memungkinkan
-    """
+    __help__ = "disable_help"
 
     DISABLE_HANDLER = CommandHandler("disable", disable, pass_args=True)#, filters=Filters.group)
     ENABLE_HANDLER = CommandHandler("enable", enable, pass_args=True)#, filters=Filters.group)

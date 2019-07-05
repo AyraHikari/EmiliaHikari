@@ -13,6 +13,7 @@ from emilia import dispatcher, OWNER_ID, LOGGER
 from emilia.modules.helper_funcs.filters import CustomFilters
 
 import emilia.modules.sql.feds_sql as fedsql
+from emilia.modules import languages
 
 USERS_GROUP = 4
 
@@ -77,7 +78,7 @@ def log_user(bot: Bot, update: Update):
         if user:
             fban, fbanreason = fedsql.get_fban_user(fed_id, user.id)
             if fban:
-                update.effective_message.reply_text("Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`".format(fbanreason), parse_mode="markdown")
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
                 try:
                      bot.kick_chat_member(chat.id, user.id)
                 except:
@@ -112,15 +113,15 @@ def chats(bot: Bot, update: Update):
                                                 caption="Berikut ini daftar obrolan dalam database saya.")
 
 
-def __user_info__(user_id):
+def __user_info__(user_id, chat_id):
     if user_id == dispatcher.bot.id:
-        return """Saya telah melihatnya... Wow. Apakah mereka menguntit saya? Mereka ada di semua tempat yang sama dengan saya... oh. Ini aku."""
+        return languages.tl(chat_id, """Saya telah melihatnya... Wow. Apakah mereka menguntit saya? Mereka ada di semua tempat yang sama dengan saya... oh. Ini aku.""")
     num_chats = sql.get_user_num_chats(user_id)
-    return """Saya telah melihatnya <code>{}</code> obrolan total.""".format(num_chats)
+    return languages.tl(chat_id, """Saya telah melihatnya <code>{}</code> obrolan total.""").format(num_chats)
 
 
 def __stats__():
-    return "{} pengguna, pada {} obrolan".format(sql.num_users(), sql.num_chats())
+    return languages.tl(OWNER_ID, "{} pengguna, pada {} obrolan").format(sql.num_users(), sql.num_chats())
 
 
 def __migrate__(old_chat_id, new_chat_id):

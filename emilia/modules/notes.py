@@ -10,13 +10,14 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamfilters
+from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamfilters, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_note_type
 
 from emilia.modules.connection import connected
+from emilia.modules.languages import tl
 
 FILE_MATCHER = re.compile(r"^###file_id(!photo)?###:(.*?)(?:\s|$)")
 STICKER_MATCHER = re.compile(r"^###sticker(!photo)?###:")
@@ -69,8 +70,8 @@ def get(bot, update, notename, show_none=True, no_format=False):
 					bot.forward_message(chat_id=chat_id, from_chat_id=MESSAGE_DUMP, message_id=note.value)
 				except BadRequest as excp:
 					if excp.message == "Message to forward not found":
-						message.reply_text("Pesan ini tampaknya telah hilang - saya akan menghapusnya "
-										   "dari daftar catatan Anda.")
+						message.reply_text(tl(update.effective_message, "Pesan ini tampaknya telah hilang - saya akan menghapusnya "
+										   "dari daftar catatan Anda."))
 						sql.rm_note(chat_id, notename)
 					else:
 						raise
@@ -79,10 +80,10 @@ def get(bot, update, notename, show_none=True, no_format=False):
 					bot.forward_message(chat_id=chat_id, from_chat_id=chat_id, message_id=note.value)
 				except BadRequest as excp:
 					if excp.message == "Message to forward not found":
-						message.reply_text("Sepertinya pengirim asli dari catatan ini telah dihapus "
+						message.reply_text(tl(update.effective_message, "Sepertinya pengirim asli dari catatan ini telah dihapus "
 										   "pesan mereka - maaf! Dapatkan admin bot Anda untuk mulai menggunakan "
 										   "pesan dump untuk menghindari ini. Saya akan menghapus catatan ini dari "
-										   "catatan tersimpan Anda.")
+										   "catatan tersimpan Anda."))
 						sql.rm_note(chat_id, notename)
 					else:
 						raise
@@ -107,7 +108,7 @@ def get(bot, update, notename, show_none=True, no_format=False):
 										 reply_markup=keyboard)
 					except BadRequest as excp:
 						if excp.message == "Wrong http url":
-							failtext = "Kesalahan: URL pada tombol tidak valid! Harap perbaruhi catatan ini."
+							failtext = tl(update.effective_message, "Kesalahan: URL pada tombol tidak valid! Harap perbaruhi catatan ini.")
 							failtext += "\n\n```\n{}```".format(note.value + revert_buttons(buttons))
 							message.reply_text(failtext, parse_mode="markdown")
 						print("Gagal mengirim catatan: " + excp.message)
@@ -119,21 +120,21 @@ def get(bot, update, notename, show_none=True, no_format=False):
 					
 			except BadRequest as excp:
 				if excp.message == "Entity_mention_user_invalid":
-					message.reply_text("Sepertinya Anda mencoba menyebutkan seseorang yang belum pernah saya lihat sebelumnya. "
+					message.reply_text(tl(update.effective_message, "Sepertinya Anda mencoba menyebutkan seseorang yang belum pernah saya lihat sebelumnya. "
 									   "Jika kamu benar-benar ingin menyebutkannya, meneruskan salah satu pesan mereka kepada saya, "
-									   "dan saya akan dapat untuk menandai mereka!")
+									   "dan saya akan dapat untuk menandai mereka!"))
 				elif FILE_MATCHER.match(note.value):
-					message.reply_text("Catatan ini adalah file yang salah diimpor dari bot lain - saya tidak bisa menggunakan "
+					message.reply_text(tl(update.effective_message, "Catatan ini adalah file yang salah diimpor dari bot lain - saya tidak bisa menggunakan "
 									   "ini. Jika Anda benar-benar membutuhkannya, Anda harus menyimpannya lagi. "
-									   "Sementara itu, saya akan menghapusnya dari daftar catatan Anda.")
+									   "Sementara itu, saya akan menghapusnya dari daftar catatan Anda."))
 					sql.rm_note(chat_id, notename)
 				else:
-					message.reply_text("Catatan ini tidak dapat dikirim karena formatnya salah.")
+					message.reply_text(tl(update.effective_message, "Catatan ini tidak dapat dikirim karena formatnya salah."))
 					LOGGER.exception("Tidak dapat menguraikan pesan #%s di obrolan %s", notename, str(chat_id))
 					LOGGER.warning("Pesan itu: %s", str(note.value))
 		return
 	elif show_none:
-		message.reply_text("Catatan ini tidak ada")
+		message.reply_text(tl(update.effective_message, "Catatan ini tidak ada"))
 
 
 @run_async
@@ -146,7 +147,7 @@ def cmd_get(bot: Bot, update: Update, args: List[str]):
 	elif len(args) >= 1:
 		get(bot, update, args[0], show_none=True)
 	else:
-		update.effective_message.reply_text("Get apa?")
+		update.effective_message.reply_text(tl(update.effective_message, "Get apa?"))
 
 
 @run_async
@@ -185,24 +186,24 @@ def save(bot: Bot, update: Update):
 	checktext = msg.text.split()
 	if msg.reply_to_message:
 		if len(checktext) <= 1:
-			msg.reply_text("Anda harus memberi nama untuk catatan ini!")
+			msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk catatan ini!"))
 			return
 	else:
 		if len(checktext) <= 2:
-			msg.reply_text("Anda harus memberi nama untuk catatan ini!")
+			msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk catatan ini!"))
 			return
 
 	note_name, text, data_type, content, buttons = get_note_type(msg)
 
 	if data_type is None:
-		msg.reply_text("Tidak ada catatan!")
+		msg.reply_text(tl(update.effective_message, "Tidak ada catatan!"))
 		return
 	
 	if len(text.strip()) == 0:
 		text = note_name
 		
 	sql.add_note_to_db(chat_id, note_name, text, data_type, buttons=buttons, file=content)
-	msg.reply_text("Ok, `{note_name}` ditambahkan di *{chat_name}*.\ndapatkan dengan `/get {note_name}`, atau `#{note_name}`".format(note_name=note_name, chat_name=chat_name), parse_mode=ParseMode.MARKDOWN)
+	msg.reply_text(tl(update.effective_message, "Ok, `{note_name}` ditambahkan di *{chat_name}*.\ndapatkan dengan `/get {note_name}`, atau `#{note_name}`").format(note_name=note_name, chat_name=chat_name), parse_mode=ParseMode.MARKDOWN)
 
 	#if msg.reply_to_message and msg.reply_to_message.from_user.is_bot:
 	#    if text:
@@ -238,22 +239,22 @@ def clear(bot: Bot, update: Update, args: List[str]):
 			chat_name = chat.title
 
 	if len(args) >= 1:
-		catatan = ""
-		catatangagal = ""
+		catatan = []
+		catatangagal = []
 		for x in range(len(args)):
 			notename = args[x]
 			if sql.rm_note(chat_id, notename):
-				catatan += "{}, ".format(notename)
+				catatan.append(notename)
 			else:
-				catatangagal += "{}, ".format(notename)
-		if catatan != "" and catatangagal == "":
-			update.effective_message.reply_text("Catatan di *{}* untuk {}berhasil dihapus 😁".format(chat_name, catatan), parse_mode=ParseMode.MARKDOWN)
-		elif catatangagal != "" and catatan == "":
-			update.effective_message.reply_text("Catatan di *{}* untuk {}gagal dihapus!".format(chat_name, catatangagal), parse_mode=ParseMode.MARKDOWN)
+				catatangagal.append(notename)
+		if len(catatan) >= 1 and len(catatangagal) == 0:
+			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk {} berhasil dihapus 😁").format(chat_name, ", ".join(catatan)), parse_mode=ParseMode.MARKDOWN)
+		elif len(catatangagal) >= 0 and len(catatan) == 0:
+			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk {} gagal dihapus!").format(chat_name, ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
 		else:
-			update.effective_message.reply_text("Catatan di *{}* untuk {}berhasil dihapus 😁\nCatatan {}gagal dihapus!".format(chat_name, catatan, catatangagal), parse_mode=ParseMode.MARKDOWN)
+			update.effective_message.reply_text(tl(update.effective_message, "Catatan di *{}* untuk {} berhasil dihapus 😁\nCatatan {} gagal dihapus!").format(chat_name, ", ".join(catatan), ", ".join(catatangagal)), parse_mode=ParseMode.MARKDOWN)
 	else:
-		update.effective_message.reply_text("Apa yang ingin dihapus?")
+		update.effective_message.reply_text(tl(update.effective_message, "Apa yang ingin dihapus?"))
 
 @run_async
 def list_notes(bot: Bot, update: Update):
@@ -266,15 +267,15 @@ def list_notes(bot: Bot, update: Update):
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
-		msg = "*Catatan di {}:*\n".format(chat_name)
+		msg = tl(update.effective_message, "*Catatan di {}:*\n").format(chat_name)
 	else:
 		chat_id = update.effective_chat.id
 		if chat.type == "private":
 			chat_name = ""
-			msg = "*Catatan lokal:*\n"
+			msg = tl(update.effective_message, "*Catatan lokal:*\n")
 		else:
 			chat_name = chat.title
-			msg = "*Catatan di {}:*\n".format(chat_name)
+			msg = tl(update.effective_message, "*Catatan di {}:*\n").format(chat_name)
 
 	note_list = sql.get_all_chat_notes(chat_id)
 
@@ -285,14 +286,14 @@ def list_notes(bot: Bot, update: Update):
 			msg = ""
 		msg += note_name
 
-	if msg == "*Catatan di {}:*\n".format(chat_name) or msg == "*Catatan Lokal:*\n":
+	if msg == tl(update.effective_message, "*Catatan di {}:*\n").format(chat_name) or msg == tl(update.effective_message, "*Catatan Lokal:*\n"):
 		if conn:
-			update.effective_message.reply_text("Tidak ada catatan di obrolan *{}*!".format(chat_name), parse_mode="markdown")
+			update.effective_message.reply_text(tl(update.effective_message, "Tidak ada catatan di obrolan *{}*!").format(chat_name), parse_mode="markdown")
 		else:
-			update.effective_message.reply_text("Tidak ada catatan di obrolan ini!")
+			update.effective_message.reply_text(tl(update.effective_message, "Tidak ada catatan di obrolan ini!"))
 
 	elif len(msg) != 0:
-		msg += "\nAnda dapat mengambil catatan ini dengan menggunakan `/get notename`, atau `#notename`"
+		msg += tl(update.effective_message, "\nAnda dapat mengambil catatan ini dengan menggunakan `/get notename`, atau `#notename`")
 		update.effective_message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 
@@ -374,13 +375,13 @@ def __import_data__(chat_id, data):
 		with BytesIO(str.encode("\n".join(failures))) as output:
 			output.name = "failed_imports.txt"
 			dispatcher.bot.send_document(chat_id, document=output, filename="failed_imports.txt",
-										 caption="File/foto ini gagal diimpor karena berasal "
+										 caption=tl(update.effective_message, "File/foto ini gagal diimpor karena berasal "
 												 "dari bot lain. Ini adalah pembatasan API telegram, dan tidak bisa "
-												 "dihindari. Maaf untuk ketidaknyamanannya!")
+												 "dihindari. Maaf untuk ketidaknyamanannya!"))
 
 
 def __stats__():
-	return "{} catatan, pada {} obrolan.".format(sql.num_notes(), sql.num_chats())
+	return tl(OWNER_ID, "{} catatan, pada {} obrolan.").format(sql.num_notes(), sql.num_chats())
 
 
 def __migrate__(old_chat_id, new_chat_id):
@@ -389,21 +390,10 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
 	notes = sql.get_all_chat_notes(chat_id)
-	return "Ada catatan `{}` dalam obrolan ini.".format(len(notes))
+	return tl(user_id, "Ada catatan `{}` dalam obrolan ini.").format(len(notes))
 
 
-__help__ = """
- - /get <notename>: dapatkan catatan dengan notename ini, gunakan ``noformat`` di akhir untuk mendapatkan note tanpa format
- - #<notename>: sama seperti /get
- - /notes atau /saved: daftar semua catatan yang disimpan dalam obrolan ini
-
-*Hanya admin:*
- - /save <notename> <notedata>: menyimpan recordsata sebagai catatan dengan nama notename
-Sebuah tombol dapat ditambahkan ke catatan dengan menggunakan sintaks markdown standar tautan - tautan harus ditambahkan dengan \
-bagian `buttonurl:`, Seperti: `[tulisannya](buttonurl:contoh.com)`. Cek /markdownhelp untuk info lebih lanjut.
- - /save <notename>: simpan pesan yang dijawab sebagai catatan dengan nama nama file
- - /clear <notename>: hapus catatan dengan nama ini
-"""
+__help__ = "notes_help"
 
 __mod_name__ = "Notes"
 
