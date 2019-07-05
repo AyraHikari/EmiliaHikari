@@ -22,6 +22,7 @@ Disable.__table__.create(checkfirst=True)
 DISABLE_INSERTION_LOCK = threading.RLock()
 
 DISABLED = {}
+DISABLEABLE = []
 
 
 def disable_command(chat_id, disable):
@@ -90,6 +91,16 @@ def migrate_chat(old_chat_id, new_chat_id):
 
         SESSION.commit()
 
+def disableable_cache(cmd):
+    global DISABLEABLE
+    if type(cmd) == list:
+        for x in cmd:
+            DISABLEABLE.append(x)
+    else:
+        DISABLEABLE.append(cmd)
+
+def get_disableable():
+    return DISABLEABLE
 
 def __load_disabled_commands():
     global DISABLED
