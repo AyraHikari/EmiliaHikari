@@ -357,7 +357,10 @@ def adminlist(bot: Bot, update: Update):
         if status == "administrator":
             text += "\n` • `{}".format(name)
 
-    update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    try:
+        update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+    except BadRequest:
+        update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN, quote=False)
 
 
 @can_pin
