@@ -1425,7 +1425,7 @@ RAMALAN_STRINGS = (
 	"The right time to stop lazing 🏃‍♀️",
 	"It's time to reminisce with your childhood favorite book.",
 	"Today, you will see the world with open eyes 👀",
-	"An alien will come into your life and make an impression there.",
+	"A stranger will come into your life and make an impression there.",
 	"It's a good day to listen to intuition rather than advice.",
 	"Be careful with sweet words of people you just know.",
 	"The whole universe will work together to help you 🙏",
