@@ -178,7 +178,7 @@ if is_module_loaded(FILENAME):
         result = ""
         for cmd in disabled:
             result += " - `{}`\n".format(escape_markdown(cmd))
-        return languages.tl(update.effective_message, "Perintah-perintah berikut saat ini dibatasi:\n{}").format(result)
+        return languages.tl(chat_id, "Perintah-perintah berikut saat ini dibatasi:\n{}").format(result)
 
 
     @run_async
