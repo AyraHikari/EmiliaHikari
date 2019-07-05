@@ -346,7 +346,7 @@ def build_lock_message(chat_id):
     if not (locks or restr):
         res = tl(chat_id, "Tidak ada kunci saat ini dalam obrolan ini.")
     else:
-        res = tl(update.effective_message, "Ini adalah kunci dalam obrolan ini:")
+        res = tl(chat_id, "Ini adalah kunci dalam obrolan ini:")
         locklist = []
         if locks:
             locklist.append("sticker = `{}`".format(locks.sticker))
