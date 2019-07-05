@@ -211,29 +211,29 @@ def import_data(bot: Bot, update):
 					text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan pada *{}*. Selamat datang kembali! 😀").format(chat_name)
 				else:
 					text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan. Selamat datang kembali! 😀").format(chat_name)
-				text += "\n\nYang saya kembalikan:\n"
+				text += tl(update.effective_message, "\n\nYang saya kembalikan:\n")
 				if imp_antiflood:
-					text += "- Pengaturan Antiflood\n"
+					text += tl(update.effective_message, "- Pengaturan Antiflood\n")
 				if imp_blacklist:
-					text += "- Pengaturan Blacklist\n"
+					text += tl(update.effective_message, "- Pengaturan Blacklist\n")
 				if imp_blacklist_count:
-					text += "- {} blacklists\n".format(imp_blacklist_count)
+					text += tl(update.effective_message, "- {} blacklists\n").format(imp_blacklist_count)
 				if imp_disabled_count:
-					text += "- {} cmd disabled\n".format(imp_disabled_count)
+					text += tl(update.effective_message, "- {} cmd disabled\n").format(imp_disabled_count)
 				if imp_filters_count:
-					text += "- {} filters\n".format(imp_filters_count)
+					text += tl(update.effective_message, "- {} filters\n").format(imp_filters_count)
 				if imp_greet:
-					text += "- Pengaturan salam\n"
+					text += tl(update.effective_message, "- Pesan salam\n")
 				if imp_notes:
-					text += "- {} catatan\n".format(imp_notes)
+					text += tl(update.effective_message, "- {} catatan\n").format(imp_notes)
 				if imp_report:
-					text += "- Pengaturan pelaporan\n"
+					text += tl(update.effective_message, "- Pengaturan pelaporan\n")
 				if imp_rules:
-					text += "- Pengaturan peraturan grup\n"
+					text += tl(update.effective_message, "- Pesan peraturan grup\n")
 				if imp_lang:
-					text += "- Pengaturan bahasa\n"
+					text += tl(update.effective_message, "- Pengaturan bahasa\n")
 				if imp_warn:
-					text += "- Pengaturan peringatan\n"
+					text += tl(update.effective_message, "- Pengaturan peringatan\n")
 				msg.reply_text(text, parse_mode="markdown")
 				return
 
