@@ -869,7 +869,7 @@ def __chat_settings__(chat_id, user_id):
 	welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
 	goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
 	cleanserv = sql.clean_service(chat_id)
-	return tl(update.effective_message, "Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\n" \
+	return tl(user_id, "Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\n" \
 		   "Untuk preferensi pesan selamat tinggal `{}`." \
 		   "Bot `{}` menghapus notifikasi member masuk/keluar secara otomatis").format(welcome_pref, goodbye_pref, cleanserv)
 
