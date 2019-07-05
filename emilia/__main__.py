@@ -19,6 +19,7 @@ from emilia.modules import ALL_MODULES
 from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.chat_status import is_user_admin
 from emilia.modules.helper_funcs.misc import paginate_modules
+from emilia.modules.sql import languages_sql as langsql
 
 PM_START_TEXT = "start_text"
 
