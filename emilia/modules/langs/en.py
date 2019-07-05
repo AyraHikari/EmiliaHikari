@@ -18,7 +18,7 @@ en = {
 # languages
 	"Bahasa telah di ubah ke {}!": "Language changed to {}!",
 	"Bahasa di *{}* saat ini adalah:\n{}.\n\nPilih bahasa:": "Current language in *{}* is:\n{}.\n\nSelect language:",
-	"obrolan saat ini": "this chat",
+	"obrolan saat ini": "current in this chat",
 	"language_help": """Not every group speaks indonesian; some groups would rather have Emilia respond in their own language.
 
 This is where translations come in; you can change most of Emilia's replies to be in the language of your choice!
@@ -101,7 +101,7 @@ If you really are interested in donating, please visit paypal.me/AyraHikari, Tha
 	"Saya tidak memiliki akses ke tautan undangan, coba ubah izin saya!": "I don't have access to the invite link, try changing my permissions!",
 	"Saya hanya dapat memberi Anda tautan undangan untuk supergroup dan saluran, maaf!": "I can only give you invite links for supergroups and channels, sorry!",
 	"Admin di *{}*:": "Admin in *{}*:",
-	"chat ini": "this chat",
+	"chat ini": "current chat",
 	"☠ Akun Terhapus": "☠ Deleted Account",
 	"Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.": "Wrong markdown text!\nIf you don't know what markdown is, please type `/markdownhelp` in PM.",
 	"Saya tidak punya akses untuk pin pesan!": "I don't have access to pin message!",
@@ -156,8 +156,8 @@ When marked as AFK, any mentions will be replied to with a message to say you're
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""": """It looks like you are trying to set a temporary value for antiflood, but has not determined the time; use `/setfloodmode tban <timevalue>`.
 
 Examples of time values: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 week.""",
-	"blokir sementara selama {}": "temporarily banned for {}",
-	'bisukan sementara selama {}': 'temporarily mute for {}',
+	"blokir sementara selama {}": "temp banned for {}",
+	"bisukan sementara selama {}": "temp mute for {}",
 	"Saya hanya mengerti ban/kick/mute/tban/tmute!": "I only understand ban/kick/mute/tban/tmute!",
 	"Terlalu banyak mengirim pesan sekarang akan menghasilkan `{}` pada *{}*!": "Flooding messages now will result `{}` in *{}*!",
 	"Terlalu banyak mengirim pesan sekarang akan menghasilkan `{}`!": "Flooding messages now will result `{}`!",
@@ -278,8 +278,8 @@ that files/photos can't be imported due to telegram restrictions.
 	"di bisukan": "mute sender",
 	"di tendang": "kick sender",
 	"di blokir": "banned sender",
-	"di blokir sementara selama {}": "temp ban for {}",
-	"di bisukan sementara selama {}": "temp mute for {}",
+	"di blokir sementara selama {}": "temporarily ban for {}",
+	"di bisukan sementara selama {}": "temporarily mute for {}",
 	"""Sepertinya Anda mencoba menetapkan nilai sementara untuk blacklist, tetapi belum menentukan waktu; gunakan `/blacklistmode tban <timevalue>`.
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""": """It looks like you are trying to set a temporary value to blacklist, but has not determined the time; use `/blacklistmode tban <timevalue>`.
@@ -352,8 +352,8 @@ Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""": """It looks like you are trying to set a temporary value to blacklist, but has not determined the time; use `/blstickermode tmute <timevalue>`.
 
 Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks.""",
-	"Mode blacklist sticker diubah, Pengguna akan `{}` pada *{}*!": "Blacklist mode changed, will `{}` at *{}*!",
-	"Mode blacklist sticker diubah, Pengguna akan `{}`!": "Blacklist mode changed, will `{}`!",
+	"Mode blacklist sticker diubah, Pengguna akan `{}` pada *{}*!": "Blacklist sticker mode changed, will `{}` at *{}*!",
+	"Mode blacklist sticker diubah, Pengguna akan `{}`!": "Blacklist sticker mode changed, will `{}`!",
 	"Mode blacklist sticker saat ini disetel ke *{}* pada *{}*.": "Blacklist sticker mode is currently set to *{}* in *{}*.",
 	"Mode blacklist saat ini disetel ke *{}*.": "Blacklist sticker mode is currently set to *{}*.",
 	"Menggunakan stiker '{}' yang ada di daftar hitam stiker": "Using sticker '{}' which in blacklist stickers",
@@ -589,9 +589,7 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"Mengapa Anda mencoba mempromosikan pemilik federasi!?": "Why are you trying to promote federated owner!?",
 	"Saya tidak dapat mempromosikan pengguna yang sudah menjadi admin federasi! Tapi saya bisa menurunkannya.": "I cannot promote users who are already federated admins! But I can demote him/her.",
 	"Saya sudah menjadi admin federasi dan yang mengelolanya!": "I have become a federation admin and managed it!",
-	"💖 Berhasil Dipromosikan!": "💖 Successfully promoted!",
 	"Gagal dipromosikan!": "Failed to promote!",
-	"Hanya pemilik federasi yang dapat melakukan ini!": "Only fed owner can do this!",
 	"Apa yang sedang Anda coba lakukan? Menurunkan saya dari federasi Anda?": "What are you trying to do? Demote me from your federation?",
 	"Saya tidak dapat mendemosikan pengguna yang bukan merupakan admin federasi! Jika Anda ingin membuatnya menangis, promosikan dia terlebih dahulu!": "I cannot demote users who are not federated admins! If you want to make him/her cry, Promote him/her first!",
 	"💔 Dia telah di keluarkan dari federasi anda!": "💔 Demoted from your federation!",
@@ -604,7 +602,6 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"\nSeluruh admin: <code>{}</code>": "\nAll admins: <code>{}</code>",
 	"\nTotal yang di banned: <code>{}</code>": "\nTotal banned: <code>{}</code>",
 	"\nTotal grup yang terkoneksi: <code>{}</code>": "\nConnected group: <code>{}</code>",
-	"Grup ini tidak ada dalam federasi apa pun!": "This group is not in any federation!",
 	"<b>Admin Federasi {}:</b>\n\n": "<b>Federation Admin {}:</b>\n\n",
 	"\n🔱 Tidak ada admin di federasi ini": "\n🔱 There is no admin in this federation",
 	"Anda sepertinya tidak merujuk ke pengguna.": "You do not seem to be referring to the user.",
@@ -934,7 +931,7 @@ Keep in mind that your message <b>MUST</b> contain some text other than just a b
 	"\nAnda dapat mengambil catatan ini dengan menggunakan `/get notename`, atau `#notename`": "\nYou can retrieve these notes by using `/get notename`, or `#notename`",
 	"\nAnda dapat mengambil catatan ini dengan menggunakan <code>/get notename</code>, atau <code>#notename</code>": "\nYou can retrieve these notes by using <code>/get notename</code>, or <code>#notename</code>",
 	"File/foto ini gagal diimpor karena berasal dari bot lain. Ini adalah pembatasan API telegram, dan tidak bisa dihindari. Maaf untuk ketidaknyamanannya!": "These files/photos failed to import due to originating from another bot. This is a telegram API restriction, and can't be avoided. Sorry for the inconvenience!",
-	"{} catatan, pada {} obrolan.": "There are `{}` notes in this chat.",
+	"{} catatan, pada {} obrolan.": "`{}` notes, accross {} chats.",
 	"Ada catatan `{}` dalam obrolan ini.": "There are `{}` notes in this chat.",
 	"notes_help": """
  - /get <notename>: get the note with this notename
@@ -1098,7 +1095,6 @@ NOTE: In groups, only admins can add/remove RSS links to the group's subscriptio
 	"Itu bukan filter peringatan saat ini - jalankan /warnlist untuk semua filter peringatan aktif.": "That's not a current warning filter - run /warnlist for all active warning filters.",
 	"Tidak ada filter peringatan aktif di *{}*!": "No warning filters are active in *{}*!",
 	"Tidak ada filter peringatan aktif di sini!": "No warning filters are active here!",
-	"obrolan ini": "this chat",
 	"obrolan *{}*": "*{}*",
 	"Batas peringatan minimum adalah 3!": "The minimum warn limit is 3!",
 	"Diperbarui batas untuk diperingatkan {} pada *{}*": "Updated the warn limit to {} at *{}*",
