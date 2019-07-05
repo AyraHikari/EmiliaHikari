@@ -549,6 +549,8 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"Perintah berikut dapat diubah:\n{}": "The following commands are toggleable:\n{}",
 	"Tidak ada perintah yang dapat dinonaktifkan.": "No commands can be disabled.",
 	"{} item yang dinonaktifkan, pada {} obrolan.": "{} disabled items, across {} chats.",
+	"Perintah-perintah berikut saat ini dibatasi:\n{}": "The following commands are currently restricted:\n{}",
+	"Tidak ada perintah yang dinonaktifkan!": "No commands are disabled!",
 	"disable_help": """
  - /cmds: check the current status of disabled commands
 
