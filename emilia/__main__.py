@@ -115,7 +115,9 @@ def start(bot: Bot, update: Update, args: List[str]):
             elif args[0][:4] == "wiki":
                 wiki = args[0].split("-")[1].replace('_', ' ')
                 message = update.effective_message
-                wikipedia.set_lang("id")
+                getlang = langsql.get_lang(message)
+                if getlang == "id":
+                    wikipedia.set_lang("id")
                 try:
                     pagewiki = wikipedia.page(wiki)
                 except wikipedia.exceptions.PageError:
