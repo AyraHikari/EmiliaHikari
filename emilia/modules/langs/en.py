@@ -567,7 +567,7 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"Tolong tulis nama federasinya!": "Please write the name of the federation!",
 	"Hapus federasi Anda di PM saya, bukan dalam grup.": "Delete your federation in my PM, not in the group.",
 	"Federasi ini tidak di temukan!": "This federation is not found!",
-	"Hanya pemilik fedarasi yang dapat melakukan ini!": "Only fed owner can do this!",
+	"Hanya pemilik federasi yang dapat melakukan ini!": "Only fed owner can do this!",
 	"Apa yang harus saya hapus?": "What should I delete?",
 	"Anda yakin ingin menghapus federasi Anda? Tindakan ini tidak bisa dibatalkan, Anda akan kehilangan seluruh daftar larangan Anda, dan '{}' akan hilang secara permanen.": "Are you sure you want to delete your federation? This action cannot be undone - you will lose your entire ban list, and '{}' will be permanently gone.",
 	"⚠️ Hapus Federasi ⚠️": "⚠️ Delete Federation ⚠️",
@@ -1213,7 +1213,7 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"WELC_HELP_TXT": "Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages to be individually generated, like the default welcome message is, you can use *these* variables:\n - `{{first}}`: this represents the user's *first* name\n - `{{last}}`: this represents the user's *last* name. Defaults to *first name* if user has no last name.\n - `{{fullname}}`: this represents the user's *full* name. Defaults to *first name* if user has no last name.\n - `{{username}}`: this represents the user's *username*. Defaults to a *mention* of the user's first name if has no username.\n - `{{mention}}`: this simply *mentions* a user - tagging them with their first name.\n - `{{id}}`: this represents the user's *id*\n - `{{count}}`: this represents the user's *member number*.\n - `{{chatname}}`: this represents the *current chat name*.\n\nEach variable MUST be surrounded by `{{}}` to be replaced.\nWelcome messages also support markdown, so you can make any elements bold/italic/code/links. Buttons are also supported, so you can make your welcomes look awesome with some nice intro buttons.\nTo create a button linking to your rules, use this: `[Rules](buttonurl://t.me/{}?start=group_id)`. Simply replace `group_id` with your group's id, which can be obtained via /id, and you're good to go. Note that group ids are usually preceded by a `-` sign; this is required, so please don't remove it.\nIf you're feeling fun, you can even set images/gifs/videos/voice messages as the welcome message by replying to the desired media, and calling /setwelcome.",
 	"Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\nUntuk preferensi pesan selamat tinggal `{}`.\nBot `{}` menghapus notifikasi member masuk/keluar secara otomatis": "This chat has it's welcome preference set to `{}`.\nIt's goodbye preference is `{}`.",
 	"welcome_help": """
-*Hanya admin:*
+*Admin only:*
  - /welcome <on/off>: enable/disable the welcome message.
  - /goodbye <on/off>: enable/disable goodbye message.
  - /welcome: show current welcome settings, without formatting - useful for recycling your welcome message!

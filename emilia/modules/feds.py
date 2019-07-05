@@ -129,14 +129,14 @@ def del_fed(bot: Bot, update: Update, args: List[str]):
 		if int(getinfo['owner']) == int(user.id) or int(user.id) == OWNER_ID:
 			fed_id = is_fed_id
 		else:
-			update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik fedarasi yang dapat melakukan ini!"))
+			update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik federasi yang dapat melakukan ini!"))
 			return
 	else:
 		update.effective_message.reply_text(tl(update.effective_message, "Apa yang harus saya hapus?"))
 		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
-		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik fedarasi yang dapat melakukan ini!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Hanya pemilik federasi yang dapat melakukan ini!"))
 		return
 
 	update.effective_message.reply_text(tl(update.effective_message, "Anda yakin ingin menghapus federasi Anda? Tindakan ini tidak bisa dibatalkan, Anda akan kehilangan seluruh daftar larangan Anda, dan '{}' akan hilang secara permanen.").format(getinfo['fname']),
@@ -297,7 +297,7 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 			return
 		res = sql.user_join_fed(fed_id, user_id)
 		if res:
-			update.effective_message.reply_text(tl(update.effective_message, "💖 Berhasil Dipromosikan!"))
+			update.effective_message.reply_text(tl(update.effective_message, "💖 Berhasil dinaikan jabatannya!"))
 		else:
 			update.effective_message.reply_text(tl(update.effective_message, "Gagal dipromosikan!"))
 	else:
@@ -416,7 +416,7 @@ def fed_admin(bot: Bot, update: Update, args: List[str]):
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_admin(fed_id, user.id) == False:
@@ -464,7 +464,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	info = sql.get_fed_info(fed_id)
@@ -712,7 +712,7 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	info = sql.get_fed_info(fed_id)
@@ -956,7 +956,7 @@ def fed_ban_list(bot: Bot, update: Update, args: List[str], chat_data):
 	info = sql.get_fed_info(fed_id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
@@ -1070,7 +1070,7 @@ def fed_notif(bot: Bot, update: Update, args: List[str]):
 	fed_id = sql.get_fed_id(chat.id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	if args:
@@ -1103,7 +1103,7 @@ def fed_chats(bot: Bot, update: Update, args: List[str]):
 	info = sql.get_fed_info(fed_id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_admin(fed_id, user.id) == False:
@@ -1149,7 +1149,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 	getfed = sql.get_fed_info(fed_id)
 
 	if not fed_id:
-		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak ada dalam federasi apa pun!"))
+		update.effective_message.reply_text(tl(update.effective_message, "Grup ini tidak dalam federasi apa pun!"))
 		return
 
 	if is_user_fed_owner(fed_id, user.id) == False:
