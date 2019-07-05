@@ -114,7 +114,7 @@ def set_about_bio(bot: Bot, update: Update):
                     tl(update.effective_message, "Biografi harus di bawah {} karakter! Anda mencoba mengatur {}.").format(
                         MAX_MESSAGE_LENGTH // 4, len(bio[1])))
     else:
-        message.reply_text(tl(update.effective_message, atext))
+        message.reply_text(tl(update.effective_message, "Balas pesan seseorang untuk mengatur bio mereka!"))
 
 
 def __user_info__(user_id, chat_id):

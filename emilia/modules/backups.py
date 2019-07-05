@@ -61,7 +61,7 @@ def import_data(bot: Bot, update):
 		try:
 			file_info = bot.get_file(msg.reply_to_message.document.file_id)
 		except BadRequest:
-			msg.reply_text(tl(update.effective_message, atext))
+			msg.reply_text(tl(update.effective_message, "Coba unduh dan unggah ulang file seperti Anda sendiri sebelum mengimpor - yang ini sepertinya rusak!"))
 			return
 
 		with BytesIO() as file:

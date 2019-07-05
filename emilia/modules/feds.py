@@ -1499,7 +1499,7 @@ def welcome_fed(bot, update):
 def __stats__():
 	all_fbanned = sql.get_all_fban_users_global()
 	all_feds = sql.get_all_feds_users_global()
-	return tl(update.effective_message, atext).format(len(all_fbanned), len(all_feds))
+	return tl(OWNER_ID).format(len(all_fbanned), len(all_feds))
 
 
 def __user_info__(user_id, chat_id):
@@ -1510,15 +1510,15 @@ def __user_info__(user_id, chat_id):
 		infoname = info['fname']
 
 		if int(info['owner']) == user_id:
-			text = tl(update.effective_message, "Pengguna ini adalah owner di federasi saat ini: <b>{}</b>.").format(infoname)
+			text = tl(chat_id, "Pengguna ini adalah owner di federasi saat ini: <b>{}</b>.").format(infoname)
 		elif is_user_fed_admin(fed_id, user_id):
-			text = tl(update.effective_message, "Pengguna ini adalah admin di federasi saat ini: <b>{}</b>.").format(infoname)
+			text = tl(chat_id, "Pengguna ini adalah admin di federasi saat ini: <b>{}</b>.").format(infoname)
 
 		elif fban:
-			text = tl(update.effective_message, "Dilarang di federasi saat ini: <b>Ya</b>")
-			text += tl(update.effective_message, "\n<b>Alasan:</b> {}").format(fbanreason)
+			text = tl(chat_id, "Dilarang di federasi saat ini: <b>Ya</b>")
+			text += tl(chat_id, "\n<b>Alasan:</b> {}").format(fbanreason)
 		else:
-			text = tl(update.effective_message, "Dilarang di federasi saat ini: <b>Tidak</b>")
+			text = tl(chat_id, "Dilarang di federasi saat ini: <b>Tidak</b>")
 	else:
 		text = ""
 	return text

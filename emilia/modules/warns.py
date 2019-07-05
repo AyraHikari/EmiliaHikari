@@ -304,7 +304,7 @@ def warns(bot: Bot, update: Update, args: List[str]):
         if conn:
             update.effective_message.reply_text(tl(update.effective_message, "Pengguna ini belum mendapatkan peringatan apa pun pada *{}*!").format(chat_name), parse_mode="markdown")
         else:
-            update.effective_message.reply_text(tl(update.effective_message, atext))
+            update.effective_message.reply_text(tl(update.effective_message, "Pengguna ini belum mendapatkan peringatan apa pun!"))
 
 
 # Dispatcher handler stop - do not async
