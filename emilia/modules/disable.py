@@ -37,6 +37,7 @@ if is_module_loaded(FILENAME):
                 DISABLE_CMDS.extend(command)
                 if admin_ok:
                     ADMIN_CMDS.extend(command)
+            sql.disableable_cache(command)
 
         def check_update(self, update):
             chat = update.effective_chat  # type: Optional[Chat]
@@ -60,6 +61,7 @@ if is_module_loaded(FILENAME):
         def __init__(self, pattern, callback, friendly="", **kwargs):
             super().__init__(pattern, callback, **kwargs)
             DISABLE_OTHER.append(friendly or pattern)
+            sql.disableable_cache(friendly or pattern)
             self.friendly = friendly or pattern
 
         def check_update(self, update):

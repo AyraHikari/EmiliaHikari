@@ -14,15 +14,21 @@ from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_note_type
 from emilia.modules.rules import get_rules
-import emilia.modules.sql.rules_sql as rulessql
-from emilia.modules.sql import warns_sql as warnssql
+from emilia.modules.helper_funcs.string_handling import button_markdown_parser
+
+# SQL
+import emilia.modules.sql.antiflood_sql as antifloodsql
 import emilia.modules.sql.blacklist_sql as blacklistsql
 from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.sql import cust_filters_sql as filtersql
-from emilia.modules.sql import notes_sql as notesql
-import emilia.modules.sql.welcome_sql as welcsql
+from emilia.modules.sql import languages_sql as langsql
 import emilia.modules.sql.locks_sql as locksql
-import emilia.modules.sql.antiflood_sql as antifloodsql
+from emilia.modules.sql import notes_sql as notesql
+from emilia.modules.sql import reporting_sql as reportsql
+import emilia.modules.sql.rules_sql as rulessql
+from emilia.modules.sql import warns_sql as warnssql
+import emilia.modules.sql.welcome_sql as welcsql
+
 from emilia.modules.connection import connected
 
 from emilia.modules.helper_funcs.msg_types import Types
@@ -70,28 +76,201 @@ def import_data(bot: Bot, update):
 			data = json.load(file)
 
 		# If backup is from miss rose
+		# doing manual lol
 		if data.get('bot_id') == 609517172:
+			imp_antiflood = False
+			imp_blacklist = False
+			imp_blacklist_count = 0
+			imp_disabled_count = 0
+			imp_filters_count = 0
+			imp_greet = False
+			imp_gdbye = False
+			imp_greet_pref = False
+			imp_notes = 0
+			imp_report = False
+			imp_rules = False
+			imp_lang = False
+			imp_warn = False
 			if data.get('data'):
-				# TODO
-				"""
+				# Import antiflood
 				if data['data'].get('antiflood'):
 					floodlimit = data['data']['antiflood'].get('flood_limit')
-					if floodlimit:
-						antifloodsql.set_flood(chat_id, int(floodlimit))
-				"""
+					action = data['data']['antiflood'].get('action')
+					# TODO
+					# actionduration = data['data']['antiflood'].get('action_duration')
+					antifloodsql.set_flood(chat_id, int(floodlimit))
+					if action == "ban":
+						antifloodsql.set_flood_strength(chat_id, 1, "0")
+						imp_antiflood = True
+					elif action == "kick":
+						antifloodsql.set_flood_strength(chat_id, 2, "0")
+						imp_antiflood = True
+					elif action == "mute":
+						antifloodsql.set_flood_strength(chat_id, 3, "0")
+						imp_antiflood = True
+				# Import blacklist
+				if data['data'].get('blacklists'):
+					action = data['data']['blacklists'].get('action')
+					strengthdone = False
+					if action == "del":
+						strengthdone = True
+						blacklistsql.set_blacklist_strength(chat_id, 1, "0")
+						imp_blacklist = True
+					elif action == "warn":
+						strengthdone = True
+						blacklistsql.set_blacklist_strength(chat_id, 2, "0")
+						imp_blacklist = True
+					elif action == "mute":
+						strengthdone = True
+						blacklistsql.set_blacklist_strength(chat_id, 3, "0")
+						imp_blacklist = True
+					elif action == "kick":
+						strengthdone = True
+						blacklistsql.set_blacklist_strength(chat_id, 4, "0")
+						imp_blacklist = True
+					elif action == "ban":
+						strengthdone = True
+						blacklistsql.set_blacklist_strength(chat_id, 5, "0")
+						imp_blacklist = True
+					else:
+						if not strengthdone:
+							action = data['data']['blacklists'].get('should_delete')
+							if action:
+								blacklistsql.set_blacklist_strength(chat_id, 1, "0")
+								imp_blacklist = True
+					blacklisted = data['data']['blacklists'].get('filters')
+					for x in blacklisted:
+						blacklistsql.add_to_blacklist(chat_id, x['name'].lower())
+						imp_blacklist_count += 1
+				# Import disabled
+				if data['data'].get('disabled'):
+					candisable = disabledsql.get_disableable()
+					for listdisabled in data['data']['disabled'].get('disabled'):
+						if listdisabled in candisable:
+							disabledsql.disable_command(chat_id, listdisabled)
+							imp_disabled_count += 1
+				# Import filters
+				if data['data'].get('filters'):
+					for x in data['data']['filters'].get('filters'):
+						if x['type'] == 0:
+							note_data, buttons = button_markdown_parser(x['text'].replace("\\", ""), entities=0)
+							filtersql.add_filter(chat_id, x['name'], note_data, False, False, False, False, False, False, buttons)
+							imp_filters_count += 1
+				# Import greetings
+				if data['data'].get('greetings'):
+					if data['data']['greetings'].get('welcome'):
+						welctext = data['data']['greetings']['welcome'].get('text')
+						if welctext:
+							note_data, buttons = button_markdown_parser(welctext.replace("\\", ""), entities=0)
+							welcsql.set_custom_welcome(chat_id, None, note_data, Types.TEXT, buttons)
+							imp_greet = True
+					if data['data']['greetings'].get('goodbye'):
+						gdbytext = data['data']['greetings']['goodbye'].get('text')
+						if welctext:
+							note_data, buttons = button_markdown_parser(gdbytext.replace("\\", ""), entities=0)
+							welcsql.set_custom_gdbye(chat_id, None, note_data, Types.TEXT, buttons)
+							imp_gdbye = True
+					# Welcome config
+					if data['data']['greetings'].get('should_welcome'):
+						welcsql.set_welc_preference(str(chat_id), True)
+					else:
+						welcsql.set_welc_preference(str(chat_id), False)
+					# Goodbye config
+					if data['data']['greetings'].get('should_goodbye'):
+						welcsql.set_gdbye_preference(str(chat_id), True)
+					else:
+						welcsql.set_gdbye_preference(str(chat_id), False)
+					# clean service
+					if data['data']['greetings'].get('should_delete_service'):
+						welcsql.set_clean_service(chat.id, True)
+					else:
+						welcsql.set_clean_service(chat.id, False)
+					# clean old msg
+					if data['data']['greetings'].get('should_clean'):
+						welcsql.set_clean_service(str(chat.id), True)
+					else:
+						welcsql.set_clean_service(str(chat.id), False)
+					# custom mute btn
+					if data['data']['greetings'].get('mute_text'):
+						getcur, cur_value, cust_text = welcsql.welcome_security(chat.id)
+						welcsql.set_welcome_security(chat.id, getcur, cur_value, data['data']['greetings'].get('mute_text'))
+					imp_greet_pref = True
+					# TODO parsing unix time and import that
+				# TODO Locks
+				# Import notes
 				if data['data'].get('notes'):
 					allnotes = data['data']['notes']['notes']
 					for x in allnotes:
 						# If this text
 						if x['type'] == 0:
+							note_data, buttons = button_markdown_parser(x['text'].replace("\\", ""), entities=0)
 							note_name = x['name']
-							note_data = x['text']
-							print('add {} for {}'.format(note_name, note_data))
-							notesql.add_note_to_db(chat_id, note_name, note_data, Types.TEXT, None, None)
+							notesql.add_note_to_db(chat_id, note_name, note_data, Types.TEXT, buttons, None)
+							imp_notes += 1
+				# Import reports
+				if data['data'].get('reports'):
+					if data['data']['reports'].get('disable_reports'):
+						reporting = False
+					else:
+						reporting = True
+					reportsql.set_chat_setting(chat_id, reporting)
+					imp_report = True
+				# Import rules
+				if data['data'].get('rules'):
+					contrules = data['data']['rules'].get('content')
+					if contrules:
+						rulessql.set_rules(chat_id, contrules.replace("\\", ""))
+						imp_rules = True
+				# Import current lang
+				if data['data'].get('translations'):
+					lang = data['data']['translations'].get('lang')
+					if lang:
+						if lang in ('en', 'id'):
+							langsql.set_lang(chat_id, lang)
+							imp_lang = True
+				# Import warn
+				if data['data'].get('warns'):
+					action = data['data']['warns'].get('action')
+					if action == "kick":
+						warnssql.set_warn_mode(chat.id, 1)
+						imp_warn = True
+					elif action == "ban":
+						warnssql.set_warn_mode(chat.id, 2)
+						imp_warn = True
+					elif action == "mute":
+						warnssql.set_warn_mode(chat.id, 3)
+						imp_warn = True
 				if conn:
 					text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan pada *{}*. Selamat datang kembali! 😀").format(chat_name)
 				else:
 					text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan. Selamat datang kembali! 😀").format(chat_name)
+				text += tl(update.effective_message, "\n\nYang saya kembalikan:\n")
+				if imp_antiflood:
+					text += tl(update.effective_message, "- Pengaturan Antiflood\n")
+				if imp_blacklist:
+					text += tl(update.effective_message, "- Pengaturan Blacklist\n")
+				if imp_blacklist_count:
+					text += tl(update.effective_message, "- {} blacklists\n").format(imp_blacklist_count)
+				if imp_disabled_count:
+					text += tl(update.effective_message, "- {} cmd disabled\n").format(imp_disabled_count)
+				if imp_filters_count:
+					text += tl(update.effective_message, "- {} filters\n").format(imp_filters_count)
+				if imp_greet_pref:
+					text += tl(update.effective_message, "- Pengaturan salam\n")
+				if imp_greet:
+					text += tl(update.effective_message, "- Pesan salam\n")
+				if imp_gdbye:
+					text += tl(update.effective_message, "- Pesan selamat tinggal\n")
+				if imp_notes:
+					text += tl(update.effective_message, "- {} catatan\n").format(imp_notes)
+				if imp_report:
+					text += tl(update.effective_message, "- Pengaturan pelaporan\n")
+				if imp_rules:
+					text += tl(update.effective_message, "- Pesan peraturan grup\n")
+				if imp_lang:
+					text += tl(update.effective_message, "- Pengaturan bahasa\n")
+				if imp_warn:
+					text += tl(update.effective_message, "- Pengaturan peringatan\n")
 				msg.reply_text(text, parse_mode="markdown")
 				return
 
