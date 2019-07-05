@@ -86,6 +86,17 @@ def set_language(bot, update):
 		return
 
 	getlang = sql.get_lang(chat.id)
+	if getlang == 'None' or not getlang:
+		if msg.from_user.language_code:
+			sql.set_lang(msg.chat.id, msg.from_user.language_code)
+			getlang = msg.from_user.language_code
+		else:
+			if msg.chat.type == "private":
+				sql.set_lang(msg.chat.id, 'en')
+				getlang = 'en'
+			else:
+				sql.set_lang(msg.chat.id, 'id')
+				getlang = 'id'
 	loaded_langs = []
 	counter = 0
 
