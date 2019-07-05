@@ -1153,7 +1153,7 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Kamu bukan pengguna yang di tuju!": "You are not the intended user!",
 
 	"Selamat jalan master 😢": "RIP Master 😢",
-	"Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!": "I can't restirect member here! Make sure I'm an admin an can mute someone!",
+	"Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!": "I can't restrict member here! Make sure I'm an admin an can mute someone!",
 	"Keamanan untuk member baru di aktifkan!": "Security for new members is activated!",
 	"Di nonaktifkan, saya tidak akan membisukan member masuk lagi": "Disabled, I will not mute new member again",
 	"Silakan tulis `on`/`ya`/`off`/`ga`!": "Please write `on`/`off`!",
