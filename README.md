@@ -3,6 +3,8 @@ Telegram modular Python bot berjalan di python3 dengan database sqlalchemy.
 
 Based on [marie bot](https://github.com/PaulSonOfLars/tgbot)
 
+[Read english README](https://github.com/AyraHikari/EmiliaHikari/blob/master/README.en.md)
+
 Dapat ditemukan di telegram sebagai [Emilia](https://t.me/EmiliaHikariBot).
 
 
@@ -15,6 +17,9 @@ Saya juga akan membantu ketika skema database berubah, dan beberapa kolom tabel 
 Bergabunglah dengan [news channel](https://t.me/AyraBotNews) jika Anda hanya ingin tetap di loop tentang fitur-fitur baru atau pengumuman.
 
 Kalau tidak, [temukan aku di telegram](https://t.me/AyraHikari)! (Simpan semua pertanyaan dukungan dalam obrolan dukungan, tempat lebih banyak orang dapat membantu Anda.)
+
+Catatan untuk pengelola bahwa semua perubahan skema akan ditemukan dalam pesan komit, dan tanggung jawabnya untuk membaca komitmen baru.
+
 
 ## Mulai bot.
 
