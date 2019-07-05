@@ -120,6 +120,7 @@ def new_member(bot: Bot, update: Update):
 					  print("Fban: cannot banned this user")
 				return
 	if cleanserv:
+		new_members = update.effective_message.new_chat_members
 		for new_mem in new_members:
 			try:
 				dispatcher.bot.delete_message(chat.id, update.message.message_id)
