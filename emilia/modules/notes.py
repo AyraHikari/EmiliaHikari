@@ -286,7 +286,7 @@ def list_notes(bot: Bot, update: Update):
 			msg = ""
 		msg += note_name
 
-	if msg == tl(update.effective_message, "*Catatan di {}:*\n").format(chat_name) or msg == tl(update.effective_message, "*Catatan Lokal:*\n"):
+	if msg == tl(update.effective_message, "*Catatan di {}:*\n").format(chat_name) or msg == tl(update.effective_message, "*Catatan lokal:*\n"):
 		if conn:
 			update.effective_message.reply_text(tl(update.effective_message, "Tidak ada catatan di obrolan *{}*!").format(chat_name), parse_mode="markdown")
 		else:
