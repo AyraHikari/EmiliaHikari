@@ -5,6 +5,8 @@ Based on [marie bot](https://github.com/PaulSonOfLars/tgbot)
 
 [Read english README](https://github.com/AyraHikari/EmiliaHikari/blob/master/README.en.md)
 
+**If you want to translate this bot**, [please go here](https://github.com/AyraHikari/EmiliaHikari/blob/master/TRANSLATION.md)
+
 Dapat ditemukan di telegram sebagai [Emilia](https://t.me/EmiliaHikariBot).
 
 

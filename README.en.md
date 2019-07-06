@@ -4,7 +4,9 @@ A modular telegram Python bot running on python3 with an sqlalchemy database.
 Originally a simple group management bot with multiple admin features, it has evolved into becoming a basis for modular
 bots aiming to provide simple plugin expansion via a simple drag and drop.
 
-Dapat ditemukan di telegram sebagai [Emilia](https://t.me/EmiliaHikariBot).
+**If you want to translate this bot**, [please go here](https://github.com/AyraHikari/EmiliaHikari/blob/master/TRANSLATION.md)
+
+Can be found as [Emilia](https://t.me/EmiliaHikariBot).
 
 For questions regarding creating your own bot, please head to [support group](https://t.me/TeamNusantaraDevs) where you'll find a
 group of volunteers to help. We'll also help when a database schema changes, and some table column needs to be
