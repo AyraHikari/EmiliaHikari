@@ -37,8 +37,12 @@ def tl(message, text):
 		getlang = sql.get_lang(message.chat.id)
 		if getlang == 'None' or not getlang:
 			if message.from_user.language_code:
-				sql.set_lang(message.chat.id, message.from_user.language_code)
-				getlang = message.from_user.language_code
+				if message.from_user.language_code in LOADED_LANGS_ID:
+					sql.set_lang(message.chat.id, message.from_user.language_code)
+					getlang = message.from_user.language_code
+				else:
+					sql.set_lang(message.chat.id, 'en')
+					getlang = 'en'
 			else:
 				if message.chat.type == "private":
 					sql.set_lang(message.chat.id, 'en')
