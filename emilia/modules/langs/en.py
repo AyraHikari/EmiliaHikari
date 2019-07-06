@@ -1413,6 +1413,6 @@ RAMALAN_STRINGS = (
 )
 
 RAMALAN_FIRST = (
-	"Here's a tip about mindfulness",
-	"Here's a tip to help you stay mindful"
+	"Here's a tip about mindfulness.\n",
+	"Here's a tip to help you stay mindful.\n"
 )
