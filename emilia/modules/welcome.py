@@ -42,10 +42,6 @@ def send(update, message, keyboard, backup_message):
 	reply = update.message.message_id
 	# Clean service welcome
 	if cleanserv:
-		try:
-			dispatcher.bot.delete_message(chat.id, update.message.message_id)
-		except BadRequest:
-			pass
 		reply = False
 	try:
 		msg = dispatcher.bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, reply_to_message_id=reply, disable_web_page_preview=True)
