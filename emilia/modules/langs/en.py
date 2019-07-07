@@ -36,6 +36,9 @@ Available commands are:
 Hi {}, my name is {}! I am a group manager managed by [my master](tg://user?id={}).
 To get this bot status info and update, you can join our channel [Ayra's Bot News](https://t.me/AyraBotNews)
 
+Any issue or need more help?
+Join our group [Emilia Official Support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ)!
+
 You can find the list of available commands with /help.
 
 If you're enjoying using me, and/or would like to help me survive in the wild, hit /donate to help fund/upgrade my VPS!
