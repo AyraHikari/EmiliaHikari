@@ -765,6 +765,9 @@ you and your groups by removing spam flooders as quickly as possible. They can b
 	"Saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will not warn* user if send any message/media which currently locked",
 	"Saat ini saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will warn* user if send any message/media which currently locked",
 	"Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will not warn* user if send any message/media which currently locked",
+	"Mengirim 'Teks RTL' yang sedang di kunci saat ini": "Send 'RTL Text' which currently locked",
+	"Memasukan 'Bot' yang sedang di kunci saat ini": "Invite 'Bot' which currently locked",
+	"Mengirim '{}' yang sedang di kunci saat ini": "Send '{}' which currently locked",
 	"locks_help": """
  - /locktypes: a list of possible locktypes
 
