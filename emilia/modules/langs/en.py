@@ -761,6 +761,10 @@ you and your groups by removing spam flooders as quickly as possible. They can b
 	"Tidak ada kunci saat ini dalam obrolan ini.": "There are no current locks in this chat.",
 	"Ini adalah kunci dalam obrolan ini:": "These are the locks in this chat:",
 	"obrolan ini": "this chat",
+	"Saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will warn* user if send any message/media which currently locked",
+	"Saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will not warn* user if send any message/media which currently locked",
+	"Saat ini saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will warn* user if send any message/media which currently locked",
+	"Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will not warn* user if send any message/media which currently locked",
 	"locks_help": """
  - /locktypes: a list of possible locktypes
 
@@ -768,6 +772,7 @@ you and your groups by removing spam flooders as quickly as possible. They can b
  - /lock <type>: lock items of a certain type (not available in private)
  - /unlock <type>: unlock items of a certain type (not available in private)
  - /locks: the current list of locks in this chat.
+ - /lockwarns <on/off/yes/no>: whether or not warn users sending locked messages.
 
 Locks can be used to restrict a group's users.
 eg:

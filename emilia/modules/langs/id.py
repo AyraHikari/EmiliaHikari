@@ -302,6 +302,7 @@ Anda dan grup Anda dengan menghapus spam banjir secepat mungkin. Mereka dapat di
  - /lock <type>: mengunci sesuatu dengan jenis tertentu (tidak tersedia secara pribadi)
  - /unlock <type>: membuka kunci sesuatu dengan jenis tertentu (tidak tersedia secara pribadi)
  - /locks: daftar kunci saat ini di obrolan ini.
+ - /lockwarns <on/off/yes/no>: apakah peringati atau tidak jika pengguna mengirim pesan terkunci.
 
 Kunci dapat digunakan untuk membatasi pengguna grup.
 seperti:
