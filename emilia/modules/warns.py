@@ -77,8 +77,18 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
         keyboard = InlineKeyboardMarkup(
             [[InlineKeyboardButton(tl(chat.id, "Hapus peringatan"), callback_data="rm_warn({})".format(user.id))]])
 
-        reply = tl(chat.id, "{} punya {}/{} peringatan... Hati-hati!").format(mention_html(user.id, user.first_name), num_warns,
-                                                             limit)
+        if num_warns+1 == limit:
+            if not warn_mode:
+                action_mode = tl(chat.id, "tendang")
+            elif warn_mode == 1:
+                action_mode = tl(chat.id, "tendang")
+            elif warn_mode == 2:
+                action_mode = tl(chat.id, "blokir")
+            elif warn_mode == 3:
+                action_mode = tl(chat.id, "bisukan")
+            reply = tl(chat.id, "{} punya {}/{} peringatan... Jika anda di peringati lagi maka kamu akan di {}!").format(mention_html(user.id, user.first_name), num_warns, limit, action_mode)
+        else:
+            reply = tl(chat.id, "{} punya {}/{} peringatan... Hati-hati!").format(mention_html(user.id, user.first_name), num_warns, limit)
         if reason:
             reply += tl(chat.id, "\nAlasan pada peringatan terakhir:\n{}").format(html.escape(reason))
 
