@@ -1261,7 +1261,7 @@ This also works with /goodbye.
 	"exclusive_help": """
  - /stickerid: reply message sticker at PM to get ID sticker
  - /ping: check the speed of the bot
- - /mindful: give a tip to help you stay mindful
+ - /fortune: give a fortune
  - /tr <from>-<to> <text>: translate text written or reply for any language to the intended language, or
  - /tr <to> <text>: translate text written or reply for any language to the intended language
  - /wiki <text>: search for text written from the wikipedia source
