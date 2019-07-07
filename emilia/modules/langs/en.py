@@ -1113,6 +1113,7 @@ NOTE: In groups, only admins can add/remove RSS links to the group's subscriptio
 	"Terlalu banyak peringatan sekarang akan menghasilkan tendangan pada *{}*! Pengguna akan dapat bergabung lagi.": "Too many warns will now result in a kick in *{}*! Users will be able to join again after.",
 	"Terlalu banyak peringatan sekarang akan menghasilkan tendangan! Pengguna akan dapat bergabung lagi.": "Too many warns will now result in a kick! Users will be able to join again after.",
 	"Terlalu banyak peringatan akan menghasilkan blokir pada *{}*!": "Too many warns will now result in a ban on *{}*!",
+	"Terlalu banyak peringatan akan menghasilkan blokir!": "Too many warns will now result in a ban!",
 	"Terlalu banyak peringatan akan menghasilkan bisukan pada *{}*!": "Too many warns will now result in a mute on *{}*!",
 	"Terlalu banyak peringatan akan menghasilkan bisukan!": "Too many warns will now result in a mute!",
 	"Saya hanya mengerti kick/ban/mute!": "I only understand kick/ban/mute!",

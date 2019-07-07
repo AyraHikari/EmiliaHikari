@@ -686,7 +686,7 @@ def set_warn_mode(bot: Bot, update: Update, args: List[str]):
             if conn:
                 text = tl(update.effective_message, "Terlalu banyak peringatan akan menghasilkan blokir pada *{}*!").format(chat_name)
             else:
-                text = "Terlalu banyak peringatan akan menghasilkan tendangan!"
+                text = tl(update.effective_message, "Terlalu banyak peringatan akan menghasilkan blokir!")
             msg.reply_text(text, parse_mode="markdown")
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
