@@ -19,6 +19,7 @@ from emilia.modules.helper_funcs.chat_status import can_delete, is_user_admin, u
 from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import users_sql
+from emilia.modules.warns import warn
 from emilia.modules.connection import connected
 
 from emilia.modules.languages import tl
@@ -288,6 +289,9 @@ def del_lockables(bot: Bot, update: Update):
                                 pass
                             else:
                                 LOGGER.exception("ERROR in lockables")
+                        getconf = sql.get_lockconf(chat.id)
+                        if getconf:
+                            warn(update.effective_user, chat, tl(update.effective_message, "Mengirim 'Teks RTL' yang sedang di kunci saat ini"), message, update.effective_user, conn=False)
                 if message.text:
                     check = ad.detect_alphabet(u'{}'.format(message.text))
                     if 'ARABIC' in check:
@@ -298,6 +302,9 @@ def del_lockables(bot: Bot, update: Update):
                                 pass
                             else:
                                 LOGGER.exception("ERROR in lockables")
+                        getconf = sql.get_lockconf(chat.id)
+                        if getconf:
+                            warn(update.effective_user, chat, tl(update.effective_message, "Mengirim 'Teks RTL' yang sedang di kunci saat ini"), message, update.effective_user, conn=False)
             break
         if filter(message) and sql.is_locked(chat.id, lockable) and can_delete(chat, bot.id):
             if lockable == "bots":
@@ -311,6 +318,9 @@ def del_lockables(bot: Bot, update: Update):
 
                         chat.kick_member(new_mem.id)
                         message.reply_text(tl(update.effective_message, "Hanya admin yang diizinkan menambahkan bot ke obrolan ini! Keluar dari sini!"))
+                        getconf = sql.get_lockconf(chat.id)
+                        if getconf:
+                            warn(update.effective_user, chat, tl(update.effective_message, "Memasukan 'Bot' yang sedang di kunci saat ini"), message, update.effective_user, conn=False)
             else:
                 try:
                     message.delete()
@@ -319,6 +329,9 @@ def del_lockables(bot: Bot, update: Update):
                         pass
                     else:
                         LOGGER.exception("ERROR in lockables")
+                getconf = sql.get_lockconf(chat.id)
+                if getconf:
+                    warn(update.effective_user, chat, tl(update.effective_message, "Mengirim '{}' yang sedang di kunci saat ini").format(lockable), message, update.effective_user, conn=False)
  
             break
     
@@ -433,6 +446,60 @@ def list_locks(bot: Bot, update: Update):
     update.effective_message.reply_text(res, parse_mode=ParseMode.MARKDOWN)
 
 
+@run_async
+def lock_warns(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user
+
+    # Connection check
+    conn = connected(bot, update, chat, user.id, need_admin=True)
+    if conn:
+        chat = dispatcher.bot.getChat(conn)
+        chat_id = conn
+        chat_name = chat.title
+    else:
+        if update.effective_message.chat.type == "private":
+            update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+            return ""
+        chat = update.effective_chat
+        chat_id = update.effective_chat.id
+        chat_name = update.effective_message.chat.title
+
+    if args:
+        if args[0] == "on" or args[0] == "yes":
+            sql.set_lockconf(chat_id, True)
+            try:
+                update.effective_message.reply_text(tl(update.effective_message, "Saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown")
+            except BadRequest:
+                update.effective_message.reply_text(tl(update.effective_message, "Saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci", parse_mode="markdown", quote=False))
+        elif args[0] == "off" or args[0] == "no":
+            sql.set_lockconf(chat_id, False)
+            try:
+                update.effective_message.reply_text(tl(update.effective_message, "Saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown")
+            except BadRequest:
+                update.effective_message.reply_text(tl(update.effective_message, "Saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci", parse_mode="markdown", quote=False))
+        else:
+            try:
+                update.effective_message.reply_text(tl(update.effective_message, "Saya hanya mengerti 'on/yes' atau 'off/no' saja!"), parse_mode="markdown")
+            except BadRequest:
+                update.effective_message.reply_text(tl(update.effective_message, "Saya hanya mengerti 'on/yes' atau 'off/no' saja!"), parse_mode="markdown", quote=False)
+    else:
+        getconf = sql.get_lockconf(chat_id)
+        if getconf:
+            try:
+                update.effective_message.reply_text(tl(update.effective_message, "Saat ini saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown")
+            except BadRequest:
+                update.effective_message.reply_text(tl(update.effective_message, "Saat ini saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown", quote=False)
+        else:
+            try:
+                update.effective_message.reply_text(tl(update.effective_message, "Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown")
+            except BadRequest:
+                update.effective_message.reply_text(tl(update.effective_message, "Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown", quote=False)
+
+
 def __import_data__(chat_id, data):
     # set chat locks
     locks = data.get('locks', {})
@@ -461,11 +528,13 @@ LOCKTYPES_HANDLER = DisableAbleCommandHandler("locktypes", locktypes)
 LOCK_HANDLER = CommandHandler("lock", lock, pass_args=True)#, filters=Filters.group)
 UNLOCK_HANDLER = CommandHandler("unlock", unlock, pass_args=True)#, filters=Filters.group)
 LOCKED_HANDLER = CommandHandler("locks", list_locks)#, filters=Filters.group)
+LOCKWARNS_HANDLER = CommandHandler("lockwarns", lock_warns, pass_args=True)
 
 dispatcher.add_handler(LOCK_HANDLER)
 dispatcher.add_handler(UNLOCK_HANDLER)
 dispatcher.add_handler(LOCKTYPES_HANDLER)
 dispatcher.add_handler(LOCKED_HANDLER)
+dispatcher.add_handler(LOCKWARNS_HANDLER)
 
 dispatcher.add_handler(MessageHandler(Filters.all & Filters.group, del_lockables), PERM_GROUP)
 dispatcher.add_handler(MessageHandler(Filters.all & Filters.group, rest_handler), REST_GROUP)
