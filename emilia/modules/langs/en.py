@@ -1242,7 +1242,7 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
  - /setmutetext <new text>: Customise the "Click here to unmute" button obtained from enabling welcomemutes.
  - /resetmutetext: Reset teks tombol unmute menjadi default.
 
-Read /markdownhelp to learn about formatting your text and mentioning new users when the join!
+Read /welcomehelp and /markdownhelp to learn about formatting your text and mentioning new users when the join!
 
 If you want to save an image, gif, or sticker, or any other data, do the following:
 /setwelcome while replying to a sticker or whatever data you'd like. This data will now be sent to welcome new users.

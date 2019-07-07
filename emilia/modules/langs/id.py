@@ -455,7 +455,7 @@ Sedangkan off, hanya akan menendang.
  - /setmutetext <teks tombol>: Ubahsuaikan untuk tombol "Klik disini untuk mensuarakan" yang diperoleh dari mengaktifkan welcomemute.
  - /resetmutetext: Reset teks tombol unmute menjadi default.
 
-Baca /welcomehelp untuk mempelajari tentang memformat teks Anda dan menyebutkan pengguna baru saat bergabung!
+Baca /welcomehelp dan /markdownhelp untuk mempelajari tentang memformat teks Anda dan menyebutkan pengguna baru saat bergabung!
 
 Jika Anda ingin menyimpan gambar, gif, atau stiker, atau data lain, lakukan hal berikut:
 Balas pesan stiker atau data apa pun yang Anda inginkan dengan teks `/setwelcome`. Data ini sekarang akan dikirim untuk menyambut pengguna baru.
