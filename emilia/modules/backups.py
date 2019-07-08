@@ -14,7 +14,7 @@ from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_note_type
 from emilia.modules.rules import get_rules
-from emilia.modules.helper_funcs.string_handling import button_markdown_parser
+from emilia.modules.helper_funcs.string_handling import button_markdown_parser, make_time
 
 # SQL
 import emilia.modules.sql.antiflood_sql as antifloodsql
@@ -424,41 +424,43 @@ def import_data(bot: Bot, update):
 					if data['data'].get('antiflood'):
 						floodlimit = data['data']['antiflood'].get('flood_limit')
 						action = data['data']['antiflood'].get('action')
-						# TODO
-						# actionduration = data['data']['antiflood'].get('action_duration')
+						actionduration = data['data']['antiflood'].get('action_duration')
+						act_dur = make_time(int(actionduration))
 						antifloodsql.set_flood(chat_id, int(floodlimit))
 						if action == "ban":
-							antifloodsql.set_flood_strength(chat_id, 1, "0")
+							antifloodsql.set_flood_strength(chat_id, 1, str(act_dur))
 							imp_antiflood = True
 						elif action == "kick":
-							antifloodsql.set_flood_strength(chat_id, 2, "0")
+							antifloodsql.set_flood_strength(chat_id, 2, str(act_dur))
 							imp_antiflood = True
 						elif action == "mute":
-							antifloodsql.set_flood_strength(chat_id, 3, "0")
+							antifloodsql.set_flood_strength(chat_id, 3, str(act_dur))
 							imp_antiflood = True
 					# Import blacklist
 					if data['data'].get('blacklists'):
 						action = data['data']['blacklists'].get('action')
+						actionduration = data['data']['blacklists'].get('action_duration')
+						act_dur = make_time(int(actionduration))
 						strengthdone = False
 						if action == "del":
 							strengthdone = True
-							blacklistsql.set_blacklist_strength(chat_id, 1, "0")
+							blacklistsql.set_blacklist_strength(chat_id, 1, str(act_dur))
 							imp_blacklist = True
 						elif action == "warn":
 							strengthdone = True
-							blacklistsql.set_blacklist_strength(chat_id, 2, "0")
+							blacklistsql.set_blacklist_strength(chat_id, 2, str(act_dur))
 							imp_blacklist = True
 						elif action == "mute":
 							strengthdone = True
-							blacklistsql.set_blacklist_strength(chat_id, 3, "0")
+							blacklistsql.set_blacklist_strength(chat_id, 3, str(act_dur))
 							imp_blacklist = True
 						elif action == "kick":
 							strengthdone = True
-							blacklistsql.set_blacklist_strength(chat_id, 4, "0")
+							blacklistsql.set_blacklist_strength(chat_id, 4, str(act_dur))
 							imp_blacklist = True
 						elif action == "ban":
 							strengthdone = True
-							blacklistsql.set_blacklist_strength(chat_id, 5, "0")
+							blacklistsql.set_blacklist_strength(chat_id, 5, str(act_dur))
 							imp_blacklist = True
 						else:
 							if not strengthdone:
@@ -554,6 +556,8 @@ def import_data(bot: Bot, update):
 					# Import warn
 					if data['data'].get('warns'):
 						action = data['data']['warns'].get('action')
+						# actionduration = data['data']['warns'].get('action_duration')
+						# act_dur = make_time(int(actionduration))
 						if action == "kick":
 							warnssql.set_warn_mode(chat_id, 1)
 							imp_warn = True
