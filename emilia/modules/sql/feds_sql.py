@@ -63,19 +63,34 @@ class FedsUserSettings(BASE):
 	def __repr__(self):
 		return "<Feds report settings ({})>".format(self.user_id)
 
+class FedSubs(BASE):
+	__tablename__ = "feds_subs"
+	fed_id = Column(UnicodeText, primary_key=True)
+	fed_subs = Column(UnicodeText, primary_key=True, nullable=False)
+
+	def __init__(self, fed_id, fed_subs):
+		self.fed_id = fed_id
+		self.fed_subs = fed_subs
+
+	def __repr__(self):
+		return "<Fed {} subscribes for {}>".format(self.fed_id, self.fed_subs)
+
 # Dropping db
 # Federations.__table__.drop()
 # ChatF.__table__.drop()
 # BansF.__table__.drop()
+# FedSubs.__table__.drop()
 
 Federations.__table__.create(checkfirst=True)
 ChatF.__table__.create(checkfirst=True)
 BansF.__table__.create(checkfirst=True)
 FedsUserSettings.__table__.create(checkfirst=True)
+FedSubs.__table__.create(checkfirst=True)
 
 FEDS_LOCK = threading.RLock()
 CHAT_FEDS_LOCK = threading.RLock()
 FEDS_SETTINGS_LOCK = threading.RLock()
+FEDS_SUBSCRIBER_LOCK = threading.RLock()
 
 
 FEDERATION_BYNAME = {}
@@ -89,6 +104,7 @@ FEDERATION_BANNED_FULL = {}
 FEDERATION_BANNED_USERID = {}
 
 FEDERATION_NOTIFICATION = {}
+FEDS_SUBSCRIBER = {}
 
 
 def get_fed_info(fed_id):
@@ -545,6 +561,61 @@ def set_fed_log(fed_id, chat_id):
 		return True
 
 
+def subs_fed(fed_id, my_fed):
+	check = get_spec_subs(fed_id, my_fed)
+	if check:
+		return False
+	with FEDS_SUBSCRIBER_LOCK:
+		subsfed = FedSubs(fed_id, my_fed)
+
+		SESSION.merge(subsfed)  # merge to avoid duplicate key issues
+		SESSION.commit()
+		global FEDS_SUBSCRIBER
+		if FEDS_SUBSCRIBER.get(fed_id, set()) == set():
+			FEDS_SUBSCRIBER[fed_id] = {my_fed}
+		else:
+			FEDS_SUBSCRIBER.get(fed_id, set()).add(my_fed)
+		return True
+
+def unsubs_fed(fed_id, my_fed):
+	with FEDS_SUBSCRIBER_LOCK:
+		getsubs = SESSION.query(FedSubs).get(fed_id, my_fed)
+		if getsubs:
+			if my_fed in FEDS_SUBSCRIBER.get(fed_id, set()):  # sanity check
+				FEDS_SUBSCRIBER.get(fed_id, set()).remove(my_fed)
+
+			SESSION.delete(getsubs)
+			SESSION.commit()
+			return True
+
+		SESSION.close()
+		return False
+
+def get_all_subs(fed_id):
+	return FEDS_SUBSCRIBER.get(fed_id, set())
+
+def get_spec_subs(fed_id, fed_target):
+	if FEDS_SUBSCRIBER.get(fed_id, set()) == set():
+		return {}
+	else:
+		return FEDS_SUBSCRIBER.get(fed_id, fed_target)
+
+def get_mysubs(my_fed):
+	allfed = list(FEDS_SUBSCRIBER)
+	mysubs = []
+	for x in allfed:
+		if x == my_fed:
+			continue
+		getsub = FEDS_SUBSCRIBER.get(x, my_fed)
+		if getsub:
+			mysubs.append(x)
+	return mysubs
+
+def get_subscriber(fed_id):
+	return FEDS_SUBSCRIBER.get(fed_id, set())
+
+
+
 def __load_all_feds():
 	global FEDERATION_BYOWNER, FEDERATION_BYFEDID, FEDERATION_BYNAME
 	try:
@@ -616,8 +687,25 @@ def __load_all_feds_settings():
 	finally:
 		SESSION.close()
 
+def __load_feds_subscriber():
+	global FEDS_SUBSCRIBER
+	try:
+		feds = SESSION.query(FedSubs.fed_id).distinct().all()
+		for (fed_id,) in feds:  # remove tuple by ( ,)
+			FEDS_SUBSCRIBER[fed_id] = []
+
+		all_fedsubs = SESSION.query(FedSubs).all()
+		for x in all_fedsubs:
+			FEDS_SUBSCRIBER[x.fed_id] += [x.fed_subs]
+
+		FEDS_SUBSCRIBER = {x: set(y) for x, y in FEDS_SUBSCRIBER.items()}
+
+	finally:
+		SESSION.close()
+
 
 __load_all_feds()
 __load_all_feds_chats()
 __load_all_feds_banned()
 __load_all_feds_settings()
+__load_feds_subscriber()

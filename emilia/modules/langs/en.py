@@ -677,6 +677,16 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"Dilarang di federasi saat ini: <b>Ya</b>": "Banned in the current federation: <b>Yes</b>",
 	"\n<b>Alasan:</b> {}": "\n<b>Reason:</b> {}",
 	"Dilarang di federasi saat ini: <b>Tidak</b>": "Banned in the current federation: <b>No</b>",
+	"Federasi `{}` telah mengikuti federasi `{}`. Setiap ada fedban dari federasi tersebut, federasi ini juga akan banned pengguna tsb.": "Federation `{}` has subscribe the federation `{}`. Every time there is a Fedban from that federation, this federation will also banned that user.",
+	"Federasi `{}` sudah mengikuti federasi `{}`.": "Federation `{}` already subscribe the federation `{}`.",
+	"Federasi `{}` sudah tidak mengikuti `{}` lagi.": "Federation `{}` now unsubscribe fed `{}`.",
+	"Federasi `{}` tidak mengikuti federasi `{}`.": "Federation `{}` is not subscribing `{}`.",
+	"Federasi `{}` tidak mengikuti federasi apapun.": "Federation `{}` is not subscribing any federation.",
+	"Federasi `{}` mengikuti federasi berikut ini:\n": "Federation `{}` is subscribing federation:\n",
+	"\nUntuk info federasi, ketik `/fedinfo <fedid>`. Untuk berhenti berlangganan ketik `/unsubfed <fedid>`.": "\nTo get fed info `/fedinfo <fedid>`. To unsubscribe `/unsubfed <fedid>`.",
+	"Federasi `{}` telah mengikuti federasi `{}`": "Federation `{}` has subscribe the federation `{}`",
+	"Federasi `{}` sudah tidak mengikuti `{}`": "Federation `{}` has unsubscribe fed `{}`.",
+	
 	"feds_help": """
 Ah, group management. It's all fun and games, until you start getting spammers in, and you need to ban them. Then you need to start banning more, and more, and it gets painful.
 But then you have multiple groups, and you don't want these spammers in any of your groups - how can you deal? Do you have to ban them manually, in all your groups?
