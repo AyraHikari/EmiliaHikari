@@ -686,7 +686,6 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"\nUntuk info federasi, ketik `/fedinfo <fedid>`. Untuk berhenti berlangganan ketik `/unsubfed <fedid>`.": "\nTo get fed info `/fedinfo <fedid>`. To unsubscribe `/unsubfed <fedid>`.",
 	"Federasi `{}` telah mengikuti federasi `{}`": "Federation `{}` has subscribe the federation `{}`",
 	"Federasi `{}` sudah tidak mengikuti `{}`": "Federation `{}` has unsubscribe fed `{}`.",
-	
 	"feds_help": """
 Ah, group management. It's all fun and games, until you start getting spammers in, and you need to ban them. Then you need to start banning more, and more, and it gets painful.
 But then you have multiple groups, and you don't want these spammers in any of your groups - how can you deal? Do you have to ban them manually, in all your groups?
@@ -720,6 +719,9 @@ You can even appoint federation admins, so that your trustworthiest admins can b
  - /fdemote <user>: Demotes the user from fed admin to normal user, in your fed.
  - /fbanlist: Get the list of currently banned users. If you want different modes, use /fbanlist <csv/json>
  - /importfbans: Reply federated backup message file to import banned list to current federation.
+ - /subfed <fedid>: to subscribe federation, can subscribe multiple federations.
+ - /unsubfed <fedid>: unsubscribe that federation.
+ - /fedsubs: check all subscribed in current federation.
 """,
 
 # global bans

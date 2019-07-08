@@ -284,11 +284,14 @@ Anda bahkan dapat menunjuk admin federasi, sehingga admin tepercaya Anda dapat m
  - /fedchats: Dapatkan semua chat yang terhubung di federasi.
 
 
-*Only federation owner:*
+*Hanya pemilik federasi:*
  - /fpromote <user>: mempromosikan pengguna untuk memberi fed admin. Pemilik fed saja.
  - /fdemote <user>: menurunkan pengguna dari admin federasi ke pengguna normal. Pemilik fed saja.
  - /fbanlist: Menampilkan semua pengguna yang di fban pada federasi saat ini. Jika Anda menginginkan mode yang berbeda, gunakan /fbanlist
-  - /importfbans: Balas file pesan cadangan federasi untuk mengimpor list banned ke federasi sekarang.
+ - /importfbans: Balas file pesan cadangan federasi untuk mengimpor list banned ke federasi sekarang.
+ - /subfed <fedid>: untuk berlangganan federasi, dapat berlangganan beberapa federasi.
+ - /unsubfed <fedid>: berhenti berlangganan federasi itu.
+ - /fedsubs: periksa semua yang berlangganan federasi saat ini.
 """,
     "globalbans_help": """
 *Hanya admin:*
