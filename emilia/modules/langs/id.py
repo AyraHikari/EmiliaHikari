@@ -88,9 +88,9 @@ Ketika ditandai sebagai AFK, sebutan apa pun akan dibalas dengan pesan untuk men
 """,
 	"backups_help": """
 *Hanya admin:*
- - /import: balas ke file cadangan grup butler/emilia untuk mengimpor sebanyak mungkin, membuat transfer menjadi sangat mudah! \
- Catatan bahwa file/foto tidak dapat diimpor karena pembatasan telegram.
- - /export: export data grup, yang akan di export adalah: peraturan, catatan (dokumen, gambar, musik, video, audio, voice, teks, tombol teks).
+ - /import: balas ke file cadangan grup butler/marie/rose/emilia untuk mengimpor sebanyak mungkin, membuat transfer menjadi sangat mudah! \
+ Catatan bahwa file/foto tidak dapat diimpor karena pembatasan telegram. Kecuali backup dari Emilia.
+ - /export: export data grup, hanya bisa di lakukan 12 jam sekali.
 """,
 	"bans_help": """
  - /kickme: menendang pengguna yang mengeluarkan perintah
