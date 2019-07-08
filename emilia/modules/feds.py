@@ -613,24 +613,25 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 		# Fban for fed subscriber
 		subscriber = list(sql.get_subscriber(fed_id))
-		for fedsid in subscriber:
-			all_fedschat = sql.all_fed_chats(fedsid)
-			for fedschat in all_fedschat:
-				try:
-					bot.kick_chat_member(fedschat, user_id)
-				except BadRequest as excp:
-					if excp.message in FBAN_ERRORS:
-						try:
-							dispatcher.bot.getChat(fedschat)
-						except Unauthorized:
-							targetfed_id = sql.get_fed_id(fedschat)
-							sql.unsubs_fed(fed_id, targetfed_id)
-							LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
-							continue
-					else:
-						LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
-				except TelegramError:
-					pass
+		if len(subscriber) != 0:
+			for fedsid in subscriber:
+				all_fedschat = sql.all_fed_chats(fedsid)
+				for fedschat in all_fedschat:
+					try:
+						bot.kick_chat_member(fedschat, user_id)
+					except BadRequest as excp:
+						if excp.message in FBAN_ERRORS:
+							try:
+								dispatcher.bot.getChat(fedschat)
+							except Unauthorized:
+								targetfed_id = sql.get_fed_id(fedschat)
+								sql.unsubs_fed(fed_id, targetfed_id)
+								LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
+								continue
+						else:
+							LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
+					except TelegramError:
+						pass
 		message.reply_text(tl(update.effective_message, "Alasan fedban telah di perbarui."))
 		return
 
@@ -718,24 +719,25 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 	# Fban for fed subscriber
 	subscriber = list(sql.get_subscriber(fed_id))
-	for fedsid in subscriber:
-		all_fedschat = sql.all_fed_chats(fedsid)
-		for fedschat in all_fedschat:
-			try:
-				bot.kick_chat_member(fedschat, user_id)
-			except BadRequest as excp:
-				if excp.message in FBAN_ERRORS:
-					try:
-						dispatcher.bot.getChat(fedschat)
-					except Unauthorized:
-						targetfed_id = sql.get_fed_id(fedschat)
-						sql.unsubs_fed(fed_id, targetfed_id)
-						LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
-						continue
-				else:
-					LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
-			except TelegramError:
-				pass
+	if len(subscriber) != 0:
+		for fedsid in subscriber:
+			all_fedschat = sql.all_fed_chats(fedsid)
+			for fedschat in all_fedschat:
+				try:
+					bot.kick_chat_member(fedschat, user_id)
+				except BadRequest as excp:
+					if excp.message in FBAN_ERRORS:
+						try:
+							dispatcher.bot.getChat(fedschat)
+						except Unauthorized:
+							targetfed_id = sql.get_fed_id(fedschat)
+							sql.unsubs_fed(fed_id, targetfed_id)
+							LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
+							continue
+					else:
+						LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
+				except TelegramError:
+					pass
 	message.reply_text(tl(update.effective_message, "Orang ini telah di fbanned."))
 
 
@@ -843,24 +845,25 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 
 	# UnFban for fed subscriber
 	subscriber = list(sql.get_subscriber(fed_id))
-	for fedsid in subscriber:
-		all_fedschat = sql.all_fed_chats(fedsid)
-		for fedschat in all_fedschat:
-			try:
-				bot.unban_chat_member(fedchats, user_id)
-			except BadRequest as excp:
-				if excp.message in FBAN_ERRORS:
-					try:
-						dispatcher.bot.getChat(fedschat)
-					except Unauthorized:
-						targetfed_id = sql.get_fed_id(fedschat)
-						sql.unsubs_fed(fed_id, targetfed_id)
-						LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
-						continue
-				else:
-					LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
-			except TelegramError:
-				pass
+	if len(subscriber) != 0:
+		for fedsid in subscriber:
+			all_fedschat = sql.all_fed_chats(fedsid)
+			for fedschat in all_fedschat:
+				try:
+					bot.unban_chat_member(fedchats, user_id)
+				except BadRequest as excp:
+					if excp.message in FBAN_ERRORS:
+						try:
+							dispatcher.bot.getChat(fedschat)
+						except Unauthorized:
+							targetfed_id = sql.get_fed_id(fedschat)
+							sql.unsubs_fed(fed_id, targetfed_id)
+							LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
+							continue
+					else:
+						LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
+				except TelegramError:
+					pass
 
 	message.reply_text(tl(update.effective_message, "Orang ini telah di un-fbanned."))
 	# Also do not spamming all fed admins
