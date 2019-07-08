@@ -242,7 +242,7 @@ def get_help(bot: Bot, update: Update):
         module = args[1].lower()
         text = tl(update.effective_message, "Ini adalah bantuan yang tersedia untuk modul *{}*:\n").format(HELPABLE[module].__mod_name__) \
                + tl(update.effective_message, HELPABLE[module].__help__)
-        send_help(chat.id, text, InlineKeyboardMarkup([[InlineKeyboardButton(text=tl(query.message, "Kembali"), callback_data="help_back")]]))
+        send_help(chat.id, text, InlineKeyboardMarkup([[InlineKeyboardButton(text=tl(update.effective_message, "Kembali"), callback_data="help_back")]]))
 
     else:
         send_help(chat.id, tl(update.effective_message, HELP_STRINGS))
