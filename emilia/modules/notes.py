@@ -111,7 +111,11 @@ def get(bot, update, notename, show_none=True, no_format=False):
 							failtext = tl(update.effective_message, "Kesalahan: URL pada tombol tidak valid! Harap perbaruhi catatan ini.")
 							failtext += "\n\n```\n{}```".format(note.value + revert_buttons(buttons))
 							message.reply_text(failtext, parse_mode="markdown")
-						print("Gagal mengirim catatan: " + excp.message)
+						elif excp.message == "Button_url_invalid":
+							failtext = tl(update.effective_message, "Kesalahan: URL pada tombol tidak valid! Harap perbaruhi catatan ini.")
+							failtext += "\n\n```\n{}```".format(note.value + revert_buttons(buttons))
+							message.reply_text(failtext, parse_mode="markdown")
+						LOGGER.warning("Gagal mengirim catatan: " + excp.message)
 						pass
 				else:
 					ENUM_FUNC_MAP[note.msgtype](send_id, note.file, caption=text, reply_to_message_id=reply_id,
@@ -198,7 +202,7 @@ def save(bot: Bot, update: Update):
 	if data_type is None:
 		msg.reply_text(tl(update.effective_message, "Tidak ada catatan!"))
 		return
-	
+
 	if len(text.strip()) == 0:
 		text = "`" + note_name + "`"
 		
