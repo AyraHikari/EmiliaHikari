@@ -164,82 +164,22 @@ def terjemah(bot: Bot, update: Update):
 		return
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
-	"""
-	lang = str("af,am,ar,az,be,bg,bn,bs,ca,ceb,co,cs,cy,da,de,el,en,eo,es,et,eu,fa,fi,fr,fy,ga,gd,gl,gu,ha,haw,hi,hmn,hr,ht,hu,hy,id,ig,is,it,iw,ja,jw,ka,kk,km,kn,ko,ku,ky,la,lb,lo,lt,lv,mg,mi,mk,ml,mn,mr,ms,mt,my,ne,nl,no,ny,pa,pl,ps,pt,ro,ru,sd,si,sk,sl,sm,sn,so,sq,sr,st,su,sv,sw,ta,te,tg,th,tl,tr,uk,ur,uz,vi,xh,yi,yo,zh,zh_CN,zh_TW,zu".split(","))
+	getlang = langsql.get_lang(update.effective_message.from_user.id)
 	try:
 		if msg.reply_to_message and msg.reply_to_message.text:
 			args = update.effective_message.text.split(None, 1)
-			try:
-				target = args[1].split(None, 1)[0]
-			except:
-				target = args[1]
-			try:
-				target2 = args[1].split(None, 2)[1]
-				if target2 not in lang:
-					target2 = None
-				else:
-					target = args[1].split(None, 2)[0]
-					target2 = args[1].split(None, 2)[1]
-			except:
+			if len(args) != 1:
 				target2 = None
-			teks = msg.reply_to_message.text
-			message = update.effective_message
-			trl = Translator()
-			if target2 == None:
-				deteksibahasa = trl.detect(teks)
-				tekstr = trl.translate(teks, dest=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n*Aksara:*\n`{}`\n*Teks:*\n`{}`".format(deteksibahasa.lang, target, tekstr.text, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+				try:
+					target = args[1].split(None, 1)[0]
+				except:
+					target = args[1]
+				if "-" in target:
+					target2 = target.split("-")[1]
+					target = target.split("-")[0]
 			else:
-				tekstr = trl.translate(teks, dest=target2, src=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n*Aksara:*\n`{}`\n*Teks:*\n`{}`".format(target, target2, tekstr.text, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
-			
-		else:
-			args = update.effective_message.text.split(None, 2)
-			target = args[1]
-			try:
-				target2 = args[2].split(None, 1)[0]
-				if target2 not in lang:
-					target2 = None
-					teks = args[2]
-				else:
-					target2 = args[2].split(None, 1)[0]
-					teks = args[2].split(None, 1)[1]
-			except:
+				target = getlang
 				target2 = None
-				teks = args[2]
-			message = update.effective_message
-			trl = Translator()
-			if target2 == None:
-				deteksibahasa = trl.detect(teks)
-				tekstr = trl.translate(teks, dest=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n*Aksara:*\n`{}`\n*Teks:*\n`{}`".format(deteksibahasa.lang, target, tekstr.text, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
-			else:
-				tekstr = trl.translate(teks, dest=target2, src=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n*Aksara:*\n`{}`\n*Teks:*\n`{}`".format(target, target2, tekstr.text, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
-	"""
-	try:
-		if msg.reply_to_message and msg.reply_to_message.text:
-			args = update.effective_message.text.split(None, 1)
-			target2 = None
-			try:
-				target = args[1].split(None, 1)[0]
-			except:
-				target = args[1]
-			if "-" in target:
-				target2 = target.split("-")[1]
-				target = target.split("-")[0]
 			teks = msg.reply_to_message.text
 			#teks = deEmojify(teks)
 			exclude_list = UNICODE_EMOJI.keys()
@@ -264,34 +204,30 @@ def terjemah(bot: Bot, update: Update):
 			
 		else:
 			args = update.effective_message.text.split(None, 2)
-			target = args[1]
-			teks = args[2]
+			if len(args) != 1:
+				target = args[1]
+				teks = args[2]
+				target2 = None
+				if "-" in target:
+					target2 = target.split("-")[1]
+					target = target.split("-")[0]
+			else:
+				target = getlang
+				teks = args[1]
 			#teks = deEmojify(teks)
 			exclude_list = UNICODE_EMOJI.keys()
 			for emoji in exclude_list:
 				if emoji in teks:
 					teks = teks.replace(emoji, '')
-			target2 = None
-			if "-" in target:
-				target2 = target.split("-")[1]
-				target = target.split("-")[0]
 			message = update.effective_message
 			trl = Translator()
 			if target2 == None:
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
 				return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				#if tekstr.pronunciation == None:
-				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				#else:
-				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
 				message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				#if tekstr.pronunciation == None:
-				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				#else:
-				#	return message.reply_text("Diterjemahkan dari `{}` ke `{}`:\n`{}`".format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
 				
 	except IndexError:
 		update.effective_message.reply_text(tl(update.effective_message, "Balas pesan atau tulis pesan dari bahasa lain untuk "
@@ -520,7 +456,7 @@ FILE_HANDLER = CommandHandler("file", file, filters=Filters.user(OWNER_ID))
 GETLINK_HANDLER = CommandHandler("getlink", getlink, pass_args=True, filters=Filters.user(OWNER_ID))
 LEAVECHAT_HANDLER = CommandHandler("leavechat", leavechat, pass_args=True, filters=Filters.user(OWNER_ID))
 RAMALAN_HANDLER = DisableAbleCommandHandler(["ramalan", "fortune"], ramalan)
-TERJEMAH_HANDLER = DisableAbleCommandHandler("tr", terjemah)
+TERJEMAH_HANDLER = DisableAbleCommandHandler(["tr", "tl"], terjemah)
 WIKIPEDIA_HANDLER = DisableAbleCommandHandler("wiki", wiki)
 KBBI_HANDLER = DisableAbleCommandHandler("kbbi", kamusbesarbahasaindonesia)
 KBGAUL_HANDLER = DisableAbleCommandHandler("kbgaul", kitabgaul)
