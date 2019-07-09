@@ -8,7 +8,7 @@ Hai {}, nama saya {}! Saya seorang manajer grup yang dikelola oleh [master saya 
 Untuk mendapatkan info status dan update bot ini, anda dapat bergabung dengan channel kami [Ayra's Bot News](https://t.me/AyraBotNews)
 
 Ada masalah atau butuh bantuan lebih?
-Gabung grup [Emilia Official Support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ)!
+Gabung grup [Emilia Official Support](https://t.me/EmiliaOfficial)!
 
 Anda dapat menemukan daftar perintah yang tersedia dengan /help.
 
