@@ -250,71 +250,35 @@ def wiki(bot: Bot, update: Update):
 	args = update.effective_message.text.split(None, 1)
 	teks = args[1]
 	message = update.effective_message
-	getlang = langsql.get_lang(message)
-	if getlang == "id":
+	getlang = langsql.get_lang(chat_id)
+	if str(getlang) == "id":
 		wikipedia.set_lang("id")
-		try:
-			pagewiki = wikipedia.page(teks)
-		except wikipedia.exceptions.PageError:
-			wikipedia.set_lang("en")
-			try:
-				pagewiki = wikipedia.page(teks)
-			except wikipedia.exceptions.PageError:
-				update.effective_message.reply_text(tl(update.effective_message, "Hasil tidak ditemukan"))
-				return
-			except wikipedia.exceptions.DisambiguationError as refer:
-				rujuk = str(refer).split("\n")
-				if len(rujuk) >= 6:
-					batas = 6
-				else:
-					batas = len(rujuk)
-				teks = ""
-				for x in range(batas):
-					if x == 0:
-						teks += rujuk[x].replace('may refer to', 'dapat merujuk ke')+"\n"
-					else:
-						teks += "- `"+rujuk[x]+"`\n"
-				update.effective_message.reply_text(teks, parse_mode="markdown")
-				return
-		except wikipedia.exceptions.DisambiguationError as refer:
-			rujuk = str(refer).split("\n")
-			if len(rujuk) >= 6:
-				batas = 6
-			else:
-				batas = len(rujuk)
-			teks = ""
-			for x in range(batas):
-				if x == 0:
+	else:
+		wikipedia.set_lang("en")
+	try:
+		pagewiki = wikipedia.page(teks)
+	except wikipedia.exceptions.PageError:
+		update.effective_message.reply_text(tl(update.effective_message, "Hasil tidak ditemukan"))
+	except wikipedia.exceptions.DisambiguationError as refer:
+		rujuk = str(refer).split("\n")
+		if len(rujuk) >= 6:
+			batas = 6
+		else:
+			batas = len(rujuk)
+		teks = ""
+		for x in range(batas):
+			if x == 0:
+				if getlang == "id":
 					teks += rujuk[x].replace('may refer to', 'dapat merujuk ke')+"\n"
 				else:
-					teks += "- `"+rujuk[x]+"`\n"
-			update.effective_message.reply_text(teks, parse_mode="markdown")
-			return
-		except IndexError:
-			update.effective_message.reply_text("Tulis pesan untuk mencari dari sumber wikipedia")
-			return
-	else:
-		try:
-			pagewiki = wikipedia.page(teks)
-		except wikipedia.exceptions.PageError:
-			update.effective_message.reply_text(tl(update.effective_message, "Hasil tidak ditemukan"))
-		except wikipedia.exceptions.DisambiguationError as refer:
-			rujuk = str(refer).split("\n")
-			if len(rujuk) >= 6:
-				batas = 6
-			else:
-				batas = len(rujuk)
-			teks = ""
-			for x in range(batas):
-				if x == 0:
 					teks += rujuk[x]+"\n"
-				else:
-					teks += "- `"+rujuk[x]+"`\n"
-			update.effective_message.reply_text(teks, parse_mode="markdown")
-			return
-		except IndexError:
-			update.effective_message.reply_text(tl(update.effective_message, "Tulis pesan untuk mencari dari sumber wikipedia"))
-			return
+			else:
+				teks += "- `"+rujuk[x]+"`\n"
+		update.effective_message.reply_text(teks, parse_mode="markdown")
+		return
+	except IndexError:
+		update.effective_message.reply_text(tl(update.effective_message, "Tulis pesan untuk mencari dari sumber wikipedia"))
+		return
 	judul = pagewiki.title
 	summary = pagewiki.summary
 	if update.effective_message.chat.type == "private":
