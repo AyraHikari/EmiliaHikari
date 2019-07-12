@@ -95,6 +95,8 @@ def import_data(bot: Bot, update):
 				imp_warn = False
 				imp_warn_chat = 0
 				imp_warn_filter = 0
+				NOT_IMPORTED = "This cannot be imported because from other bot."
+				NOT_IMPORTED_INT = 0
 				# If backup is from this bot, import all files
 				if data.get('bot_id') == bot.id:
 					is_self = True
@@ -136,6 +138,7 @@ def import_data(bot: Bot, update):
 
 				# Import filters
 				if data.get('filters'):
+					NOT_IMPORTED += "\n\nFilters:\n"
 					for x in data['filters'].get('filters'):
 						# If from self, import all
 						if is_self:
@@ -167,8 +170,11 @@ def import_data(bot: Bot, update):
 						else:
 							if x['has_markdown']:
 								note_data, buttons = button_markdown_parser(x['reply'], entities=0)
-								filtersql.add_filter(chat_id, x['reply'], note_data, False, False, False, False, False, False, buttons)
+								filtersql.add_filter(chat_id, x['name'], note_data, False, False, False, False, False, False, buttons)
 								imp_filters_count += 1
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['name'])
+								NOT_IMPORTED_INT += 1
 
 				# Import greetings
 				if data.get('greetings'):
@@ -275,6 +281,7 @@ def import_data(bot: Bot, update):
 				# Import notes
 				if data.get('notes'):
 					allnotes = data['notes']
+					NOT_IMPORTED += "\n\nNotes:\n"
 					for x in allnotes:
 						# If from self, import all
 						if is_self:
@@ -314,6 +321,9 @@ def import_data(bot: Bot, update):
 								note_name = x['name']
 								notesql.add_note_to_db(chat_id, note_name, note_data, Types.TEXT, buttons, None)
 								imp_notes += 1
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['name'])
+								NOT_IMPORTED_INT += 1
 
 				# Import reports
 				if data.get('report'):
@@ -397,6 +407,12 @@ def import_data(bot: Bot, update):
 					msg.reply_text(text, parse_mode="markdown")
 				except BadRequest:
 					msg.reply_text(text, parse_mode="markdown", quote=False)
+				if NOT_IMPORTED_INT:
+					f = open("{}-notimported.txt".format(chat_id), "w")
+					f.write(str(NOT_IMPORTED))
+					f.close()
+					bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+					os.remove("{}-notimported.txt".format(chat_id))
 				return
 		except Exception as err:
 			msg.reply_text(tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
@@ -420,6 +436,8 @@ def import_data(bot: Bot, update):
 				imp_rules = False
 				imp_lang = False
 				imp_warn = False
+				NOT_IMPORTED = "This cannot be imported because from other bot."
+				NOT_IMPORTED_INT = 0
 				if data.get('data'):
 					# Import antiflood
 					if data['data'].get('antiflood'):
@@ -483,12 +501,16 @@ def import_data(bot: Bot, update):
 									imp_disabled_count += 1
 					# Import filters
 					if data['data'].get('filters'):
+						NOT_IMPORTED += "\n\nFilters:\n"
 						if data['data']['filters'].get('filters'):
 							for x in data['data']['filters'].get('filters'):
 								if x['type'] == 0:
 									note_data, buttons = button_markdown_parser(x['text'].replace("\\", ""), entities=0)
 									filtersql.add_filter(chat_id, x['name'], note_data, False, False, False, False, False, False, buttons)
 									imp_filters_count += 1
+								else:
+									NOT_IMPORTED += "- {}\n".format(x['name'])
+									NOT_IMPORTED_INT += 1
 					# Import greetings
 					if data['data'].get('greetings'):
 						if data['data']['greetings'].get('welcome'):
@@ -527,6 +549,7 @@ def import_data(bot: Bot, update):
 					# TODO Locks
 					# Import notes
 					if data['data'].get('notes'):
+						NOT_IMPORTED += "\n\nNotes:\n"
 						allnotes = data['data']['notes']['notes']
 						for x in allnotes:
 							# If this text
@@ -535,6 +558,9 @@ def import_data(bot: Bot, update):
 								note_name = x['name']
 								notesql.add_note_to_db(chat_id, note_name, note_data, Types.TEXT, buttons, None)
 								imp_notes += 1
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['name'])
+								NOT_IMPORTED_INT += 1
 					# Import reports
 					if data['data'].get('reports'):
 						if data['data']['reports'].get('disable_reports'):
@@ -605,6 +631,12 @@ def import_data(bot: Bot, update):
 						msg.reply_text(text, parse_mode="markdown")
 					except BadRequest:
 						msg.reply_text(text, parse_mode="markdown", quote=False)
+					if NOT_IMPORTED_INT:
+						f = open("{}-notimported.txt".format(chat_id), "w")
+						f.write(str(NOT_IMPORTED))
+						f.close()
+						bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+						os.remove("{}-notimported.txt".format(chat_id))
 					return
 		except Exception as err:
 			msg.reply_text(tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Rose!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")

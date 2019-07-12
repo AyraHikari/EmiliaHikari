@@ -232,6 +232,7 @@ Examples of time values: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 week.
 Note that files/photos from other bots can't be imported due to telegram restrictions. Except for Emilia backup it self.
  - /export: export group data, you can do this 12 hours once.
 """,
+	"*Data yang tidak dapat di import*": "*Data which can't be imported*",
 
 # Bans
 	"Saya tidak bisa membatasi orang di {}! Pastikan saya admin dan dapat menunjuk admin baru.": "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.",
