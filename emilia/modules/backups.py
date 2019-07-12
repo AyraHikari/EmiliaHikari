@@ -401,6 +401,7 @@ def import_data(bot: Bot, update):
 		except Exception as err:
 			msg.reply_text(tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
 			LOGGER.exception("An error when importing from Emilia base!")
+			return
 
 		try:
 			# If backup is from rose
@@ -474,18 +475,20 @@ def import_data(bot: Bot, update):
 							imp_blacklist_count += 1
 					# Import disabled
 					if data['data'].get('disabled'):
-						candisable = disabledsql.get_disableable()
-						for listdisabled in data['data']['disabled'].get('disabled'):
-							if listdisabled in candisable:
-								disabledsql.disable_command(chat_id, listdisabled)
-								imp_disabled_count += 1
+						if data['data']['disabled'].get('disabled'):
+							candisable = disabledsql.get_disableable()
+							for listdisabled in data['data']['disabled'].get('disabled'):
+								if listdisabled in candisable:
+									disabledsql.disable_command(chat_id, listdisabled)
+									imp_disabled_count += 1
 					# Import filters
 					if data['data'].get('filters'):
-						for x in data['data']['filters'].get('filters'):
-							if x['type'] == 0:
-								note_data, buttons = button_markdown_parser(x['text'].replace("\\", ""), entities=0)
-								filtersql.add_filter(chat_id, x['name'], note_data, False, False, False, False, False, False, buttons)
-								imp_filters_count += 1
+						if data['data']['filters'].get('filters'):
+							for x in data['data']['filters'].get('filters'):
+								if x['type'] == 0:
+									note_data, buttons = button_markdown_parser(x['text'].replace("\\", ""), entities=0)
+									filtersql.add_filter(chat_id, x['name'], note_data, False, False, False, False, False, False, buttons)
+									imp_filters_count += 1
 					# Import greetings
 					if data['data'].get('greetings'):
 						if data['data']['greetings'].get('welcome'):
@@ -605,7 +608,8 @@ def import_data(bot: Bot, update):
 					return
 		except Exception as err:
 			msg.reply_text(tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Rose!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
-			LOGGER.exception("An error when importing from Emilia base!")
+			LOGGER.exception("An error when importing from Rose base!")
+			return
 
 		# only import one group
 		if len(data) > 1 and str(chat_id) not in data:
