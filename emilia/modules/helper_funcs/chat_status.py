@@ -107,7 +107,8 @@ def bot_admin(func):
         if is_bot_admin(update.effective_chat, bot.id):
             return func(bot, update, *args, **kwargs)
         else:
-            update.effective_message.reply_text()
+            update.effective_message.reply_text(languages.tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! "
+                                                "Pastikan saya admin dan dapat menunjuk admin baru."))
 
     return is_admin
 

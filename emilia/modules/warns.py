@@ -29,7 +29,7 @@ WARN_HANDLER_GROUP = 9
 # Not async
 def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = None, conn=False) -> str:
     if is_user_admin(chat, user.id):
-        message.reply_text(tl(update.effective_message, "Sayangnya admin tidak bisa di warn 😔"))
+        message.reply_text(tl(chat.id, "Sayangnya admin tidak bisa di warn 😔"))
         return ""
 
     if warner:
