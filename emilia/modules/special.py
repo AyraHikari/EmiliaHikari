@@ -165,21 +165,22 @@ def terjemah(bot: Bot, update: Update):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	getlang = langsql.get_lang(update.effective_message.from_user.id)
-	try:
+	if True:#try:
 		if msg.reply_to_message and msg.reply_to_message.text:
-			args = update.effective_message.text.split(None, 1)
-			if len(args) != 1:
-				target2 = None
-				try:
-					target = args[1].split(None, 1)[0]
-				except:
-					target = args[1]
+			args = update.effective_message.text.split()
+			if len(args) >= 2:
+				target = args[1]
 				if "-" in target:
 					target2 = target.split("-")[1]
 					target = target.split("-")[0]
+				else:
+					target2 = None
 			else:
-				target = getlang
-				target2 = None
+				if getlang:
+					target = getlang
+					target2 = None
+				else:
+					raise IndexError
 			teks = msg.reply_to_message.text
 			#teks = deEmojify(teks)
 			exclude_list = UNICODE_EMOJI.keys()
@@ -191,16 +192,10 @@ def terjemah(bot: Bot, update: Update):
 			if target2 == None:
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+				message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
-				if tekstr.pronunciation == None:
-					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				else:
-					return message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.pronunciation), parse_mode=ParseMode.MARKDOWN)
+				message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 			
 		else:
 			args = update.effective_message.text.split(None, 2)
@@ -228,7 +223,7 @@ def terjemah(bot: Bot, update: Update):
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
 				message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-				
+	"""
 	except IndexError:
 		update.effective_message.reply_text(tl(update.effective_message, "Balas pesan atau tulis pesan dari bahasa lain untuk "
 											"diterjemahkan kedalam bahasa yang di dituju\n\n"
@@ -238,6 +233,7 @@ def terjemah(bot: Bot, update: Update):
 		update.effective_message.reply_text(tl(update.effective_message, "Bahasa yang di tuju tidak ditemukan!"))
 	else:
 		return
+	"""
 
 
 @run_async
