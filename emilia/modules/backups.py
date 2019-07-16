@@ -488,9 +488,10 @@ def import_data(bot: Bot, update):
 									blacklistsql.set_blacklist_strength(chat_id, 1, "0")
 									imp_blacklist = True
 						blacklisted = data['data']['blacklists'].get('filters')
-						for x in blacklisted:
-							blacklistsql.add_to_blacklist(chat_id, x['name'].lower())
-							imp_blacklist_count += 1
+						if blacklisted:
+							for x in blacklisted:
+								blacklistsql.add_to_blacklist(chat_id, x['name'].lower())
+								imp_blacklist_count += 1
 					# Import disabled
 					if data['data'].get('disabled'):
 						if data['data']['disabled'].get('disabled'):
