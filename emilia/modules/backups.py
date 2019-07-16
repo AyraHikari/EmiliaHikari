@@ -951,7 +951,7 @@ __mod_name__ = "Import/Export"
 
 __help__ = "backups_help"
 
-IMPORT_HANDLER = CommandHandler("import", import_data)
+IMPORT_HANDLER = CommandHandler("import", import_data, filters=Filters.group)
 EXPORT_HANDLER = CommandHandler("export", export_data, pass_chat_data=True)
 # EXPORT_HANDLER = CommandHandler("export", export_data, filters=Filters.user(OWNER_ID))
 
