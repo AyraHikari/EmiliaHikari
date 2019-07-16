@@ -850,7 +850,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 
 	lock_warn = locksql.get_lockconf(chat_id)
 
-	locks = {'lock_warn': lock_warn, 'locks': locked_lock, 'restirect': locked_restr}
+	locks = {'lock_warn': lock_warn, 'locks': locked_lock, 'restrict': locked_restr}
 
 	# Backuping notes
 	note_list = notesql.get_all_chat_notes(chat_id)
