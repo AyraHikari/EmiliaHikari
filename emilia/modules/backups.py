@@ -19,6 +19,7 @@ from emilia.modules.helper_funcs.string_handling import button_markdown_parser, 
 # SQL
 import emilia.modules.sql.antiflood_sql as antifloodsql
 import emilia.modules.sql.blacklist_sql as blacklistsql
+import emilia.modules.sql.blsticker_sql as blackliststksql
 from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.sql import cust_filters_sql as filtersql
 from emilia.modules.sql import languages_sql as langsql
@@ -82,6 +83,8 @@ def import_data(bot: Bot, update):
 				imp_antiflood = False
 				imp_blacklist = False
 				imp_blacklist_count = 0
+				imp_blsticker = False
+				imp_blsticker_count = 0
 				imp_disabled_count = 0
 				imp_filters_count = 0
 				imp_greet = False
@@ -126,6 +129,20 @@ def import_data(bot: Bot, update):
 						for x in blacklisted:
 							blacklistsql.add_to_blacklist(chat_id, x.lower())
 							imp_blacklist_count += 1
+
+				# Import blacklist sticker
+				if data.get('blstickers'):
+					imp_blsticker = True
+					blsticker_mode = data['blstickers'].get('blsticker_mode')
+					blsticker_duration = data['blstickers'].get('blsticker_duration')
+					blstickers = data['blstickers'].get('blstickers')
+
+					# Add to db
+					blackliststksql.set_blacklist_strength(chat_id, blsticker_mode, blsticker_duration)
+					if blstickers:
+						for x in blstickers:
+							blackliststksql.add_to_stickers(chat_id, x.lower())
+							imp_blsticker_count += 1
 
 				# Import disabled
 				if data.get('disabled'):
@@ -377,6 +394,8 @@ def import_data(bot: Bot, update):
 					text += tl(update.effective_message, "- Pengaturan Blacklist\n")
 				if imp_blacklist_count:
 					text += tl(update.effective_message, "- {} blacklists\n").format(imp_blacklist_count)
+				if imp_blsticker:
+					text += tl(update.effective_message, "- {} blacklist stickers\n").format(imp_blsticker_count)
 				if imp_disabled_count:
 					text += tl(update.effective_message, "- {} cmd disabled\n").format(imp_disabled_count)
 				if imp_filters_count:
@@ -756,6 +775,11 @@ def export_data(bot: Bot, update: Update, chat_data):
 	blacklist_mode, blacklist_duration = blacklistsql.get_blacklist_setting(chat.id)
 	blacklists = {'blacklist_mode': blacklist_mode, 'blacklist_duration': blacklist_duration, 'blacklists': all_blacklisted}
 
+	# Backuping blacklists sticker
+	all_blsticker = blackliststksql.get_chat_stickers(chat_id)
+	blsticker_mode, blsticker_duration = blacklistsql.get_blacklist_setting(chat.id)
+	blstickers = {'blsticker_mode': blsticker_mode, 'blsticker_duration': blsticker_duration, 'blstickers': all_blsticker}
+
 	# Backuping disabled
 	cmd_disabled = disabledsql.get_all_disabled(chat_id)
 	disabled = {'disabled': cmd_disabled}
@@ -901,7 +925,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 
 
 	# Parsing backups
-	backup = {"bot_id": bot_id, "bot_base": bot_base, "antiflood": antiflood, "blacklists": blacklists, "disabled": disabled, "filters": filters, "greetings": greetings, "language": language, "locks": locks, "notes": notes, "report": report, "rules": rules, "warns": warns, "version": backup_ver}
+	backup = {"bot_id": bot_id, "bot_base": bot_base, "antiflood": antiflood, "blacklists": blacklists, "blstickers": blstickers, "disabled": disabled, "filters": filters, "greetings": greetings, "language": language, "locks": locks, "notes": notes, "report": report, "rules": rules, "warns": warns, "version": backup_ver}
 
 
 	all_backups = json.dumps(backup, indent=4, cls=SetEncoder)
