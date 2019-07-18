@@ -165,7 +165,7 @@ def terjemah(bot: Bot, update: Update):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	getlang = langsql.get_lang(update.effective_message.from_user.id)
-	if True:#try:
+	try:
 		if msg.reply_to_message and msg.reply_to_message.text:
 			args = update.effective_message.text.split()
 			if len(args) >= 2:
@@ -223,7 +223,6 @@ def terjemah(bot: Bot, update: Update):
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
 				message.reply_text(tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
-	"""
 	except IndexError:
 		update.effective_message.reply_text(tl(update.effective_message, "Balas pesan atau tulis pesan dari bahasa lain untuk "
 											"diterjemahkan kedalam bahasa yang di dituju\n\n"
@@ -233,7 +232,6 @@ def terjemah(bot: Bot, update: Update):
 		update.effective_message.reply_text(tl(update.effective_message, "Bahasa yang di tuju tidak ditemukan!"))
 	else:
 		return
-	"""
 
 
 @run_async
