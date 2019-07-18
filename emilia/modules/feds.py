@@ -81,6 +81,9 @@ def new_fed(bot: Bot, update: Update):
 	if chat.type != "private":
 		update.effective_message.reply_text(tl(update.effective_message, "Buat federasi Anda di PM saya, bukan dalam grup."))
 		return
+	if len(message.text) == 1:
+		update.effective_message.reply_text(tl(update.effective_message, "Tolong tulis nama federasinya!"))
+		return
 	fednam = message.text.split(None, 1)[1]
 	if not fednam == '':
 		fed_id = str(uuid.uuid4())
