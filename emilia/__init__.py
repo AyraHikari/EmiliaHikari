@@ -148,17 +148,21 @@ if ALLOW_EXCL:
 	tg.CommandHandler = CustomCommandHandler
 
 # Disable this (line 151) if you dont have a antispam script
-from emilia.antispam import antispam_restrict_user, antispam_cek_user, detect_user
+try:
+	from emilia.antispam import antispam_restrict_user, antispam_cek_user, detect_user
+	antispam_module = True
+except ModuleNotFoundError:
+	antispam_module = False
+	LOGGER.info("Note: Can't load antispam module. This is an optional.")
 
 def spamfilters(text, user_id, chat_id, message):
-	print("{} | {} | {}".format(text, user_id, chat_id))
-	# Delete this until line 161 if you dont have a antispam script
-	parsing_date = time.mktime(message.date.timetuple())
-	detecting = detect_user(user_id, chat_id, message, parsing_date)
-	if detecting:
-		return True
-	antispam_restrict_user(user_id, parsing_date)
-	# Delete above like i told in line 155
+	print("{} | {} | {} | {}".format(text, user_id, message.chat.title, chat_id))
+	if antispam_module:
+		parsing_date = time.mktime(message.date.timetuple())
+		detecting = detect_user(user_id, chat_id, message, parsing_date)
+		if detecting:
+			return True
+		antispam_restrict_user(user_id, parsing_date)
 	if int(user_id) in SPAMMERS:
 		print("This user is spammer!")
 		return True
