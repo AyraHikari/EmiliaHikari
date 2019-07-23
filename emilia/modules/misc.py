@@ -22,11 +22,12 @@ from emilia.modules.helper_funcs.msg_types import get_message_type
 from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 
 from emilia.modules.languages import tl
+from emilia.modules.sql import languages_sql as lang_sql
 
 # Change language locale to Indonesia
 # Install language:
 # - sudo apt-get install language-pack-id language-pack-id-base manpages
-locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
+# locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
 
 RUN_STRINGS = (
     "Kemana Anda pikir Anda akan pergi?",
@@ -359,7 +360,11 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
                 return
             placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
             localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
-            time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
+            if lang_sql.get_lang(update.effective_chat.id) == "id":
+                locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
+                time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
+            else:
+                time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S %A, %d %B")
             update.message.reply_text(tl(update.effective_message, "Sekarang pukul `{}` di `{}`").format(time, placename), parse_mode="markdown")
     else:
         update.message.reply_text(tl(update.effective_message, "Gunakan `/time nama daerah`\nMisal: `/time jakarta`"), parse_mode="markdown")
