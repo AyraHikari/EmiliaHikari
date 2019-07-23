@@ -126,6 +126,8 @@ def connect_chat(bot, update, args):
                     bot.send_message(update.effective_message.from_user.id, languages.tl(update.effective_message, "Anda telah terhubung dengan *{}*. Gunakan /connection untuk informasi perintah apa saja yang tersedia.").format(chat_name), parse_mode="markdown")
                 except BadRequest:
                     pass
+                except error.Unauthorized:
+                    pass
             else:
                 update.effective_message.reply_text(languages.tl(update.effective_message, "Koneksi gagal!"))
         else:
