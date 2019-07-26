@@ -890,8 +890,8 @@ def export_data(bot: Bot, update: Update, chat_data):
 		else:
 			tombol = notesql.get_buttons(chat_id, note_tag)
 			keyb = []
+			buttonlist = ""
 			for btn in tombol:
-				buttonlist = ""
 				if btn.same_line:
 					buttonlist += "[{}](buttonurl:{}:same)\n".format(btn.name, btn.url)
 				else:
