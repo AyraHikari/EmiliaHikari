@@ -663,7 +663,7 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"Federasi {} tidak di temukan!": "Fed {} not found!",
 	"Dia": "He/she",
 	"{} belum di larang di federasi ini!": "{} is not banned in this federation!",
-	"{} di larang di federasi ini karena:\n`{}`": "{} banned in this federation because:\n`{}`",
+	"{} di larang di federasi ini karena:\n`{}`\n*Di banned pada:* `{}`": "{} banned in this federation because:\n`{}`\n*Banned at:* `{}`",
 	"{} belum di larang di federasi mana pun!": "{} is not banned in any federation!",
 	"{} sudah di larang di federasi ini:\n": "{} has been banned in this federation:\n",
 	"\nJika anda ingin mengetahui lebih lanjut tentang alasan fedban dengan spesifik, gunakan /fbanstat <FedID>": "\nIf you want to find out more about the reasons for Fedban specifically, use /fbanstat <FedID>",
