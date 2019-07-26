@@ -132,10 +132,10 @@ def get_fed_name(chat_id):
 
 def get_user_fban(fed_id, user_id):
 	if not FEDERATION_BANNED_FULL.get(fed_id):
-		return False, False
+		return False, False, False
 	user_info = FEDERATION_BANNED_FULL[fed_id].get(user_id)
 	if not user_info:
-		return None, None
+		return None, None, None
 	return user_info['first_name'], user_info['reason'], user_info['time']
 
 def get_user_fbanlist(user_id):

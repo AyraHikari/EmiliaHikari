@@ -20,7 +20,7 @@ from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_
 from emilia.modules.helper_funcs.handlers import CMD_STARTERS
 from emilia.modules.helper_funcs.misc import is_module_loaded, send_to_list
 from emilia.modules.helper_funcs.chat_status import is_user_admin
-from emilia.modules.helper_funcs.extraction import extract_user, extract_user_and_text
+from emilia.modules.helper_funcs.extraction import extract_user, extract_unt_fedban, extract_user_fban
 from emilia.modules.helper_funcs.string_handling import markdown_parser
 from emilia.modules.disable import DisableAbleCommandHandler
 
@@ -481,7 +481,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 	message = update.effective_message  # type: Optional[Message]
 
-	user_id, reason = extract_user_and_text(message, args)
+	user_id, reason = extract_unt_fedban(message, args)
 
 	fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user_id)
 
@@ -515,16 +515,35 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 	try:
 		user_chat = bot.get_chat(user_id)
+		isvalid = True
+		fban_user_id = user_chat.id
+		fban_user_name = user_chat.first_name
+		fban_user_lname = user_chat.last_name
+		fban_user_uname = user_chat.username
 	except BadRequest as excp:
-		message.reply_text(excp.message)
-		return
+		if not str(user_id).isdigit():
+			message.reply_text(excp.message)
+			return
+		elif not len(str(user_id)) == 9:
+			message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
+			return
+		isvalid = False
+		fban_user_id = int(user_id)
+		fban_user_name = "user({})".format(user_id)
+		fban_user_lname = None
+		fban_user_uname = None
 
-	if user_chat.type != 'private':
+
+	if isvalid and user_chat.type != 'private':
 		message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
 		return
 
+	if isvalid:
+		user_target = mention_html(fban_user_id, fban_user_name)
+	else:
+		user_target = fban_user_name
+
 	if fban:
-		user_target = mention_html(user_chat.id, user_chat.first_name)
 		fed_name = info['fname']
 		starting = tl(update.effective_message, "Alasan fban di ganti untuk {} pada Federasi <b>{}</b>.").format(user_target, fed_name)
 		update.effective_message.reply_text(starting, parse_mode=ParseMode.HTML)
@@ -532,11 +551,11 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 		if reason == "":
 			reason = tl(update.effective_message, "Tidak ada alasan.")
 
-		temp = sql.un_fban_user(fed_id, user_id)
+		temp = sql.un_fban_user(fed_id, fban_user_id)
 		if not temp:
 			message.reply_text(tl(update.effective_message, "Gagal mengupdate alasan fedban!"))
 			return
-		x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason, int(time.time()))
+		x = sql.fban_user(fed_id, fban_user_id, fban_user_name, fban_user_lname, fban_user_uname, reason, int(time.time()))
 		if not x:
 			message.reply_text(tl(update.effective_message, "Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya."))
 			return
@@ -548,9 +567,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 								  "\n<b>Federasi Admin:</b> {}" \
 								  "\n<b>Pengguna:</b> {}" \
 								  "\n<b>Pengguna ID:</b> <code>{}</code>" \
-								  "\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
-												   mention_html(user_chat.id, user_chat.first_name),
-																user_chat.id, reason), parse_mode="HTML")
+								  "\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 		# Send message to owner if fednotif is enabled
 		if getfednotif:
 			bot.send_message(info['owner'], tl(update.effective_message, "<b>Alasan FedBan Diperbarui</b>" \
@@ -558,9 +575,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 											"\n<b>Federasi Admin:</b> {}" \
 											"\n<b>Pengguna:</b> {}" \
 											"\n<b>Pengguna ID:</b> <code>{}</code>" \
-											"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
-												   mention_html(user_chat.id, user_chat.first_name),
-																user_chat.id, reason), parse_mode="HTML")
+											"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 		# If fedlog is set, then send message, except fedlog is current chat
 		get_fedlog = sql.get_fed_log(fed_id)
 		if get_fedlog:
@@ -570,9 +585,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 											"\n<b>Federasi Admin:</b> {}" \
 											"\n<b>Pengguna:</b> {}" \
 											"\n<b>Pengguna ID:</b> <code>{}</code>" \
-											"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
-												   mention_html(user_chat.id, user_chat.first_name),
-																user_chat.id, reason), parse_mode="HTML")
+											"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 		for fedschat in fed_chats:
 			try:
 				# Do not spamming all fed chats
@@ -582,11 +595,9 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 							 "\n<b>Federasi Admin:</b> {}" \
 							 "\n<b>Pengguna:</b> {}" \
 							 "\n<b>Pengguna ID:</b> <code>{}</code>" \
-							 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
-												   mention_html(user_chat.id, user_chat.first_name),
-																user_chat.id, reason), parse_mode="HTML")
+							 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 				"""
-				bot.kick_chat_member(fedschat, user_id)
+				bot.kick_chat_member(fedschat, fban_user_id)
 			except BadRequest as excp:
 				if excp.message in FBAN_ERRORS:
 					try:
@@ -595,6 +606,8 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 						sql.chat_leave_fed(fedschat)
 						LOGGER.info("Chat {} has leave fed {} because bot is kicked".format(fedschat, info['fname']))
 						continue
+				elif excp.message == "User_id_invalid":
+					break
 				else:
 					LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
 			except TelegramError:
@@ -608,9 +621,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 				 "\n<b>Federasi Admin:</b> {}" \
 				 "\n<b>Pengguna:</b> {}" \
 				 "\n<b>Pengguna ID:</b> <code>{}</code>" \
-				 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
-									   mention_html(user_chat.id, user_chat.first_name),
-													user_chat.id, reason), 
+				 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), 
 				html=True)
 		"""
 
@@ -621,7 +632,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 				all_fedschat = sql.all_fed_chats(fedsid)
 				for fedschat in all_fedschat:
 					try:
-						bot.kick_chat_member(fedschat, user_id)
+						bot.kick_chat_member(fedschat, fban_user_id)
 					except BadRequest as excp:
 						if excp.message in FBAN_ERRORS:
 							try:
@@ -631,6 +642,8 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 								sql.unsubs_fed(fed_id, targetfed_id)
 								LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
 								continue
+						elif excp.message == "User_id_invalid":
+							break
 						else:
 							LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
 					except TelegramError:
@@ -638,7 +651,6 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 		message.reply_text(tl(update.effective_message, "Alasan fedban telah di perbarui."))
 		return
 
-	user_target = mention_html(user_chat.id, user_chat.first_name)
 	fed_name = info['fname']
 
 	starting = tl(update.effective_message, "Memulai larangan federasi untuk {} pada Federasi <b>{}</b>.").format(user_target, fed_name)
@@ -647,7 +659,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 	if reason == "":
 		reason = tl(update.effective_message, "Tidak ada alasan.")
 
-	x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason, int(time.time()))
+	x = sql.fban_user(fed_id, fban_user_id, fban_user_name, fban_user_lname, fban_user_uname, reason, int(time.time()))
 	if not x:
 		message.reply_text(tl(update.effective_message, "Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya."))
 		return
@@ -659,9 +671,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 							  "\n<b>Federasi Admin:</b> {}" \
 							  "\n<b>Pengguna:</b> {}" \
 							  "\n<b>Pengguna ID:</b> <code>{}</code>" \
-							  "\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
-											   mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id, reason), parse_mode="HTML")
+							  "\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 	# Send message to owner if fednotif is enabled
 	if getfednotif:
 		bot.send_message(info['owner'], tl(update.effective_message, "<b>FedBan baru</b>" \
@@ -669,9 +679,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 										"\n<b>Federasi Admin:</b> {}" \
 										"\n<b>Pengguna:</b> {}" \
 										"\n<b>Pengguna ID:</b> <code>{}</code>" \
-										"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
-											   mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id, reason), parse_mode="HTML")
+										"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 	# If fedlog is set, then send message, except fedlog is current chat
 	get_fedlog = sql.get_fed_log(fed_id)
 	if get_fedlog:
@@ -681,9 +689,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 										"\n<b>Federasi Admin:</b> {}" \
 										"\n<b>Pengguna:</b> {}" \
 										"\n<b>Pengguna ID:</b> <code>{}</code>" \
-										"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name),
-											   mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id, reason), parse_mode="HTML")
+										"\n<b>Alasan:</b> {}").format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 	for fedschat in fed_chats:
 		try:
 			# Do not spamming all fed chats
@@ -693,14 +699,14 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
 						 "\n<b>Pengguna ID:</b> <code>{}</code>" \
-						 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
-											   mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id, reason), parse_mode="HTML")
+						 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 			"""
-			bot.kick_chat_member(fedschat, user_id)
+			bot.kick_chat_member(fedschat, fban_user_id)
 		except BadRequest as excp:
 			if excp.message in FBAN_ERRORS:
 				pass
+			elif excp.message == "User_id_invalid":
+				break
 			else:
 				LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
 		except TelegramError:
@@ -714,9 +720,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 			 "\n<b>Federasi Admin:</b> {}" \
 			 "\n<b>Pengguna:</b> {}" \
 			 "\n<b>Pengguna ID:</b> <code>{}</code>" \
-			 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name),
-								   mention_html(user_chat.id, user_chat.first_name),
-												user_chat.id, reason), 
+			 "\n<b>Alasan:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), 
 			html=True)
 	"""
 
@@ -727,7 +731,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 			all_fedschat = sql.all_fed_chats(fedsid)
 			for fedschat in all_fedschat:
 				try:
-					bot.kick_chat_member(fedschat, user_id)
+					bot.kick_chat_member(fedschat, fban_user_id)
 				except BadRequest as excp:
 					if excp.message in FBAN_ERRORS:
 						try:
@@ -737,6 +741,8 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 							sql.unsubs_fed(fed_id, targetfed_id)
 							LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
 							continue
+					elif excp.message == "User_id_invalid":
+						break
 					else:
 						LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
 				except TelegramError:
@@ -771,24 +777,48 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 		update.effective_message.reply_text(tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
 		return
 
-	user_id = extract_user(message, args)
+	user_id = extract_user_fban(message, args)
 	if not user_id:
 		message.reply_text(tl(update.effective_message, "Anda sepertinya tidak merujuk ke pengguna."))
 		return
 
-	user_chat = bot.get_chat(user_id)
-	if user_chat.type != 'private':
+	try:
+		user_chat = bot.get_chat(user_id)
+		isvalid = True
+		fban_user_id = user_chat.id
+		fban_user_name = user_chat.first_name
+		fban_user_lname = user_chat.last_name
+		fban_user_uname = user_chat.username
+	except BadRequest as excp:
+		if not str(user_id).isdigit():
+			message.reply_text(excp.message)
+			return
+		elif not len(str(user_id)) == 9:
+			message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
+			return
+		isvalid = False
+		fban_user_id = int(user_id)
+		fban_user_name = "user({})".format(user_id)
+		fban_user_lname = None
+		fban_user_uname = None
+
+	if isvalid and user_chat.type != 'private':
 		message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
 		return
 
-	fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user_id)
+	if isvalid:
+		user_target = mention_html(fban_user_id, fban_user_name)
+	else:
+		user_target = fban_user_name
+
+	fban, fbanreason, fbantime = sql.get_fban_user(fed_id, fban_user_id)
 	if fban == False:
 		message.reply_text(tl(update.effective_message, "Pengguna ini tidak di fbanned!"))
 		return
 
 	banner = update.effective_user  # type: Optional[User]
 
-	message.reply_text(tl(update.effective_message, "Saya akan memberi {} kesempatan kedua dalam federasi ini.").format(user_chat.first_name))
+	message.reply_text(tl(update.effective_message, "Saya akan memberi {} kesempatan kedua dalam federasi ini.").format(user_target))
 
 	chat_list = sql.all_fed_chats(fed_id)
 	# Will send to current chat
@@ -796,16 +826,14 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id), parse_mode="HTML")
+						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 	# Send message to owner if fednotif is enabled
 	if getfednotif:
 		bot.send_message(info['owner'], tl(update.effective_message, "<b>Un-FedBan</b>" \
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id), parse_mode="HTML")
+						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 	# If fedlog is set, then send message, except fedlog is current chat
 	get_fedlog = sql.get_fed_log(fed_id)
 	if get_fedlog:
@@ -814,8 +842,7 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id), parse_mode="HTML")
+						 "\n<b>Pengguna ID:</b> <code>{}</code>").format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 	for fedchats in chat_list:
 		try:
 			member = bot.get_chat_member(fedchats, user_id)
@@ -827,24 +854,25 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 						 "\n<b>Federasi:</b> {}" \
 						 "\n<b>Federasi Admin:</b> {}" \
 						 "\n<b>Pengguna:</b> {}" \
-						 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), mention_html(user_chat.id, user_chat.first_name),
-															user_chat.id), parse_mode="HTML")
+						 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 				"""
 		except BadRequest as excp:
 			if excp.message in UNFBAN_ERRORS:
 				pass
+			elif excp.message == "User_id_invalid":
+				break
 			else:
 				LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedchats, excp.message))
 		except TelegramError:
 			pass
 
-		try:
-			x = sql.un_fban_user(fed_id, user_id)
-			if not x:
-				message.reply_text(tl(update.effective_message, "Gagal fban, Pengguna ini mungkin sudah di un-fedbanned!"))
-				return
-		except:
-			pass
+	try:
+		x = sql.un_fban_user(fed_id, user_id)
+		if not x:
+			message.reply_text(tl(update.effective_message, "Gagal fban, Pengguna ini mungkin sudah di un-fedbanned!"))
+			return
+	except:
+		pass
 
 	# UnFban for fed subscriber
 	subscriber = list(sql.get_subscriber(fed_id))
@@ -863,6 +891,8 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 							sql.unsubs_fed(fed_id, targetfed_id)
 							LOGGER.info("Chat {} has unsub fed {} because bot is kicked".format(fedschat, info['fname']))
 							continue
+					elif excp.message == "User_id_invalid":
+						break
 					else:
 						LOGGER.warning("Tidak dapat fban di {} karena: {}".format(fedschat, excp.message))
 				except TelegramError:
@@ -881,9 +911,7 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 			 "\n<b>Federasi:</b> {}" \
 			 "\n<b>Federasi Admin:</b> {}" \
 			 "\n<b>Pengguna:</b> {}" \
-			 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name),
-												 mention_html(user_chat.id, user_chat.first_name),
-															  user_chat.id),
+			 "\n<b>Pengguna ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id),
 			html=True)
 	"""
 
@@ -1418,7 +1446,7 @@ def fed_stat_user(bot, update, args):
 			if user_name == False:
 				update.effective_message.reply_text(tl(update.effective_message, "Federasi {} tidak di temukan!").format(fed_id), parse_mode="markdown")
 				return
-			if user_name == "":
+			if user_name == "" or user_name == None:
 				user_name = tl(update.effective_message, "Dia")
 			if not reason:
 				update.effective_message.reply_text(tl(update.effective_message, "{} belum di larang di federasi ini!").format(user_name))
@@ -1432,7 +1460,7 @@ def fed_stat_user(bot, update, args):
 				user_name = bot.get_chat(user_id).first_name
 			except BadRequest:
 				user_name = tl(update.effective_message, "Dia")
-			if user_name == "":
+			if user_name == "" or user_name == None:
 				user_name = tl(update.effective_message, "Dia")
 		if len(fbanlist) == 0:
 			update.effective_message.reply_text(tl(update.effective_message, "{} belum di larang di federasi mana pun!").format(user_name))
