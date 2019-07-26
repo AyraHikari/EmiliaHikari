@@ -43,14 +43,16 @@ class BansF(BASE):
 	last_name = Column(UnicodeText)
 	user_name = Column(UnicodeText)
 	reason = Column(UnicodeText, default="")
+	time = Column(Integer, default=0)
 
-	def __init__(self, fed_id, user_id, first_name, last_name, user_name, reason):
+	def __init__(self, fed_id, user_id, first_name, last_name, user_name, reason, time):
 		self.fed_id = fed_id
 		self.user_id = user_id
 		self.first_name = first_name
 		self.last_name = last_name
 		self.user_name = user_name
 		self.reason = reason
+		self.time = time
 
 class FedsUserSettings(BASE):
 	__tablename__ = "feds_settings"
@@ -134,7 +136,7 @@ def get_user_fban(fed_id, user_id):
 	user_info = FEDERATION_BANNED_FULL[fed_id].get(user_id)
 	if not user_info:
 		return None, None
-	return user_info['first_name'], user_info['reason']
+	return user_info['first_name'], user_info['reason'], user_info['time']
 
 def get_user_fbanlist(user_id):
 	banlist = FEDERATION_BANNED_FULL
@@ -363,7 +365,7 @@ def get_frules(fed_id):
 		return rules
 
 
-def fban_user(fed_id, user_id, first_name, last_name, user_name, reason):
+def fban_user(fed_id, user_id, first_name, last_name, user_name, reason, time):
 	with FEDS_LOCK:
 		r = SESSION.query(BansF).all()
 		for I in r:
@@ -371,7 +373,7 @@ def fban_user(fed_id, user_id, first_name, last_name, user_name, reason):
 				if int(I.user_id) == int(user_id):
 					SESSION.delete(I)
 
-		r = BansF(str(fed_id), str(user_id), first_name, last_name, user_name, reason)
+		r = BansF(str(fed_id), str(user_id), first_name, last_name, user_name, reason, time)
 
 		SESSION.add(r)
 		try:
@@ -401,7 +403,7 @@ def multi_fban_user(multi_fed_id, multi_user_id, multi_first_name, multi_last_na
 					if int(I.user_id) == int(user_id):
 						SESSION.delete(I)
 
-			r = BansF(str(fed_id), str(user_id), first_name, last_name, user_name, reason)
+			r = BansF(str(fed_id), str(user_id), first_name, last_name, user_name, reason, time)
 
 			SESSION.add(r)
 			counter += 1
@@ -450,9 +452,10 @@ def get_fban_user(fed_id, user_id):
 			if I.fed_id == fed_id:
 				if int(I.user_id) == int(user_id):
 					reason = I.reason
-		return True, reason
+					time = I.time
+		return True, reason, time
 	else:
-		return False, None
+		return False, None, None
 
 
 def get_all_fban_users(fed_id):
@@ -674,7 +677,7 @@ def __load_all_feds_banned():
 			check = FEDERATION_BANNED_FULL.get(x.fed_id)
 			if check == None:
 				FEDERATION_BANNED_FULL[x.fed_id] = {}
-			FEDERATION_BANNED_FULL[x.fed_id][x.user_id] = {'first_name': x.first_name, 'last_name': x.last_name, 'user_name': x.user_name, 'reason': x.reason}
+			FEDERATION_BANNED_FULL[x.fed_id][x.user_id] = {'first_name': x.first_name, 'last_name': x.last_name, 'user_name': x.user_name, 'reason': x.reason, 'time': x.time}
 	finally:
 		SESSION.close()
 

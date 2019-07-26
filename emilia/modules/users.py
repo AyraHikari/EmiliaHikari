@@ -76,7 +76,7 @@ def log_user(bot: Bot, update: Update):
     if fed_id:
         user = update.effective_user
         if user:
-            fban, fbanreason = fedsql.get_fban_user(fed_id, user.id)
+            fban, fbanreason, fbantime = fedsql.get_fban_user(fed_id, user.id)
             if fban:
                 update.effective_message.reply_text(languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
                 try:

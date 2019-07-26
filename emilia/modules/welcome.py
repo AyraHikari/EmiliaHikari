@@ -107,7 +107,7 @@ def new_member(bot: Bot, update: Update):
 	if fed_id:
 		new_members = update.effective_message.new_chat_members
 		for new_mem in new_members:
-			fban, fbanreason = fedsql.get_fban_user(fed_id, new_mem.id)
+			fban, fbanreason, fbantime = fedsql.get_fban_user(fed_id, new_mem.id)
 			if fban:
 				update.effective_message.reply_text(tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
 				try:

@@ -483,7 +483,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 
 	user_id, reason = extract_user_and_text(message, args)
 
-	fban, fbanreason = sql.get_fban_user(fed_id, user_id)
+	fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user_id)
 
 	if not user_id:
 		message.reply_text(tl(update.effective_message, "Anda sepertinya tidak merujuk ke pengguna."))
@@ -536,7 +536,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 		if not temp:
 			message.reply_text(tl(update.effective_message, "Gagal mengupdate alasan fedban!"))
 			return
-		x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason)
+		x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason, int(time.time()))
 		if not x:
 			message.reply_text(tl(update.effective_message, "Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya."))
 			return
@@ -647,7 +647,7 @@ def fed_ban(bot: Bot, update: Update, args: List[str]):
 	if reason == "":
 		reason = tl(update.effective_message, "Tidak ada alasan.")
 
-	x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason)
+	x = sql.fban_user(fed_id, user_id, user_chat.first_name, user_chat.last_name, user_chat.username, reason, int(time.time()))
 	if not x:
 		message.reply_text(tl(update.effective_message, "Gagal melarangan federasi! Jika masalah ini terus terjadi, hubungi pembuat saya."))
 		return
@@ -781,7 +781,7 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 		message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
 		return
 
-	fban, fbanreason = sql.get_fban_user(fed_id, user_id)
+	fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user_id)
 	if fban == False:
 		message.reply_text(tl(update.effective_message, "Pengguna ini tidak di fbanned!"))
 		return
@@ -1295,7 +1295,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					if int(import_userid) in WHITELIST_USERS:
 						failed += 1
 						continue
-					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason)
+					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason, int(time.time()))
 					if addtodb:
 						success += 1
 			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(success)
@@ -1355,7 +1355,7 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					multi_import_reason.append(import_reason)
 					# t = ThreadWithReturnValue(target=sql.fban_user, args=(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason,))
 					# t.start()
-				addtodb = sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason)
+				addtodb = sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason, int(time.time()))
 			csvFile.close()
 			os.remove("fban_{}.csv".format(msg.reply_to_message.document.file_id))
 			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(addtodb)
@@ -1410,7 +1410,11 @@ def fed_stat_user(bot, update, args):
 	if user_id:
 		if len(args) == 2 and args[0].isdigit():
 			fed_id = args[1]
-			user_name, reason = sql.get_user_fban(fed_id, str(user_id))
+			user_name, reason, fbantime = sql.get_user_fban(fed_id, str(user_id))
+			if fbantime:
+				fbantime = time.strftime("%d/%m/%Y", time.localtime(fbantime))
+			else:
+				fbantime = "Unavaiable"
 			if user_name == False:
 				update.effective_message.reply_text(tl(update.effective_message, "Federasi {} tidak di temukan!").format(fed_id), parse_mode="markdown")
 				return
@@ -1419,7 +1423,7 @@ def fed_stat_user(bot, update, args):
 			if not reason:
 				update.effective_message.reply_text(tl(update.effective_message, "{} belum di larang di federasi ini!").format(user_name))
 			else:
-				teks = tl(update.effective_message, "{} di larang di federasi ini karena:\n`{}`").format(user_name, reason)
+				teks = tl(update.effective_message, "{} di larang di federasi ini karena:\n`{}`\n*Di banned pada:* `{}`").format(user_name, reason, fbantime)
 				update.effective_message.reply_text(teks, parse_mode="markdown")
 			return
 		user_name, fbanlist = sql.get_user_fbanlist(str(user_id))
@@ -1460,13 +1464,17 @@ def fed_stat_user(bot, update, args):
 		if not fedinfo:
 			update.effective_message.reply_text(tl(update.effective_message, "Federasi {} tidak di temukan!").format(fed_id))
 			return
-		name, reason = sql.get_user_fban(fed_id, msg.from_user.id)
+		name, reason, fbantime = sql.get_user_fban(fed_id, msg.from_user.id)
+		if fbantime:
+			fbantime = time.strftime("%d/%m/%Y", time.localtime(fbantime))
+		else:
+			fbantime = "Unavaiable"
 		if not name:
 			name = msg.from_user.first_name
 		if not reason:
 			update.effective_message.reply_text(tl(update.effective_message, "{} tidak di larang di federasi ini").format(name))
 			return
-		update.effective_message.reply_text(tl(update.effective_message, "{} di larang di federasi ini karena:\n`{}`").format(name, reason), parse_mode="markdown")
+		update.effective_message.reply_text(tl(update.effective_message, "{} di larang di federasi ini karena:\n`{}`\n*Di banned pada:* `{}`").format(name, reason, fbantime), parse_mode="markdown")
 
 
 @run_async
@@ -1680,7 +1688,7 @@ def welcome_fed(bot, update):
 	user = update.effective_user  # type: Optional[User]
 
 	fed_id = sql.get_fed_id(chat.id)
-	fban, fbanreason = sql.get_fban_user(fed_id, user.id)
+	fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user.id)
 	if fban:
 		update.effective_message.reply_text("This user is banned in current federation! I will remove him.")
 		bot.kick_chat_member(chat.id, user.id)
@@ -1698,7 +1706,7 @@ def __stats__():
 def __user_info__(user_id, chat_id):
 	fed_id = sql.get_fed_id(chat_id)
 	if fed_id:
-		fban, fbanreason = sql.get_fban_user(fed_id, user_id)
+		fban, fbanreason, fbantime = sql.get_fban_user(fed_id, user_id)
 		info = sql.get_fed_info(fed_id)
 		infoname = info['fname']
 
@@ -1757,7 +1765,7 @@ FED_USERBAN_HANDLER = CommandHandler("fbanlist", fed_ban_list, pass_args=True, p
 FED_NOTIF_HANDLER = CommandHandler("fednotif", fed_notif, pass_args=True)
 FED_CHATLIST_HANDLER = CommandHandler("fedchats", fed_chats, pass_args=True)
 FED_IMPORTBAN_HANDLER = CommandHandler("importfbans", fed_import_bans, pass_chat_data=True, filters=Filters.user(OWNER_ID))
-FEDSTAT_USER = DisableAbleCommandHandler("fedstat", fed_stat_user, pass_args=True)
+FEDSTAT_USER = DisableAbleCommandHandler(["fedstat", "fbanstat"], fed_stat_user, pass_args=True)
 SET_FED_LOG = CommandHandler("setfedlog", set_fed_log, pass_args=True)
 UNSET_FED_LOG = CommandHandler("unsetfedlog", unset_fed_log, pass_args=True)
 SUBS_FED = CommandHandler("subfed", subs_feds, pass_args=True)
