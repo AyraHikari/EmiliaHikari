@@ -494,14 +494,14 @@ Note:
 	"Saat ini Anda terhubung dengan {}.\n": "You are currently connected with {}.\n",
 	"Saat ini Anda tidak terhubung dengan grup.\n": "You are currently not connected in any group.\n",
 	"ID Obrolan tidak valid!": "Invalid Chat ID!",
-	"Berhasil tersambung ke *{}*": "Successfully connected to *{}*",
+	"Berhasil tersambung ke *{}*. Gunakan /connection untuk informasi perintah apa saja yang tersedia.": "Successfully connected to *{}*. Use /connection for see current available commands.",
 	"Koneksi gagal!": "Connection failed!",
 	"Sambungan ke obrolan ini tidak diizinkan!": "Connection to this chat is not allowed!",
 	"Anda telah terkoneksi pada *{}* (`{}`)": "You are connected to *{}* (`{}`)",
 	"Tulis ID obrolan atau tagnya untuk terhubung!": "Write the chat ID or tag to connect!",
 	"Anda telah terhubung dengan *{}*. Gunakan /connection untuk informasi perintah apa saja yang tersedia.": "You have connected with *{}*. Use /connection for see current available commands.",
 	"Terputus dari obrolan!": "Disconnected from chat!",
-	"Memutus sambungan tidak berhasil!": "Disconnecting is unsuccessful!",
+	"Anda tidak terkoneksi!": "You're not connected!",
 	"Penggunaan terbatas hanya untuk PM": "This command only available in PM",
 	"Anda harus menjadi admin dalam grup yang terhubung!": "You must be an admin in the connected group!",
 	"Grup mengubah koneksi hak atau Anda bukan admin lagi.\nSaya putuskan koneksi Anda.": "The group changes the connection rights or you are no longer an admin.\nI've disconnect you.",
@@ -515,6 +515,9 @@ Organize your group via PM easily.
  - /allowconnect on/yes/off/no: Allow connecting non-admin users to groups
  - /helpconnect: Get command help for connections
 """,
+	"🧹 Hapus riwayat": "🧹 Clear history",
+	"🔌 Putuskan sambungan": "🔌 Disconnect",
+	"Riwayat yang terhubung telah dihapus!": "History connected has been cleared!",
 
 # Custom filters
 	"filter lokal": "local filters",
