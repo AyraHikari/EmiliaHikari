@@ -113,18 +113,18 @@ def connect_chat(bot, update, args):
         else:
             gethistory = sql.get_history_conn(user.id)
             if gethistory:
-                buttons = [InlineKeyboardButton(text="🧹 Hapus riwayat", callback_data="connect_clear")]
+                buttons = [InlineKeyboardButton(text=languages.tl(update.effective_message, "🧹 Hapus riwayat"), callback_data="connect_clear")]
             else:
                 buttons = []
             conn = connected(bot, update, chat, user.id, need_admin=False)
             if conn:
                 connectedchat = dispatcher.bot.getChat(conn)
                 text = languages.tl(update.effective_message, "Anda telah terkoneksi pada *{}* (`{}`)").format(connectedchat.title, conn)
-                buttons.append(InlineKeyboardButton(text="🔌 Putuskan sambungan", callback_data="connect_disconnect"))
+                buttons.append(InlineKeyboardButton(text=languages.tl(update.effective_message, "🔌 Putuskan sambungan"), callback_data="connect_disconnect"))
             else:
                 text = languages.tl(update.effective_message, "Tulis ID obrolan atau tagnya untuk terhubung!")
             if gethistory:
-                text += "\n\n*Riwayat koneksi:*\n"
+                text += languages.tl(update.effective_message, "\n\n*Riwayat koneksi:*\n")
                 buttons = [buttons]
                 for x in gethistory:
                     htime = time.strftime("%d/%m/%Y", time.localtime(x))

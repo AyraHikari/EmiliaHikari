@@ -518,6 +518,7 @@ Organize your group via PM easily.
 	"🧹 Hapus riwayat": "🧹 Clear history",
 	"🔌 Putuskan sambungan": "🔌 Disconnect",
 	"Riwayat yang terhubung telah dihapus!": "History connected has been cleared!",
+	"\n\n*Riwayat koneksi:*\n": "\n\n*Connection history:*\n",
 
 # Custom filters
 	"filter lokal": "local filters",
