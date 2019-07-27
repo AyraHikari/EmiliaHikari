@@ -854,6 +854,7 @@ Setting the log channel is done by:
 	"Selalu ada waktu banned untukku!": "Its always banhammer time for me!",
 	"Sekarang pukul `{}` di `{}`": "It is now `{}` in `{}`",
 	"Gunakan `/time nama daerah`\nMisal: `/time jakarta`": "Use `/time place name`\nEx: `/time jakarta`",
+	"Lokasi tidak di temukan!": "Location not found!",
 
 	"MARKDOWN_HELP": """
 Markdown is a very powerful formatting tool supported by telegram. {} has some enhancements, to make sure that \

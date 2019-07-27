@@ -356,7 +356,7 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
         if res.status_code == 200:
             loc = res.json()
             if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
-                update.message.reply_text("Lokasi tidak di temukan!")
+                update.message.reply_text(tl(update.effective_message, "Lokasi tidak di temukan!"))
                 return
             placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
             localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
