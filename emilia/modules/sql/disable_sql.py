@@ -31,7 +31,7 @@ def disable_command(chat_id, disable):
 
         if not disabled:
             DISABLED.setdefault(str(chat_id), set()).add(disable)
-            
+
             disabled = Disable(str(chat_id), disable)
             SESSION.add(disabled)
             SESSION.commit()
@@ -48,7 +48,7 @@ def enable_command(chat_id, enable):
         if disabled:
             if enable in DISABLED.get(str(chat_id)):  # sanity check
                 DISABLED.setdefault(str(chat_id), set()).remove(enable)
-                
+
             SESSION.delete(disabled)
             SESSION.commit()
             return True
@@ -85,11 +85,12 @@ def migrate_chat(old_chat_id, new_chat_id):
         for chat in chats:
             chat.chat_id = str(new_chat_id)
             SESSION.add(chat)
-            
+
         if str(old_chat_id) in DISABLED:
             DISABLED[str(new_chat_id)] = DISABLED.get(str(old_chat_id), set())
 
         SESSION.commit()
+
 
 def disableable_cache(cmd):
     global DISABLEABLE
@@ -99,8 +100,10 @@ def disableable_cache(cmd):
     else:
         DISABLEABLE.append(cmd)
 
+
 def get_disableable():
     return DISABLEABLE
+
 
 def __load_disabled_commands():
     global DISABLED

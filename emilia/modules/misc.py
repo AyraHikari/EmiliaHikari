@@ -1,26 +1,33 @@
 import html
 import json
+import locale
 import random
 from datetime import datetime
 from typing import Optional, List
-import time
-import locale
 
 import requests
-from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity, InlineKeyboardMarkup
 from telegram import ParseMode
+from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamfilters, MAPS_API
+from emilia import (
+    dispatcher,
+    OWNER_ID,
+    SUDO_USERS,
+    SUPPORT_USERS,
+    WHITELIST_USERS,
+    BAN_STICKER,
+    spamfilters,
+    MAPS_API,
+)
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
-from emilia.modules.helper_funcs.msg_types import get_message_type
 from emilia.modules.helper_funcs.misc import build_keyboard_alternate
-
+from emilia.modules.helper_funcs.msg_types import get_message_type
 from emilia.modules.languages import tl
 from emilia.modules.sql import languages_sql as lang_sql
 
@@ -55,7 +62,7 @@ RUN_STRINGS = (
     "Semoga peluang akan selalu menguntungkan Anda.",
     "Kata-kata terakhir yang terkenal.",
     "Dan mereka menghilang selamanya, tidak pernah terlihat lagi.",
-    "\"Oh, lihat aku! Aku sangat keren, aku bisa lari dari bot!\" - orang ini",
+    '"Oh, lihat aku! Aku sangat keren, aku bisa lari dari bot!" - orang ini',
     "Ya ya, cukup ketuk /kickme saja 😏",
     "Ini, ambil cincin ini dan pergi ke Mordor saat Anda berada di sana.",
     "Legenda mengatakan, mereka masih berlari...",
@@ -92,7 +99,7 @@ SLAP_TEMPLATES = (
     "{user1} menusuk {user2} dan berulang kali {hits} dia dengan {item}.",
     "{user1} {hits} {user2} dengan sebuah {item}.",
     "{user1} mengikat {user2} ke kursi dan {throws} sebuah {item}.",
-    "{user1} memberikan dorongan ramah untuk membantu {user2} belajar berenang di lava."
+    "{user1} memberikan dorongan ramah untuk membantu {user2} belajar berenang di lava.",
 )
 
 ITEMS = (
@@ -127,20 +134,9 @@ ITEMS = (
     "sekarung batu bata",
 )
 
-THROW = (
-    "melempar",
-    "melempar",
-    "membuang",
-    "melempar",
-)
+THROW = ("melempar", "melempar", "membuang", "melempar")
 
-HIT = (
-    "memukul",
-    "memukul",
-    "menampar",
-    "memukul",
-    "menampar keras",
-)
+HIT = ("memukul", "memukul", "menampar", "memukul", "menampar keras")
 
 GMAPS_LOC = "https://maps.googleapis.com/maps/api/geocode/json"
 GMAPS_TIME = "https://maps.googleapis.com/maps/api/timezone/json"
@@ -148,34 +144,51 @@ GMAPS_TIME = "https://maps.googleapis.com/maps/api/timezone/json"
 
 @run_async
 def runs(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
-    update.effective_message.reply_text(random.choice(tl(update.effective_message, "RUN_STRINGS")))
+    update.effective_message.reply_text(
+        random.choice(tl(update.effective_message, "RUN_STRINGS"))
+    )
+
 
 @run_async
 def slap(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     msg = update.effective_message  # type: Optional[Message]
 
     # reply to correct message
-    reply_text = msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
+    reply_text = (
+        msg.reply_to_message.reply_text if msg.reply_to_message else msg.reply_text
+    )
 
     # get user who sent message
-    #if msg.from_user.username:
+    # if msg.from_user.username:
     #    curr_user = "@" + escape_markdown(msg.from_user.username)
-    #else:
-    curr_user = "{}".format(mention_markdown(msg.from_user.id, msg.from_user.first_name))
+    # else:
+    curr_user = "{}".format(
+        mention_markdown(msg.from_user.id, msg.from_user.first_name)
+    )
 
     user_id = extract_user(update.effective_message, args)
     if user_id:
         slapped_user = bot.get_chat(user_id)
         user1 = curr_user
-        #if slapped_user.username:
+        # if slapped_user.username:
         #    user2 = "@" + escape_markdown(slapped_user.username)
-        #else:
+        # else:
         user2 = "{}".format(mention_markdown(slapped_user.id, slapped_user.first_name))
 
     # if no target found, bot targets the sender
@@ -204,39 +217,67 @@ def get_bot_ip(bot: Bot, update: Update):
 
 @run_async
 def get_id(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     user_id = extract_user(update.effective_message, args)
     if user_id:
-        if update.effective_message.reply_to_message and update.effective_message.reply_to_message.forward_from:
+        if (
+            update.effective_message.reply_to_message
+            and update.effective_message.reply_to_message.forward_from
+        ):
             user1 = update.effective_message.reply_to_message.from_user
             user2 = update.effective_message.reply_to_message.forward_from
             update.effective_message.reply_text(
-                tl(update.effective_message, "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.").format(
+                tl(
+                    update.effective_message,
+                    "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.",
+                ).format(
                     escape_markdown(user2.first_name),
                     user2.id,
                     escape_markdown(user1.first_name),
-                    user1.id),
-                parse_mode=ParseMode.MARKDOWN)
+                    user1.id,
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
         else:
             user = bot.get_chat(user_id)
-            update.effective_message.reply_text(tl(update.effective_message, "Id {} adalah `{}`.").format(escape_markdown(user.first_name), user.id),
-                                                parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text(
+                tl(update.effective_message, "Id {} adalah `{}`.").format(
+                    escape_markdown(user.first_name), user.id
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
     else:
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == "private":
-            update.effective_message.reply_text(tl(update.effective_message, "Id Anda adalah `{}`.").format(chat.id),
-                                                parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text(
+                tl(update.effective_message, "Id Anda adalah `{}`.").format(chat.id),
+                parse_mode=ParseMode.MARKDOWN,
+            )
 
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Id grup ini adalah `{}`.").format(chat.id),
-                                                parse_mode=ParseMode.MARKDOWN)
+            update.effective_message.reply_text(
+                tl(update.effective_message, "Id grup ini adalah `{}`.").format(
+                    chat.id
+                ),
+                parse_mode=ParseMode.MARKDOWN,
+            )
 
 
 @run_async
 def info(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     msg = update.effective_message  # type: Optional[Message]
@@ -249,41 +290,74 @@ def info(bot: Bot, update: Update, args: List[str]):
     elif not msg.reply_to_message and not args:
         user = msg.from_user
 
-    elif not msg.reply_to_message and (not args or (
-            len(args) >= 1 and not args[0].startswith("@") and not args[0].isdigit() and not msg.parse_entities(
-        [MessageEntity.TEXT_MENTION]))):
-        msg.reply_text(tl(update.effective_message, "Saya tidak dapat mengekstrak pengguna dari ini."))
+    elif not msg.reply_to_message and (
+        not args
+        or (
+            len(args) >= 1
+            and not args[0].startswith("@")
+            and not args[0].isdigit()
+            and not msg.parse_entities([MessageEntity.TEXT_MENTION])
+        )
+    ):
+        msg.reply_text(
+            tl(
+                update.effective_message,
+                "Saya tidak dapat mengekstrak pengguna dari ini.",
+            )
+        )
         return
 
     else:
         return
 
-    text = tl(update.effective_message, "<b>Info Pengguna</b>:") \
-           + "\nID: <code>{}</code>".format(user.id) + \
-           tl(update.effective_message, "\nNama depan: {}").format(html.escape(user.first_name))
+    text = (
+        tl(update.effective_message, "<b>Info Pengguna</b>:")
+        + "\nID: <code>{}</code>".format(user.id)
+        + tl(update.effective_message, "\nNama depan: {}").format(
+            html.escape(user.first_name)
+        )
+    )
 
     if user.last_name:
-        text += tl(update.effective_message, "\nNama belakang: {}").format(html.escape(user.last_name))
+        text += tl(update.effective_message, "\nNama belakang: {}").format(
+            html.escape(user.last_name)
+        )
 
     if user.username:
-        text += tl(update.effective_message, "\nNama pengguna: @{}").format(html.escape(user.username))
+        text += tl(update.effective_message, "\nNama pengguna: @{}").format(
+            html.escape(user.username)
+        )
 
-    text += tl(update.effective_message, "\nTautan pengguna permanen: {}").format(mention_html(user.id, "link"))
+    text += tl(update.effective_message, "\nTautan pengguna permanen: {}").format(
+        mention_html(user.id, "link")
+    )
 
     if user.id == OWNER_ID:
-        text += tl(update.effective_message, "\n\nOrang ini adalah pemilik saya - saya tidak akan pernah melakukan apa pun terhadap mereka!")
+        text += tl(
+            update.effective_message,
+            "\n\nOrang ini adalah pemilik saya - saya tidak akan pernah melakukan apa pun terhadap mereka!",
+        )
     else:
         if user.id in SUDO_USERS:
-            text += tl(update.effective_message, "\n\nOrang ini adalah salah satu pengguna sudo saya! " \
-                    "Hampir sama kuatnya dengan pemilik saya - jadi tontonlah.")
+            text += tl(
+                update.effective_message,
+                "\n\nOrang ini adalah salah satu pengguna sudo saya! "
+                "Hampir sama kuatnya dengan pemilik saya - jadi tontonlah.",
+            )
         else:
             if user.id in SUPPORT_USERS:
-                text += tl(update.effective_message, "\n\nOrang ini adalah salah satu pengguna dukungan saya! " \
-                        "Tidak sekuat pengguna sudo, tetapi masih dapat menyingkirkan Anda dari peta.")
+                text += tl(
+                    update.effective_message,
+                    "\n\nOrang ini adalah salah satu pengguna dukungan saya! "
+                    "Tidak sekuat pengguna sudo, tetapi masih dapat menyingkirkan Anda dari peta.",
+                )
 
             if user.id in WHITELIST_USERS:
-                text += tl(update.effective_message, "\n\nOrang ini telah dimasukkan dalam daftar putih! " \
-                        "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka.")
+                text += tl(
+                    update.effective_message,
+                    "\n\nOrang ini telah dimasukkan dalam daftar putih! "
+                    "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka.",
+                )
 
     for mod in USER_INFO:
         mod_info = mod.__user_info__(user.id, chat.id).strip()
@@ -295,12 +369,19 @@ def info(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 def get_time(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     location = " ".join(args)
     if location.lower() == bot.first_name.lower():
-        update.effective_message.reply_text(tl(update.effective_message, "Selalu ada waktu banned untukku!"))
+        update.effective_message.reply_text(
+            tl(update.effective_message, "Selalu ada waktu banned untukku!")
+        )
         bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
@@ -309,21 +390,21 @@ def get_time(bot: Bot, update: Update, args: List[str]):
 
     if res.status_code == 200:
         loc = json.loads(res.text)
-        if loc.get('status') == 'OK':
-            lat = loc['results'][0]['geometry']['location']['lat']
-            long = loc['results'][0]['geometry']['location']['lng']
+        if loc.get("status") == "OK":
+            lat = loc["results"][0]["geometry"]["location"]["lat"]
+            long = loc["results"][0]["geometry"]["location"]["lng"]
 
             country = None
             city = None
 
-            address_parts = loc['results'][0]['address_components']
+            address_parts = loc["results"][0]["address_components"]
             for part in address_parts:
-                if 'country' in part['types']:
-                    country = part.get('long_name')
-                if 'administrative_area_level_1' in part['types'] and not city:
-                    city = part.get('long_name')
-                if 'locality' in part['types']:
-                    city = part.get('long_name')
+                if "country" in part["types"]:
+                    country = part.get("long_name")
+                if "administrative_area_level_1" in part["types"] and not city:
+                    city = part.get("long_name")
+                if "locality" in part["types"]:
+                    city = part.get("long_name")
 
             if city and country:
                 location = "{}, {}".format(city, country)
@@ -331,17 +412,29 @@ def get_time(bot: Bot, update: Update, args: List[str]):
                 location = country
 
             timenow = int(datetime.utcnow().timestamp())
-            res = requests.get(GMAPS_TIME, params=dict(location="{},{}".format(lat, long), timestamp=timenow))
+            res = requests.get(
+                GMAPS_TIME,
+                params=dict(location="{},{}".format(lat, long), timestamp=timenow),
+            )
             if res.status_code == 200:
-                offset = json.loads(res.text)['dstOffset']
-                timestamp = json.loads(res.text)['rawOffset']
-                time_there = datetime.fromtimestamp(timenow + timestamp + offset).strftime("%H:%M:%S hari %A %d %B")
-                update.message.reply_text("Sekarang pukul {} di {}".format(time_there, location))
+                offset = json.loads(res.text)["dstOffset"]
+                timestamp = json.loads(res.text)["rawOffset"]
+                time_there = datetime.fromtimestamp(
+                    timenow + timestamp + offset
+                ).strftime("%H:%M:%S hari %A %d %B")
+                update.message.reply_text(
+                    "Sekarang pukul {} di {}".format(time_there, location)
+                )
 
 
 @run_async
 def get_time_alt(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     if args:
@@ -351,23 +444,46 @@ def get_time_alt(bot: Bot, update: Update, args: List[str]):
             bot.send_sticker(update.effective_chat.id, BAN_STICKER)
             return
 
-        res = requests.get('https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}'.format(location, MAPS_API))
+        res = requests.get(
+            "https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}".format(
+                location, MAPS_API
+            )
+        )
 
         if res.status_code == 200:
             loc = res.json()
-            if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
+            if len(loc["resourceSets"][0]["resources"][0]["timeZoneAtLocation"]) == 0:
                 update.message.reply_text("Lokasi tidak di temukan!")
                 return
-            placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
-            localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
+            placename = loc["resourceSets"][0]["resources"][0]["timeZoneAtLocation"][0][
+                "placeName"
+            ]
+            localtime = loc["resourceSets"][0]["resources"][0]["timeZoneAtLocation"][0][
+                "timeZone"
+            ][0]["convertedTime"]["localTime"]
             if lang_sql.get_lang(update.effective_chat.id) == "id":
-                locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
-                time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
+                locale.setlocale(locale.LC_TIME, "id_ID.UTF-8")
+                time = datetime.strptime(localtime, "%Y-%m-%dT%H:%M:%S").strftime(
+                    "%H:%M:%S hari %A, %d %B"
+                )
             else:
-                time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S %A, %d %B")
-            update.message.reply_text(tl(update.effective_message, "Sekarang pukul `{}` di `{}`").format(time, placename), parse_mode="markdown")
+                time = datetime.strptime(localtime, "%Y-%m-%dT%H:%M:%S").strftime(
+                    "%H:%M:%S %A, %d %B"
+                )
+            update.message.reply_text(
+                tl(update.effective_message, "Sekarang pukul `{}` di `{}`").format(
+                    time, placename
+                ),
+                parse_mode="markdown",
+            )
     else:
-        update.message.reply_text(tl(update.effective_message, "Gunakan `/time nama daerah`\nMisal: `/time jakarta`"), parse_mode="markdown")
+        update.message.reply_text(
+            tl(
+                update.effective_message,
+                "Gunakan `/time nama daerah`\nMisal: `/time jakarta`",
+            ),
+            parse_mode="markdown",
+        )
 
 
 @run_async
@@ -381,32 +497,74 @@ def echo(bot: Bot, update: Update):
     # Advanced
     text, data_type, content, buttons = get_message_type(message)
     tombol = build_keyboard_alternate(buttons)
-    if str(data_type) in ('Types.BUTTON_TEXT', 'Types.TEXT'):
+    if str(data_type) in ("Types.BUTTON_TEXT", "Types.TEXT"):
         try:
             if message.reply_to_message:
-                bot.send_message(chat_id, text, parse_mode="markdown", reply_to_message_id=message.reply_to_message.message_id, disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
+                bot.send_message(
+                    chat_id,
+                    text,
+                    parse_mode="markdown",
+                    reply_to_message_id=message.reply_to_message.message_id,
+                    disable_web_page_preview=True,
+                    reply_markup=InlineKeyboardMarkup(tombol),
+                )
             else:
-                bot.send_message(chat_id, text, quote=False, disable_web_page_preview=True, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(tombol))
+                bot.send_message(
+                    chat_id,
+                    text,
+                    quote=False,
+                    disable_web_page_preview=True,
+                    parse_mode=ParseMode.MARKDOWN,
+                    reply_markup=InlineKeyboardMarkup(tombol),
+                )
         except BadRequest:
-            bot.send_message(chat_id, tl(update.effective_message, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM."), parse_mode="markdown")
+            bot.send_message(
+                chat_id,
+                tl(
+                    update.effective_message,
+                    "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.",
+                ),
+                parse_mode="markdown",
+            )
             return
 
 
 @run_async
 def markdown_help(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
-    update.effective_message.reply_text(tl(update.effective_message, "MARKDOWN_HELP").format(dispatcher.bot.first_name), parse_mode=ParseMode.HTML)
-    update.effective_message.reply_text(tl(update.effective_message, "Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!"))
-    update.effective_message.reply_text(tl(update.effective_message, "/save test Ini adalah tes markdown. _miring_, *tebal*, `kode`, "
-                                        "[URL](contoh.com) [tombol](buttonurl:github.com) "
-                                        "[tombol2](buttonurl:google.com:same)"))
+    update.effective_message.reply_text(
+        tl(update.effective_message, "MARKDOWN_HELP").format(dispatcher.bot.first_name),
+        parse_mode=ParseMode.HTML,
+    )
+    update.effective_message.reply_text(
+        tl(
+            update.effective_message,
+            "Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!",
+        )
+    )
+    update.effective_message.reply_text(
+        tl(
+            update.effective_message,
+            "/save test Ini adalah tes markdown. _miring_, *tebal*, `kode`, "
+            "[URL](contoh.com) [tombol](buttonurl:github.com) "
+            "[tombol2](buttonurl:google.com:same)",
+        )
+    )
 
 
 @run_async
 def stats(bot: Bot, update: Update):
-    update.effective_message.reply_text(tl(update.effective_message, "Statistik saat ini:\n") + "\n".join([mod.__stats__() for mod in STATS]))
+    update.effective_message.reply_text(
+        tl(update.effective_message, "Statistik saat ini:\n")
+        + "\n".join([mod.__stats__() for mod in STATS])
+    )
 
 
 # /ip is for private use

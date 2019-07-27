@@ -51,12 +51,12 @@ def stop_chat_logging(chat_id):
             SESSION.commit()
             return log_channel
 
+
 def num_logchannels():
     try:
         return SESSION.query(func.count(distinct(GroupLogs.chat_id))).scalar()
     finally:
         SESSION.close()
-
 
 
 def migrate_chat(old_chat_id, new_chat_id):
@@ -79,5 +79,5 @@ def __load_log_channels():
     finally:
         SESSION.close()
 
-        
+
 __load_log_channels()

@@ -1,9 +1,8 @@
 import threading
 from typing import Union
 
-from sqlalchemy import Column, String, Boolean, UnicodeText, Integer, func, distinct
+from sqlalchemy import Column, String, Boolean, Integer
 
-from emilia.modules.helper_funcs.msg_types import Types
 from emilia.modules.sql import SESSION, BASE
 
 
@@ -17,16 +16,19 @@ class ChatAccessConnectionSettings(BASE):
         self.allow_connect_to_chat = str(allow_connect_to_chat)
 
     def __repr__(self):
-        return "<Chat access settings ({}) is {}>".format(self.chat_id, self.allow_connect_to_chat)
+        return "<Chat access settings ({}) is {}>".format(
+            self.chat_id, self.allow_connect_to_chat
+        )
 
 
 class Connection(BASE):
     __tablename__ = "connection"
     user_id = Column(Integer, primary_key=True)
     chat_id = Column(String(14))
+
     def __init__(self, user_id, chat_id):
         self.user_id = user_id
-        self.chat_id = str(chat_id) #Ensure String
+        self.chat_id = str(chat_id)  # Ensure String
 
 
 class ConnectionHistory(BASE):
@@ -35,11 +37,13 @@ class ConnectionHistory(BASE):
     chat_id1 = Column(String(14))
     chat_id2 = Column(String(14))
     chat_id3 = Column(String(14))
+
     def __init__(self, user_id, chat_id1, chat_id2, chat_id3):
         self.user_id = user_id
-        self.chat_id1 = str(chat_id1) #Ensure String
-        self.chat_id2 = str(chat_id2) #Ensure String
-        self.chat_id3 = str(chat_id3) #Ensure String
+        self.chat_id1 = str(chat_id1)  # Ensure String
+        self.chat_id2 = str(chat_id2)  # Ensure String
+        self.chat_id3 = str(chat_id3)  # Ensure String
+
 
 ChatAccessConnectionSettings.__table__.create(checkfirst=True)
 Connection.__table__.create(checkfirst=True)
@@ -56,7 +60,7 @@ def allow_connect_to_chat(chat_id: Union[str, int]) -> bool:
         return False
     finally:
         SESSION.close()
-        
+
 
 def set_allow_connect_to_chat(chat_id: Union[int, str], setting: bool):
     with CHAT_ACCESS_LOCK:
@@ -90,9 +94,8 @@ def get_connected_chat(user_id):
 def curr_connection(chat_id):
     try:
         return SESSION.query(Connection).get((str(chat_id)))
-    finally :
+    finally:
         SESSION.close()
-
 
 
 def disconnect(user_id):

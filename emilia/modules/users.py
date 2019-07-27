@@ -8,12 +8,11 @@ from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, CommandHandler
 from telegram.ext.dispatcher import run_async
 
+import emilia.modules.sql.feds_sql as fedsql
 import emilia.modules.sql.users_sql as sql
 from emilia import dispatcher, OWNER_ID, LOGGER
-from emilia.modules.helper_funcs.filters import CustomFilters
-
-import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules import languages
+from emilia.modules.helper_funcs.filters import CustomFilters
 
 USERS_GROUP = 4
 
@@ -23,7 +22,7 @@ def get_user_id(username):
     if len(username) <= 5:
         return None
 
-    if username.startswith('@'):
+    if username.startswith("@"):
         username = username[1:]
 
     users = sql.get_userid_by_name(username)
@@ -42,7 +41,7 @@ def get_user_id(username):
                     return userdat.id
 
             except BadRequest as excp:
-                if excp.message == 'Chat not found':
+                if excp.message == "Chat not found":
                     pass
                 else:
                     LOGGER.exception("Error extracting user ID")
@@ -62,10 +61,16 @@ def broadcast(bot: Bot, update: Update):
                 sleep(0.1)
             except TelegramError:
                 failed += 1
-                LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
+                LOGGER.warning(
+                    "Couldn't send broadcast to %s, group name %s",
+                    str(chat.chat_id),
+                    str(chat.chat_name),
+                )
 
-        update.effective_message.reply_text("Siaran selesai. {} grup gagal menerima pesan, mungkin "
-                                            "karena ditendang.".format(failed))
+        update.effective_message.reply_text(
+            "Siaran selesai. {} grup gagal menerima pesan, mungkin "
+            "karena ditendang.".format(failed)
+        )
 
 
 @run_async
@@ -78,50 +83,64 @@ def log_user(bot: Bot, update: Update):
         if user:
             fban, fbanreason, fbantime = fedsql.get_fban_user(fed_id, user.id)
             if fban:
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
+                update.effective_message.reply_text(
+                    languages.tl(
+                        update.effective_message,
+                        "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`",
+                    ).format(fbanreason),
+                    parse_mode="markdown",
+                )
                 try:
-                     bot.kick_chat_member(chat.id, user.id)
+                    bot.kick_chat_member(chat.id, user.id)
                 except:
-                	 print("Fban: cannot banned this user")
+                    print("Fban: cannot banned this user")
 
-    sql.update_user(msg.from_user.id,
-                    msg.from_user.username,
-                    chat.id,
-                    chat.title)
+    sql.update_user(msg.from_user.id, msg.from_user.username, chat.id, chat.title)
 
     if msg.reply_to_message:
-        sql.update_user(msg.reply_to_message.from_user.id,
-                        msg.reply_to_message.from_user.username,
-                        chat.id,
-                        chat.title)
+        sql.update_user(
+            msg.reply_to_message.from_user.id,
+            msg.reply_to_message.from_user.username,
+            chat.id,
+            chat.title,
+        )
 
     if msg.forward_from:
-        sql.update_user(msg.forward_from.id,
-                        msg.forward_from.username)
+        sql.update_user(msg.forward_from.id, msg.forward_from.username)
 
 
 @run_async
 def chats(bot: Bot, update: Update):
     all_chats = sql.get_all_chats() or []
-    chatfile = 'Daftar obrolan.\n'
+    chatfile = "Daftar obrolan.\n"
     for chat in all_chats:
         chatfile += "{} - ({})\n".format(chat.chat_name, chat.chat_id)
 
     with BytesIO(str.encode(chatfile)) as output:
         output.name = "chatlist.txt"
-        update.effective_message.reply_document(document=output, filename="chatlist.txt",
-                                                caption="Berikut ini daftar obrolan dalam database saya.")
+        update.effective_message.reply_document(
+            document=output,
+            filename="chatlist.txt",
+            caption="Berikut ini daftar obrolan dalam database saya.",
+        )
 
 
 def __user_info__(user_id, chat_id):
     if user_id == dispatcher.bot.id:
-        return languages.tl(chat_id, """Saya telah melihatnya... Wow. Apakah mereka menguntit saya? Mereka ada di semua tempat yang sama dengan saya... oh. Ini aku.""")
+        return languages.tl(
+            chat_id,
+            """Saya telah melihatnya... Wow. Apakah mereka menguntit saya? Mereka ada di semua tempat yang sama dengan saya... oh. Ini aku.""",
+        )
     num_chats = sql.get_user_num_chats(user_id)
-    return languages.tl(chat_id, """Saya telah melihatnya <code>{}</code> obrolan total.""").format(num_chats)
+    return languages.tl(
+        chat_id, """Saya telah melihatnya <code>{}</code> obrolan total."""
+    ).format(num_chats)
 
 
 def __stats__():
-    return languages.tl(OWNER_ID, "{} pengguna, pada {} obrolan").format(sql.num_users(), sql.num_chats())
+    return languages.tl(OWNER_ID, "{} pengguna, pada {} obrolan").format(
+        sql.num_users(), sql.num_chats()
+    )
 
 
 def __migrate__(old_chat_id, new_chat_id):
@@ -132,7 +151,9 @@ __help__ = ""  # no help string
 
 __mod_name__ = "Users"
 
-BROADCAST_HANDLER = CommandHandler("broadcast", broadcast, filters=Filters.user(OWNER_ID))
+BROADCAST_HANDLER = CommandHandler(
+    "broadcast", broadcast, filters=Filters.user(OWNER_ID)
+)
 USER_HANDLER = MessageHandler(Filters.all & Filters.group, log_user)
 CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=CustomFilters.sudo_filter)
 

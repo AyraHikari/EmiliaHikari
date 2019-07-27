@@ -1,8 +1,7 @@
 import threading
 from typing import Union
 
-from sqlalchemy import Column, Integer, String, Boolean
-
+from sqlalchemy import Column, String, Boolean
 from tg_bot.modules.sql import SESSION, BASE
 
 
@@ -17,9 +16,11 @@ class CommandReactionChatSettings(BASE):
     def __repr__(self):
         return "<Chat report settings ({})>".format(self.chat_id)
 
+
 CommandReactionChatSettings.__table__.create(checkfirst=True)
 
 CHAT_LOCK = threading.RLock()
+
 
 def command_reaction(chat_id: Union[str, int]) -> bool:
     try:
@@ -44,8 +45,11 @@ def set_command_reaction(chat_id: Union[int, str], setting: bool):
 
 def migrate_chat(old_chat_id, new_chat_id):
     with CHAT_LOCK:
-        chat_notes = SESSION.query(CommandReactionChatSettings).filter(
-            CommandReactionChatSettings.chat_id == str(old_chat_id)).all()
+        chat_notes = (
+            SESSION.query(CommandReactionChatSettings)
+            .filter(CommandReactionChatSettings.chat_id == str(old_chat_id))
+            .all()
+        )
         for note in chat_notes:
             note.chat_id = str(new_chat_id)
         SESSION.commit()

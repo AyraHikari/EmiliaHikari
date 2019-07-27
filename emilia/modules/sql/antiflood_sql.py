@@ -8,6 +8,7 @@ DEF_COUNT = 0
 DEF_LIMIT = 0
 DEF_OBJ = (None, DEF_COUNT, DEF_LIMIT)
 
+
 class FloodControl(BASE):
     __tablename__ = "antiflood"
     chat_id = Column(String(14), primary_key=True)
@@ -20,6 +21,7 @@ class FloodControl(BASE):
 
     def __repr__(self):
         return "<flood control for %s>" % self.chat_id
+
 
 class FloodSettings(BASE):
     __tablename__ = "antiflood_settings"
@@ -95,7 +97,9 @@ def set_flood_strength(chat_id, flood_type, value):
     with INSERTION_FLOOD_SETTINGS_LOCK:
         curr_setting = SESSION.query(FloodSettings).get(str(chat_id))
         if not curr_setting:
-            curr_setting = FloodSettings(chat_id, flood_type=int(flood_type), value=value)
+            curr_setting = FloodSettings(
+                chat_id, flood_type=int(flood_type), value=value
+            )
 
         curr_setting.flood_type = int(flood_type)
         curr_setting.value = str(value)

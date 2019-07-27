@@ -7,13 +7,18 @@ from telegram.ext import CommandHandler
 
 from emilia import dispatcher, updater, spamfilters
 from emilia.modules.helper_funcs.chat_status import user_admin
+from emilia.modules.languages import tl
 from emilia.modules.sql import rss_sql as sql
 
-from emilia.modules.languages import tl
 
 def show_url(bot, update, args):
     tg_chat_id = str(update.effective_chat.id)
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
 
@@ -24,39 +29,64 @@ def show_url(bot, update, args):
         if link_processed.bozo == 0:
             feed_title = link_processed.feed.get("title", default="Unknown")
             feed_description = "<i>{}</i>".format(
-                re.sub('<[^<]+?>', '', link_processed.feed.get("description", default="Unknown")))
+                re.sub(
+                    "<[^<]+?>",
+                    "",
+                    link_processed.feed.get("description", default="Unknown"),
+                )
+            )
             feed_link = link_processed.feed.get("link", default="Unknown")
 
-            feed_message = tl(update.effective_message, "<b>Judul Feed:</b> \n{}" \
-                           "\n\n<b>Deskripsi Feed:</b> \n{}" \
-                           "\n\n<b>Link Feed:</b> \n{}").format(html.escape(feed_title),
-                                                               feed_description,
-                                                               html.escape(feed_link))
+            feed_message = tl(
+                update.effective_message,
+                "<b>Judul Feed:</b> \n{}"
+                "\n\n<b>Deskripsi Feed:</b> \n{}"
+                "\n\n<b>Link Feed:</b> \n{}",
+            ).format(html.escape(feed_title), feed_description, html.escape(feed_link))
 
             if len(link_processed.entries) >= 1:
                 entry_title = link_processed.entries[0].get("title", default="Unknown")
                 entry_description = "<i>{}</i>".format(
-                    re.sub('<[^<]+?>', '', link_processed.entries[0].get("description", default="Unknown")))
+                    re.sub(
+                        "<[^<]+?>",
+                        "",
+                        link_processed.entries[0].get("description", default="Unknown"),
+                    )
+                )
                 entry_link = link_processed.entries[0].get("link", default="Unknown")
 
-                entry_message = tl(update.effective_message, "\n\n<b>Judul Entri:</b> \n{}" \
-                                "\n\n<b>Deskripsi Entri:</b> \n{}" \
-                                "\n\n<b>Entri Masuk:</b> \n{}").format(html.escape(entry_title),
-                                                                     entry_description,
-                                                                     html.escape(entry_link))
+                entry_message = tl(
+                    update.effective_message,
+                    "\n\n<b>Judul Entri:</b> \n{}"
+                    "\n\n<b>Deskripsi Entri:</b> \n{}"
+                    "\n\n<b>Entri Masuk:</b> \n{}",
+                ).format(
+                    html.escape(entry_title), entry_description, html.escape(entry_link)
+                )
                 final_message = feed_message + entry_message
 
-                bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                bot.send_message(
+                    chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML
+                )
             else:
-                bot.send_message(chat_id=tg_chat_id, text=feed_message, parse_mode=ParseMode.HTML)
+                bot.send_message(
+                    chat_id=tg_chat_id, text=feed_message, parse_mode=ParseMode.HTML
+                )
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Tautan ini bukan tautan Umpan RSS"))
+            update.effective_message.reply_text(
+                tl(update.effective_message, "Tautan ini bukan tautan Umpan RSS")
+            )
     else:
         update.effective_message.reply_text(tl(update.effective_message, "URL hilang"))
 
 
 def list_urls(bot, update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     tg_chat_id = str(update.effective_chat.id)
@@ -70,17 +100,40 @@ def list_urls(bot, update):
 
     # check if the length of the message is too long to be posted in 1 chat bubble
     if len(final_content) == 0:
-        bot.send_message(chat_id=tg_chat_id, text=tl(update.effective_message, "Obrolan ini tidak berlangganan ke tautan apa pun"))
+        bot.send_message(
+            chat_id=tg_chat_id,
+            text=tl(
+                update.effective_message,
+                "Obrolan ini tidak berlangganan ke tautan apa pun",
+            ),
+        )
     elif len(final_content) <= constants.MAX_MESSAGE_LENGTH:
-        bot.send_message(chat_id=tg_chat_id, text=tl(update.effective_message, "Obrolan ini dilanggan ke tautan berikut:\n") + final_content)
+        bot.send_message(
+            chat_id=tg_chat_id,
+            text=tl(
+                update.effective_message, "Obrolan ini dilanggan ke tautan berikut:\n"
+            )
+            + final_content,
+        )
     else:
-        bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
-                         text=tl(update.effective_message, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"))
+        bot.send_message(
+            chat_id=tg_chat_id,
+            parse_mode=ParseMode.HTML,
+            text=tl(
+                update.effective_message,
+                "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim",
+            ),
+        )
 
 
 @user_admin
 def add_url(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     if len(args) >= 1:
@@ -104,20 +157,31 @@ def add_url(bot, update, args):
 
             # check if there's an entry already added to DB by the same user in the same group with the same link
             if row:
-                update.effective_message.reply_text(tl(update.effective_message, "URL ini sudah ditambahkan"))
+                update.effective_message.reply_text(
+                    tl(update.effective_message, "URL ini sudah ditambahkan")
+                )
             else:
                 sql.add_url(tg_chat_id, tg_feed_link, tg_old_entry_link)
 
-                update.effective_message.reply_text(tl(update.effective_message, "URL ditambahkan ke langganan"))
+                update.effective_message.reply_text(
+                    tl(update.effective_message, "URL ditambahkan ke langganan")
+                )
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Tautan ini bukan tautan Umpan RSS"))
+            update.effective_message.reply_text(
+                tl(update.effective_message, "Tautan ini bukan tautan Umpan RSS")
+            )
     else:
         update.effective_message.reply_text(tl(update.effective_message, "URL hilang"))
 
 
 @user_admin
 def remove_url(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    spam = spamfilters(
+        update.effective_message.text,
+        update.effective_message.from_user.id,
+        update.effective_chat.id,
+        update.effective_message,
+    )
     if spam == True:
         return
     if len(args) >= 1:
@@ -133,11 +197,17 @@ def remove_url(bot, update, args):
             if user_data:
                 sql.remove_url(tg_chat_id, tg_feed_link)
 
-                update.effective_message.reply_text(tl(update.effective_message, "URL dihapus dari langganan"))
+                update.effective_message.reply_text(
+                    tl(update.effective_message, "URL dihapus dari langganan")
+                )
             else:
-                update.effective_message.reply_text(tl(update.effective_message, "Anda belum berlangganan ke URL ini"))
+                update.effective_message.reply_text(
+                    tl(update.effective_message, "Anda belum berlangganan ke URL ini")
+                )
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Tautan ini bukan tautan Umpan RSS"))
+            update.effective_message.reply_text(
+                tl(update.effective_message, "Tautan ini bukan tautan Umpan RSS")
+            )
     else:
         update.effective_message.reply_text(tl(update.effective_message, "URL hilang"))
 
@@ -175,33 +245,66 @@ def rss_update(bot, job):
 
         if len(new_entry_links) < 5:
             # this loop sends every new update to each user from each group based on the DB entries
-            for link, title in zip(reversed(new_entry_links), reversed(new_entry_titles)):
-                final_message = "<b>{}</b>\n\n{}".format(html.escape(title), html.escape(link))
+            for link, title in zip(
+                reversed(new_entry_links), reversed(new_entry_titles)
+            ):
+                final_message = "<b>{}</b>\n\n{}".format(
+                    html.escape(title), html.escape(link)
+                )
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
                     try:
-                        bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                        bot.send_message(
+                            chat_id=tg_chat_id,
+                            text=final_message,
+                            parse_mode=ParseMode.HTML,
+                        )
                     except error.Unauthorized:
                         print("Cannot send msg bcz bot is kicked")
                 else:
                     try:
-                        bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
-                                     parse_mode=ParseMode.HTML)
+                        bot.send_message(
+                            chat_id=tg_chat_id,
+                            text=tl(
+                                tg_chat_id,
+                                "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim",
+                            ),
+                            parse_mode=ParseMode.HTML,
+                        )
                     except error.Unauthorized:
                         print("Cannot send msg bcz bot is kicked")
         else:
-            for link, title in zip(reversed(new_entry_links[-5:]), reversed(new_entry_titles[-5:])):
-                final_message = "<b>{}</b>\n\n{}".format(html.escape(title), html.escape(link))
+            for link, title in zip(
+                reversed(new_entry_links[-5:]), reversed(new_entry_titles[-5:])
+            ):
+                final_message = "<b>{}</b>\n\n{}".format(
+                    html.escape(title), html.escape(link)
+                )
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
-                    bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                    bot.send_message(
+                        chat_id=tg_chat_id,
+                        text=final_message,
+                        parse_mode=ParseMode.HTML,
+                    )
                 else:
-                    bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
-                                     parse_mode=ParseMode.HTML)
+                    bot.send_message(
+                        chat_id=tg_chat_id,
+                        text=tl(
+                            tg_chat_id,
+                            "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim",
+                        ),
+                        parse_mode=ParseMode.HTML,
+                    )
 
-            bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
-                             text=tl(tg_chat_id, "<b>Peringatan: </b>{} kejadian telah ditinggalkan untuk mencegah spam")
-                             .format(len(new_entry_links) - 5))
+            bot.send_message(
+                chat_id=tg_chat_id,
+                parse_mode=ParseMode.HTML,
+                text=tl(
+                    tg_chat_id,
+                    "<b>Peringatan: </b>{} kejadian telah ditinggalkan untuk mencegah spam",
+                ).format(len(new_entry_links) - 5),
+            )
 
 
 def rss_set(bot, job):

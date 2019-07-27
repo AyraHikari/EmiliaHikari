@@ -22,13 +22,15 @@ def extract_user(message: Message, args: List[str]) -> Optional[int]:
     return extract_user_and_text(message, args)[0]
 
 
-def extract_user_and_text(message: Message, args: List[str]) -> (Optional[int], Optional[str]):
+def extract_user_and_text(
+    message: Message, args: List[str]
+) -> (Optional[int], Optional[str]):
     prev_message = message.reply_to_message
     split_text = message.text.split(None, 1)
-    
+
     if len(split_text) < 2:
         return id_from_reply(message)  # only option possible
-    
+
     text_to_parse = split_text[1]
 
     text = ""
@@ -38,19 +40,23 @@ def extract_user_and_text(message: Message, args: List[str]) -> (Optional[int], 
         ent = entities[0]
     else:
         ent = None
-        
+
     # if entity offset matches (command end/text start) then all good
     if entities and ent and ent.offset == len(message.text) - len(text_to_parse):
         ent = entities[0]
         user_id = ent.user.id
-        text = message.text[ent.offset + ent.length:]
+        text = message.text[ent.offset + ent.length :]
 
-    elif len(args) >= 1 and args[0][0] == '@':
+    elif len(args) >= 1 and args[0][0] == "@":
         user = args[0]
         user_id = get_user_id(user)
         if not user_id:
-            message.reply_text("Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika "
-                               "Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu.")
+            message.reply_text(
+                "Saya tidak memiliki pengguna di db saya. "
+                "Anda akan dapat berinteraksi dengan mereka jika "
+                "Anda membalas pesan orang itu, "
+                "atau meneruskan salah satu dari pesan pengguna itu."
+            )
             return None, None
 
         else:
@@ -75,9 +81,12 @@ def extract_user_and_text(message: Message, args: List[str]) -> (Optional[int], 
         message.bot.get_chat(user_id)
     except BadRequest as excp:
         if excp.message in ("User_id_invalid", "Chat not found"):
-            message.reply_text("Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari "
-                               "mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa"
-                               "untuk menjalankan perintah tertentu...)")
+            message.reply_text(
+                "Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya "
+                "- silakan meneruskan pesan dari "
+                "mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa"
+                "untuk menjalankan perintah tertentu...)"
+            )
         else:
             LOGGER.exception("Exception %s on user %s", excp.message, user_id)
 
@@ -87,16 +96,22 @@ def extract_user_and_text(message: Message, args: List[str]) -> (Optional[int], 
 
 
 def extract_text(message) -> str:
-    return message.text or message.caption or (message.sticker.emoji if message.sticker else None)
+    return (
+        message.text
+        or message.caption
+        or (message.sticker.emoji if message.sticker else None)
+    )
 
 
-def extract_unt_fedban(message: Message, args: List[str]) -> (Optional[int], Optional[str]):
+def extract_unt_fedban(
+    message: Message, args: List[str]
+) -> (Optional[int], Optional[str]):
     prev_message = message.reply_to_message
     split_text = message.text.split(None, 1)
-    
+
     if len(split_text) < 2:
         return id_from_reply(message)  # only option possible
-    
+
     text_to_parse = split_text[1]
 
     text = ""
@@ -106,19 +121,21 @@ def extract_unt_fedban(message: Message, args: List[str]) -> (Optional[int], Opt
         ent = entities[0]
     else:
         ent = None
-        
+
     # if entity offset matches (command end/text start) then all good
     if entities and ent and ent.offset == len(message.text) - len(text_to_parse):
         ent = entities[0]
         user_id = ent.user.id
-        text = message.text[ent.offset + ent.length:]
+        text = message.text[ent.offset + ent.length :]
 
-    elif len(args) >= 1 and args[0][0] == '@':
+    elif len(args) >= 1 and args[0][0] == "@":
         user = args[0]
         user_id = get_user_id(user)
         if not user_id and not str(user_id).isdigit():
-            message.reply_text("Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika "
-                               "Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu.")
+            message.reply_text(
+                "Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika "
+                "Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu."
+            )
             return None, None
 
         else:
@@ -142,10 +159,15 @@ def extract_unt_fedban(message: Message, args: List[str]) -> (Optional[int], Opt
     try:
         message.bot.get_chat(user_id)
     except BadRequest as excp:
-        if excp.message in ("User_id_invalid", "Chat not found") and not str(user_id).isdigit():
-            message.reply_text("Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari "
-                               "mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa"
-                               "untuk menjalankan perintah tertentu...)")
+        if (
+            excp.message in ("User_id_invalid", "Chat not found")
+            and not str(user_id).isdigit()
+        ):
+            message.reply_text(
+                "Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari "
+                "mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa"
+                "untuk menjalankan perintah tertentu...)"
+            )
             return None, None
         elif excp.message != "Chat not found":
             LOGGER.exception("Exception %s on user %s", excp.message, user_id)
@@ -154,6 +176,7 @@ def extract_unt_fedban(message: Message, args: List[str]) -> (Optional[int], Opt
             return None, None
 
     return user_id, text
+
 
 def extract_user_fban(message: Message, args: List[str]) -> Optional[int]:
     return extract_unt_fedban(message, args)[0]

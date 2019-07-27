@@ -1,9 +1,8 @@
-
 __lang__ = "🇮🇩 Indonesia"
 
 id = {
-# main stuff
-	"start_text": """
+    # main stuff
+    "start_text": """
 Hai {}, nama saya {}! Saya seorang manajer grup yang dikelola oleh [master saya ini](tg://user?id={}).
 Untuk mendapatkan info status dan update bot ini, anda dapat bergabung dengan channel kami [Ayra's Bot News](https://t.me/AyraBotNews)
 
@@ -15,7 +14,7 @@ Anda dapat menemukan daftar perintah yang tersedia dengan /help.
 Jika Anda menikmati menggunakan saya, dan/atau ingin membantu saya bertahan hidup, tekan /donate untuk membantu \
 mendanai/meningkatkan VPS saya!
 """,
-	"help_text": """
+    "help_text": """
 Hai! Nama saya adalah *Emilia*.
 Saya adalah bot manajemen grup dengan beberapa kelebihan yang menyenangkan! Silahkan lihat berikut ini untuk beberapa ide dari \
 hal-hal yang bisa saya bantu.
@@ -34,7 +33,7 @@ All commands can either be used with / or !.
 
 Dan berikut ini:
 """,
-	"donate_text": """Hai, senang mendengar Anda ingin menyumbang!
+    "donate_text": """Hai, senang mendengar Anda ingin menyumbang!
 Butuh banyak pekerjaan untuk [pencipta saya](tg://user?id=388576209) untuk membawa saya ke tempat saya sekarang, dan \
 setiap sumbangan membantu dan memotivasi dia untuk membuat saya lebih baik.
 
@@ -42,9 +41,8 @@ Semua uang sumbangan akan diberikan ke VPS yang lebih baik untuk menjadi tuan ru
 Dia hanya orang biasa, jadi akan sangat membantu dia!
 
 Jika anda memang berminat untuk donate, silahkan kunjungi paypal.me/AyraHikari, Terima kasih 😁""",
-	
-# Help modules
-	"language_help": """Tidak semua grup berbicara bahasa Indonesia; beberapa grup lebih suka Emilia menanggapi dalam bahasa mereka sendiri.
+    # Help modules
+    "language_help": """Tidak semua grup berbicara bahasa Indonesia; beberapa grup lebih suka Emilia menanggapi dalam bahasa mereka sendiri.
 
 Di sinilah terjemahan masuk; Anda dapat mengubah sebagian besar balasan Emilia menjadi bahasa pilihan Anda!
 
@@ -54,8 +52,7 @@ Bahasa yang tersedia adalah:
 
 Perintah yang tersedia adalah:
  - /setlang: atur bahasa pilihan Anda.""",
-
-	"admin_help": """
+    "admin_help": """
  - /adminlist | /admins: daftar admin dalam obrolan
 
 *Hanya admin:*
@@ -66,13 +63,13 @@ Perintah yang tersedia adalah:
  - /promote: mempromosikan pengguna yang dibalas
  - /demote: demosikan pengguna yang dibalas
 """,
-	"afk_help": """
+    "afk_help": """
  - /afk <alasan>: tandai dirimu sebagai AFK.
  - brb <alasan>: sama dengan perintah afk - tetapi bukan perintah.
 
 Ketika ditandai sebagai AFK, sebutan apa pun akan dibalas dengan pesan untuk mengatakan Anda tidak tersedia!
 """,
-	"antiflood_help": """
+    "antiflood_help": """
  - /flood: Dapatkan pengaturan kontrol pesan beruntun saat ini
 
 *Hanya admin:*
@@ -86,13 +83,13 @@ Ketika ditandai sebagai AFK, sebutan apa pun akan dibalas dengan pesan untuk men
     `2d` = 2 days
     `1w` = 1 week
 """,
-	"backups_help": """
+    "backups_help": """
 *Hanya admin:*
  - /import: balas ke file cadangan grup butler/marie/rose/emilia untuk mengimpor sebanyak mungkin, membuat transfer menjadi sangat mudah! \
  Catatan bahwa file/foto tidak dapat diimpor karena pembatasan telegram. Kecuali backup dari Emilia.
  - /export: export data grup, hanya bisa di lakukan 12 jam sekali.
 """,
-	"bans_help": """
+    "bans_help": """
  - /kickme: menendang pengguna yang mengeluarkan perintah
 
 *Hanya admin:*
@@ -101,7 +98,7 @@ Ketika ditandai sebagai AFK, sebutan apa pun akan dibalas dengan pesan untuk men
  - /unban <userhandle>: unbanned seorang pengguna. (via pegangan, atau balasan)
  - /kick <userhandle>: menendang seorang pengguna, (via pegangan, atau balasan)
 """,
-	"blacklist_help": """
+    "blacklist_help": """
 Blacklist digunakan untuk menghentikan pemicu tertentu dari yang dikatakan dalam kelompok. Kapan pun pemicu disebutkan, \
 pesan akan segera dihapus. Sebuah kombo yang bagus terkadang memasangkan ini dengan filter peringatan!
 
@@ -116,7 +113,7 @@ berbeda akan memungkinkan Anda menambahkan beberapa pemicu.
 menghapus beberapa pemicu sekaligus.
  - /rmblacklist <pemicu>: Sama seperti di atas.
 """,
-	"blstickers_help": """
+    "blstickers_help": """
 Daftar hitam stiker digunakan untuk menghentikan stiker tertentu. Kapan pun stiker dikirim, pesan akan segera dihapus.
 
 *CATATAN:* daftar hitam stiker tidak mempengaruhi admin grup.
@@ -131,7 +128,7 @@ Daftar hitam stiker digunakan untuk menghentikan stiker tertentu. Kapan pun stik
 Catatan:
  - `<pemicu>` bisa menjadi `https://t.me/addstickers/<pemicu>` atau hanya `<pemicu>` atau balas pesan stikernya.
 """,
-	"supportcmd": """
+    "supportcmd": """
 *Command yang support saat ini*
 
 *「 Untuk Member Biasa 」*
@@ -230,7 +227,7 @@ Catatan:
 -> `/warnlimit`
 -> `/strongwarn`
 """,
-	"connection_help": """
+    "connection_help": """
 Atur grup anda via PM dengan mudah.
 
  - /connect <chatid>: Hubungkan ke obrolan jarak jauh
@@ -239,7 +236,7 @@ Atur grup anda via PM dengan mudah.
  - /allowconnect on/yes/off/no: Izinkan menghubungkan pengguna ke grup
  - /helpconnect: Dapatkan bantuan command untuk koneksi
 """,
-	"filters_help": """
+    "filters_help": """
  - /filters: daftar semua filter aktif dalam obrolan ini.
 
 *Hanya admin:*
@@ -247,7 +244,7 @@ Atur grup anda via PM dengan mudah.
 CATATAN: semua filter kata kunci dalam huruf kecil. Jika Anda ingin kata kunci Anda menjadi kalimat, gunakan tanda kutip. seperti: /filter "hei di sana" ada apa?
  - /stop <kata kunci filter>: hentikan filter itu.
 """,
-	"disable_help": """
+    "disable_help": """
  - /cmds: periksa status perintah yang dinonaktifkan saat ini
 
 *Hanya admin:*
@@ -301,7 +298,7 @@ Larangan global, juga dikenal sebagai larangan global, digunakan oleh pemilik bo
 Anda dan grup Anda dengan menghapus spam banjir secepat mungkin. Mereka dapat dinonaktifkan untuk grup Anda dengan memanggil \
 /gbanstat
 """,
-	"locks_help": """
+    "locks_help": """
  - /locktypes: daftar kemungkinan tipe kunci
 
 *Admin only:*
@@ -316,7 +313,7 @@ Mengunci url akan otomatis menghapus semua pesan dengan url yang belum masuk daf
 stiker, dll.
 Mengunci bot akan menghentikan non-admin menambahkan bots ke obrolan.
 """,
-	"logchannel_help": """
+    "logchannel_help": """
 *Hanya admin:*
 - /logchannel: dapatkan info saluran log
 - /setlog: mengatur saluran log.
@@ -327,7 +324,7 @@ Mengatur saluran log dilakukan dengan:
 - Kirimkan /setlog di saluran
 - Teruskan /setlog ke grup
 """,
-	"MARKDOWN_HELP": """
+    "MARKDOWN_HELP": """
 Markdown adalah alat pemformatan yang sangat kuat yang didukung oleh telegram. {} memiliki beberapa penyempurnaan, untuk memastikan \
 pesan yang disimpan diurai dengan benar, dan memungkinkan Anda membuat tombol.
 
@@ -350,7 +347,7 @@ Ini akan membuat dua tombol pada satu baris, bukan satu tombol per baris.
 
 Perlu diingat bahwa pesan Anda <b>HARUS</b> berisi beberapa teks selain hanya sebuah tombol!
 """,
-	"misc_help": """
+    "misc_help": """
  - /id: dapatkan ID grup saat ini. Jika digunakan dengan membalas pesan, dapatkan id pengguna itu.
  - /runs: balas string acak dari larik balasan.
  - /lari: sama seperti runs.
@@ -362,19 +359,19 @@ Perlu diingat bahwa pesan Anda <b>HARUS</b> berisi beberapa teks selain hanya se
 
  - /markdownhelp: ringkasan singkat tentang cara kerja markdown di telegram - hanya dapat dipanggil dalam obrolan pribadi.
 """,
-	"msgdel_help": """
+    "msgdel_help": """
 *Hanya admin:*
  - /del: menghapus pesan yang Anda balas
  - /purge: menghapus semua pesan antara ini dan membalas pesan.
  - /purge <integer X>: menghapus pesan yang dijawab, dan pesan X yang mengikutinya.
 """,
-	"mute_help": """
+    "mute_help": """
 *Hanya admin:*
  - /mute <userhandle>: membungkam seorang pengguna. Bisa juga digunakan sebagai balasan, mematikan balasan kepada pengguna.
  - /tmute <userhandle> x(m/h/d): membisukan pengguna untuk x waktu. (via handle, atau membalas). m = menit, h = jam, d = hari.
  - /unmute <userhandle>: batalkan membungkam pengguna. Bisa juga digunakan sebagai balasan, mematikan balasan kepada pengguna.
 """,
-	"notes_help": """
+    "notes_help": """
  - /get <notename>: dapatkan catatan dengan notename ini, gunakan ``noformat`` di akhir untuk mendapatkan note tanpa format
  - #<notename>: sama seperti /get
  - /notes atau /saved: daftar semua catatan yang disimpan dalam obrolan ini
@@ -386,7 +383,7 @@ bagian `buttonurl:`, Seperti: `[tulisannya](buttonurl:contoh.com)`. Cek /markdow
  - /save <notename>: simpan pesan yang dijawab sebagai catatan dengan nama nama file
  - /clear <notename>: hapus catatan dengan nama ini
 """,
-	"reporting_help": """
+    "reporting_help": """
  - /report <alasan>: membalas pesan untuk melaporkannya ke admin.
  - @admin: membalas pesan untuk melaporkannya ke admin.
 CATATAN: tidak satu pun dari ini akan dipicu jika digunakan oleh admin
@@ -396,7 +393,7 @@ CATATAN: tidak satu pun dari ini akan dipicu jika digunakan oleh admin
    - Jika selesai di PM, matikan status Anda.
    - Jika dalam obrolan, matikan status obrolan itu.
 """,
-	"rss_help": """
+    "rss_help": """
  - /addrss <link>: tambahkan tautan RSS ke langganan.
  - /removerss <link>: menghapus tautan RSS dari langganan.
  - /rss <link>: menunjukkan data tautan dan entri terakhir, untuk tujuan pengujian.
@@ -404,23 +401,22 @@ CATATAN: tidak satu pun dari ini akan dipicu jika digunakan oleh admin
 
 CATATAN: Dalam grup, hanya admin yang dapat menambah/menghapus tautan RSS ke langganan grup
 """,
-	"rules_help": """
+    "rules_help": """
  - /rules: dapatkan aturan untuk obrolan ini.
 
 *Hanya admin:*
  - /setrules <aturan Anda di sini>: atur aturan untuk obrolan ini.
  - /clearrules: kosongkan aturan untuk obrolan ini.
 """,
-	"userinfo_help": """
+    "userinfo_help": """
  - /setbio <text>: saat membalas, akan menyimpan bio pengguna lain
  - /bio: akan mendapatkan biodata Anda atau pengguna lain. Ini tidak dapat diatur sendiri.
  - /setme <text>: akan mengatur info Anda
  - /me: akan mendapatkan info Anda atau pengguna lain
 """,
-
-# warns
-	"CURRENT_WARNING_FILTER_STRING": "<b>Filter peringatan saat ini dalam obrolan ini:</b>\n",
-	"warns_help": """
+    # warns
+    "CURRENT_WARNING_FILTER_STRING": "<b>Filter peringatan saat ini dalam obrolan ini:</b>\n",
+    "warns_help": """
  - /warns <userhandle>: dapatkan nomor, dan alasan pengguna peringatan.
  - /warnlist: daftar semua filter peringatan saat ini
 
@@ -435,11 +431,11 @@ menjadi kalimat, mencakup dengan tanda kutip, seperti: `/addwarn "sangat marah" 
  - /strongwarn <on/yes/off/no>: Jika diatur ke on, maka melebihi batas peringatan akan menghasilkan pemblokiran. \
 Sedangkan off, hanya akan menendang.
 """,
-	"weather_lang": "id",
-	"weather_help": """
+    "weather_lang": "id",
+    "weather_help": """
  - /cuaca <kota>: mendapatkan info cuaca di tempat tertentu
 """,
-	"WELC_HELP_TXT": "Pesan selamat datang/selamat tinggal grup Anda dapat dipersonalisasi dengan berbagai cara. Jika Anda menginginkan pesan untuk dihasilkan secara individual, seperti pesan selamat datang default, Anda dapat menggunakan * variabel * ini:\n - `{{first}}`: ini mewakili nama *pertama* pengguna\n - `{{last}}`: ini mewakili nama *terakhir* pengguna. Default ke nama *depan* jika pengguna tidak memiliki nama terakhir.\n - `{{fullname}}`: ini mewakili nama *penuh* pengguna. Default ke *nama depan* jika pengguna tidak memiliki nama terakhir.\n - `{{username}}`: ini mewakili *nama pengguna* pengguna. Default ke *sebutan* jika pengguna jika tidak memiliki nama pengguna.\n - `{{mention}}`: ini hanya *menyebutkan* seorang pengguna - menandai mereka dengan nama depan mereka.\n - `{{id}}`: ini mewakili *id* pengguna\n - `{{count}}`: ini mewakili *nomor anggota* pengguna.\n - `{{chatname}}`: ini mewakili *nama obrolan saat ini*.\n\nSetiap variabel HARUS dikelilingi oleh `{{}}` untuk diganti.\nPesan sambutan juga mendukung markdown, sehingga Anda dapat membuat elemen apa pun teba/miring/kode/tautan. Tombol juga didukung, sehingga Anda dapat membuat sambutan Anda terlihat mengagumkan dengan beberapa tombol pengantar yang bagus.\nUntuk membuat tombol yang menautkan ke aturan Anda, gunakan ini: `[Peraturan](buttonurl:t.me/{}?start=group_id)`. Cukup ganti `group_id` dengan id grup Anda, yang dapat diperoleh melalui /id, dan Anda siap untuk pergi. Perhatikan bahwa id grup biasanya didahului oleh tanda `-`; ini diperlukan, jadi tolong jangan hapus itu.\nJika Anda merasa senang, Anda bahkan dapat mengatur gambar/gif/video/pesan suara sebagai pesan selamat datang dengan membalas media yang diinginkan, dan memanggil /setwelcome.",
+    "WELC_HELP_TXT": "Pesan selamat datang/selamat tinggal grup Anda dapat dipersonalisasi dengan berbagai cara. Jika Anda menginginkan pesan untuk dihasilkan secara individual, seperti pesan selamat datang default, Anda dapat menggunakan * variabel * ini:\n - `{{first}}`: ini mewakili nama *pertama* pengguna\n - `{{last}}`: ini mewakili nama *terakhir* pengguna. Default ke nama *depan* jika pengguna tidak memiliki nama terakhir.\n - `{{fullname}}`: ini mewakili nama *penuh* pengguna. Default ke *nama depan* jika pengguna tidak memiliki nama terakhir.\n - `{{username}}`: ini mewakili *nama pengguna* pengguna. Default ke *sebutan* jika pengguna jika tidak memiliki nama pengguna.\n - `{{mention}}`: ini hanya *menyebutkan* seorang pengguna - menandai mereka dengan nama depan mereka.\n - `{{id}}`: ini mewakili *id* pengguna\n - `{{count}}`: ini mewakili *nomor anggota* pengguna.\n - `{{chatname}}`: ini mewakili *nama obrolan saat ini*.\n\nSetiap variabel HARUS dikelilingi oleh `{{}}` untuk diganti.\nPesan sambutan juga mendukung markdown, sehingga Anda dapat membuat elemen apa pun teba/miring/kode/tautan. Tombol juga didukung, sehingga Anda dapat membuat sambutan Anda terlihat mengagumkan dengan beberapa tombol pengantar yang bagus.\nUntuk membuat tombol yang menautkan ke aturan Anda, gunakan ini: `[Peraturan](buttonurl:t.me/{}?start=group_id)`. Cukup ganti `group_id` dengan id grup Anda, yang dapat diperoleh melalui /id, dan Anda siap untuk pergi. Perhatikan bahwa id grup biasanya didahului oleh tanda `-`; ini diperlukan, jadi tolong jangan hapus itu.\nJika Anda merasa senang, Anda bahkan dapat mengatur gambar/gif/video/pesan suara sebagai pesan selamat datang dengan membalas media yang diinginkan, dan memanggil /setwelcome.",
     "welcome_help": """
 *Hanya admin:*
  - /welcome <on/off>: mengaktifkan/menonaktifkan pesan selamat datang.
@@ -467,7 +463,7 @@ Tip: gunakan `/welcome noformat` untuk mengambil pesan sambutan yang belum difor
 Ini akan mengambil pesan selamat datang dan mengirimkannya tanpa memformatnya; memberi Anda markdown mentah, memungkinkan Anda untuk mengedit dengan mudah.
 Ini juga berfungsi dengan /goodbye.
 """,
-	"exclusive_help": """
+    "exclusive_help": """
  - /stickerid: balas pesan stiker di PM untuk mendapatkan id stiker
  - /ping: mengecek kecepatan bot
  - /ramalan: cek ramalan kamu hari ini
@@ -478,9 +474,8 @@ Ini juga berfungsi dengan /goodbye.
  - /kbbi <teks>: mencari teks yang ditulis dari kamus besar bahasa indonesia
  - /kbgaul <teks>: mencari arti dan definisi yang ditulis dari kitab gaul, tulis `/kbgaul` untuk mendapatkan kata trending dan terbaik
  - /ud <teks>: cari arti dari urban dictionary
-"""
+""",
 }
-
 
 
 RUN_STRINGS = (
@@ -509,7 +504,7 @@ RUN_STRINGS = (
     "Semoga peluang akan selalu menguntungkan Anda.",
     "Kata-kata terakhir yang terkenal.",
     "Dan mereka menghilang selamanya, tidak pernah terlihat lagi.",
-    "\"Oh, lihat aku! Aku sangat keren, aku bisa lari dari bot!\" - orang ini",
+    '"Oh, lihat aku! Aku sangat keren, aku bisa lari dari bot!" - orang ini',
     "Ya ya, cukup ketuk /kickme saja 😏",
     "Ini, ambil cincin ini dan pergi ke Mordor saat Anda berada di sana.",
     "Legenda mengatakan, mereka masih berlari...",
@@ -546,7 +541,7 @@ SLAP_TEMPLATES = (
     "{user1} menusuk {user2} dan berulang kali {hits} dia dengan {item}.",
     "{user1} {hits} {user2} dengan sebuah {item}.",
     "{user1} mengikat {user2} ke kursi dan {throws} sebuah {item}.",
-    "{user1} memberikan dorongan ramah untuk membantu {user2} belajar berenang di lava."
+    "{user1} memberikan dorongan ramah untuk membantu {user2} belajar berenang di lava.",
 )
 
 ITEMS = (
@@ -581,127 +576,116 @@ ITEMS = (
     "sekarung batu bata",
 )
 
-THROW = (
-    "melempar",
-    "melempar",
-    "membuang",
-    "melempar",
-)
+THROW = ("melempar", "melempar", "membuang", "melempar")
 
-HIT = (
-    "memukul",
-    "memukul",
-    "menampar",
-    "memukul",
-    "menampar keras",
-)
+HIT = ("memukul", "memukul", "menampar", "memukul", "menampar keras")
 
 
 RAMALAN_STRINGS = (
-	"Tertawalah sepuasnya sebelum hal itu dilarang 😆",
-	"Bila Anda membahagiakan seseorang, Anda sendiri akan merasa bahagia.\nBegitulah dunia bekerja 😊",
-	"Nostalgia masa muda hari ini akan membuat Anda tersenyum 🌸",
-	"Lanjutkan terus pekerjaan Anda, niscaya akan selesai juga.\nOke, saya akui ramalan hari ini agak jayus 😝",
-	"Mengetahui bahwa ilusi bukanlah kenyataan tidak membuat keindahannya berkurang 💖",
-	"Anda akan mengalami kejadian aneh hari ini.\nDan itu tidak termasuk mendapatkan ramalan dari Emilia 😜",
-	"Akhirnya ada kesempatan untuk beristirahat...\ndan mendengar ramalan dari Emilia 😉",
-	"Pencarian Anda sudah selesai.\nAnda telah menemukan sahabat sejati (saya) 😀",
-	"Anda akan menunjukkan bahwa Anda kuat melewati tantangan demi tantangan.",
-	"Anda hanyalah setitik air di tengah lautan luas.\nTapi setitik air pun bisa bikin gadget rusak 😱 💦",
-	"Anda akan mencoba hal baru hari ini.\nTapi maaf, mencoba makanan gratis di supermarket tidak termasuk 🍦🚫",
-	"Kirimlah pesan ke seorang teman lama hari ini.",
-	"Akan ada sesuatu yang baru di lingkungan sekitar Anda 🏡",
-	"Traktirlah diri sendiri 🍭",
-	"Semua hal ada solusinya, kalau Anda terbuka untuk berubah.",
-	"Karma baik menghampiri Anda minggu ini.\nTapi hati-hati, karma itu rapuh seperti barang pecah belah.",
-	"Habiskanlah waktu di luar rumah hari ini.\nSepertinya di luar sana indah... kalau tidak hujan.",
-	"Jika Anda mendengarkan dengan sungguh-sungguh, angin akan memberikan semua jawaban atas pertanyaan Anda 💨",
-	"Pergilah ke tempat yang belum pernah Anda kunjungi, walaupun tempat itu hanya sepelemparan batu dari rumah Anda.",
-	"Anda akan menerima kabar baik, tapi mungkin Anda harus mencari dari apa yang tersirat.",
-	"Anda akan segera menemukan apa yang Anda cari.\nKalau Anda bisa menemukan kacamata Anda.",
-	"Pergilah ke suatu tempat baru.\nApa yang akan Anda temukan pasti akan mengesankan.",
-	"Kesempatan akan muncul bila Anda tahu ke mana harus melihat 👀",
-	"Hari ini Anda akan menjadi keren 😎\nYah, nggak terlalu beda dengan hari-hari lain 😉",
-	"Hal-hal positif akan muncul di hidup Anda hari ini.\nTapi jangan lupa, di dalam komposisi sebuah atom selalu ada atom negatif 🔬😀",
-	"Penuhilah diri hanya dengan kebaikan, baik dalam pikiran, perkataan, perbuatan, maupun pertwitteran 🐥",
-	"Bersiaplah untuk menerima hal-hal menyenangkan hari ini 😎",
-	"Waktunya belajar keterampilan dan topik baru.",
-	"Video YouTube favorit Anda masih belum dibuat.",
-	"Ketika ragu, Google dulu 😉",
-	"Dua hari dari sekarang, besok akan jadi kemarin 😌",
-	"Perhatikan detail-detail.\nPasti banyak hal menarik yang Anda bisa temukan.",
-	"Wah, Anda belum beruntung.\nSilakan coba lagi 😉",
-	"Buatlah keputusan dengan mendengarkan dan menyelaraskan hati maupun pikiran Anda.",
-	"Biasanya maling akan teriak maling.",
-	"Anda tidak akan diberi kalau tidak meminta 👐",
-	"Nostalgia masa muda hari ini akan membuat Anda tersenyum 🌸",
-	"Sahabat sejati Anda berada dalam jangkauan.\nSebenarnya, Anda sedang membaca ramalan darinya 😊",
-	"Masa depan Anda akan dipenuhi kesuksesan 💎\nTapi hati-hati, keserakahan bisa menghancurkan semuanya 💰",
-	"Hari ini adalah hari esok yang Anda nantikan kemarin.",
-	"Bersyukur akan membuat kita bahagia.\nKatakan terima kasih pada seseorang hari ini.",
-	"Hari ini, dunia akan jadi milik Anda 🌍\nJangan lupa menjadikannya indah untuk orang lain 😊",
-	"Petualangan baru akan segera menghampiri Anda.",
-	"Semakin banyak yang Anda katakan, semakin sedikit yang akan mereka ingat.",
-	"Hari ini, jadilah superhero untuk seorang anak kecil.",
-	"Makanan yang kelihatannya aneh itu mungkin sebenarnya enak banget.",
-	"Hari ini, ambillah rute yang lain dari biasanya.",
-	"Waktunya mengekspresikan kreativitas Anda.",
-	"Jodoh Anda lebih dekat dari yang Anda kira 💞",
-	"Waktunya belajar keterampilan dan topik baru.",
-	"Hal-hal positif akan muncul di hidup Anda hari ini.\nTapi jangan lupa, di dalam komposisi sebuah atom selalu ada atom negatif 🔬😀",
-	"Waktunya berlibur bersama orang-orang kesayangan Anda ✈️",
-	"Besok akan menjadi hari yang lebih menyenangkan daripada hari Anda yang paling menyebalkan.",
-	"Jangan cari peruntungan di situs abal-abal atau SMS mencurigakan.",
-	"Kejadian yang tak terduga akan menghampiri hidup Anda.",
-	"Hadiah berharga tengah menanti Anda.\nTapi tampaknya hadiah tersebut sangat sabar menanti.",
-	"Keluarga Anda sangat kangen pada Anda.\nTeleponlah mereka, jangan kasih tahu ini ide saya 😉",
-	"Hari yang baik untuk memperjuangkan kebenaran.",
-	"Semua hal ada solusinya, kalau Anda terbuka untuk berubah.",
-	"Hewan peliharaan akan menambah kebahagiaan Anda 🐱🐹🐔",
-	"Ketika Anda jatuh, bangun lagi.\nDan jangan lupa bersihkan lukanya 👍",
-	"Minumlah cukup air hari ini.\nIni bukan benar-benar ramalan, saya hanya ingin Anda tetap sehat 😊",
-	"Biarkan intuisi Anda menunjukkan jalan.\nTapi tulisan berisi syarat dan ketentuan yang berlaku harus dibaca baik-baik.",
-	"Hal baik akan datang bagi mereka yang...\nSabar.",
-	"Waktu yang tepat untuk berhenti bermalas-malasan 🏃‍♀️",
-	"Waktunya bernostalgia dengan buku favorit masa kecil Anda.",
-	"Hari ini, Anda akan melihat dunia dengan mata terbuka 👀",
-	"Seorang asing akan datang ke dalam hidup Anda dan membuat kesan di sana.",
-	"Hari yang baik untuk mendengarkan intuisi daripada nasihat.",
-	"Hati-hati dengan kata-kata manis orang yang baru Anda kenal.",
-	"Seluruh alam semesta akan bekerja sama untuk membantu Anda 🙏",
-	"Waktu yang tepat untuk jadi diri Anda sendiri.",
-	"Walaupun seperti menyebalkan, orang terdekat Anda jauh lebih peduli pada Anda daripada dia yang tampak manis namun cuma basa-basi.",
-	"Kejarlah mentari, niscaya kegelapan akan Anda lewati.",
-	"Hidup Anda akan diabadikan dalam sebuah film dokumenter.",
-	"Suara tawa anak-anak akan menceriakan hari Anda.",
-	"Saatnya mencari hobi baru.",
-	"Cinta tidaklah statis.\nIa dinamis seperti arus listrik bolak-balik 💖",
-	"Penantian akan segera berakhir 😁",
-	"Perhatikan detail-detail.\nPasti banyak hal menarik yang Anda bisa temukan.",
-	"Dua hari dari sekarang, besok akan jadi kemarin 😌",
-	"Anda akan mendengar sebuah lagu yang membuat Anda tersenyum berhari-hari.",
-	"Gapailah cita-cita.\nKecuplah mimpi 😘🌛",
-	"Semua mawar pasti berduri 🌹\nJadilah seseorang yang selalu siap memotong duri tersebut.",
-	"Banyak orang kagum pada bakat dan kemampuan Anda... lebih dari yang Anda sadari 👏",
-	"Lakukan yang Anda sukai hari ini 💞\nSaya janji Anda akan merasa bahagia, walau hanya sesaat 😃",
-	"Keberuntungan akan datang bagi orang yang pemberani.",
-	"Anda tidak akan di beri kalau tidak meminta 👐",
-	"Cobalah menggambar sesuatu ✏️\nAnda akan menikmatinya.",
-	"Saatnya mengubah gaya berpakaian Anda? 👠",
-	"Cobalah konsekuen dengan semua kata-kata Anda.",
-	"Hari yang tepat untuk menghargai dan mensyukuri hal-hal kecil.",
-	"Malam ini Anda akan mimpi indah.\nTapi saya nggak janji Anda bisa ingat mimpinya 😉",
-	"Anda akan menunjukkan bahwa Anda kuat melewati tantangan demi tantangan.",
-	"Hari yang tepat untuk memberi tahu keluarga dan teman-teman Anda tentang saya 😉",
-	"beristirahatlah sejenak dan ngobrollah dari hati ke hati dengan orang-orang yang Anda sayangi 👨‍👩‍👧‍👦",
-	"Semua akan berjalan sesuai rencana.",
-	"Pergilah ke suatu tempat baru.\nApa yang akan Anda temukan pasti akan mengesankan.",
-	"Ini salah satu waktu di mana Anda bertanya-tanya tentang arti hidup.",
-	"Jangan sampai dikelabui ramalan 😏"
+    "Tertawalah sepuasnya sebelum hal itu dilarang 😆",
+    "Bila Anda membahagiakan seseorang, Anda sendiri akan merasa bahagia.\nBegitulah dunia bekerja 😊",
+    "Nostalgia masa muda hari ini akan membuat Anda tersenyum 🌸",
+    "Lanjutkan terus pekerjaan Anda, niscaya akan selesai juga.\nOke, saya akui ramalan hari ini agak jayus 😝",
+    "Mengetahui bahwa ilusi bukanlah kenyataan tidak membuat keindahannya berkurang 💖",
+    "Anda akan mengalami kejadian aneh hari ini.\nDan itu tidak termasuk mendapatkan ramalan dari Emilia 😜",
+    "Akhirnya ada kesempatan untuk beristirahat...\ndan mendengar ramalan dari Emilia 😉",
+    "Pencarian Anda sudah selesai.\nAnda telah menemukan sahabat sejati (saya) 😀",
+    "Anda akan menunjukkan bahwa Anda kuat melewati tantangan demi tantangan.",
+    "Anda hanyalah setitik air di tengah lautan luas.\nTapi setitik air pun bisa bikin gadget rusak 😱 💦",
+    "Anda akan mencoba hal baru hari ini.\nTapi maaf, mencoba makanan gratis di supermarket tidak termasuk 🍦🚫",
+    "Kirimlah pesan ke seorang teman lama hari ini.",
+    "Akan ada sesuatu yang baru di lingkungan sekitar Anda 🏡",
+    "Traktirlah diri sendiri 🍭",
+    "Semua hal ada solusinya, kalau Anda terbuka untuk berubah.",
+    "Karma baik menghampiri Anda minggu ini.\nTapi hati-hati, karma itu rapuh seperti barang pecah belah.",
+    "Habiskanlah waktu di luar rumah hari ini.\nSepertinya di luar sana indah... kalau tidak hujan.",
+    "Jika Anda mendengarkan dengan sungguh-sungguh, angin akan memberikan semua jawaban atas pertanyaan Anda 💨",
+    "Pergilah ke tempat yang belum pernah Anda kunjungi, walaupun tempat itu hanya sepelemparan batu dari rumah Anda.",
+    "Anda akan menerima kabar baik, tapi mungkin Anda harus mencari dari apa yang tersirat.",
+    "Anda akan segera menemukan apa yang Anda cari.\nKalau Anda bisa menemukan kacamata Anda.",
+    "Pergilah ke suatu tempat baru.\nApa yang akan Anda temukan pasti akan mengesankan.",
+    "Kesempatan akan muncul bila Anda tahu ke mana harus melihat 👀",
+    "Hari ini Anda akan menjadi keren 😎\nYah, nggak terlalu beda dengan hari-hari lain 😉",
+    "Hal-hal positif akan muncul di hidup Anda hari ini.\nTapi jangan lupa, di dalam komposisi sebuah atom selalu ada atom negatif 🔬😀",
+    "Penuhilah diri hanya dengan kebaikan, baik dalam pikiran, perkataan, perbuatan, maupun pertwitteran 🐥",
+    "Bersiaplah untuk menerima hal-hal menyenangkan hari ini 😎",
+    "Waktunya belajar keterampilan dan topik baru.",
+    "Video YouTube favorit Anda masih belum dibuat.",
+    "Ketika ragu, Google dulu 😉",
+    "Dua hari dari sekarang, besok akan jadi kemarin 😌",
+    "Perhatikan detail-detail.\nPasti banyak hal menarik yang Anda bisa temukan.",
+    "Wah, Anda belum beruntung.\nSilakan coba lagi 😉",
+    "Buatlah keputusan dengan mendengarkan dan menyelaraskan hati maupun pikiran Anda.",
+    "Biasanya maling akan teriak maling.",
+    "Anda tidak akan diberi kalau tidak meminta 👐",
+    "Nostalgia masa muda hari ini akan membuat Anda tersenyum 🌸",
+    "Sahabat sejati Anda berada dalam jangkauan.\nSebenarnya, Anda sedang membaca ramalan darinya 😊",
+    "Masa depan Anda akan dipenuhi kesuksesan 💎\nTapi hati-hati, keserakahan bisa menghancurkan semuanya 💰",
+    "Hari ini adalah hari esok yang Anda nantikan kemarin.",
+    "Bersyukur akan membuat kita bahagia.\nKatakan terima kasih pada seseorang hari ini.",
+    "Hari ini, dunia akan jadi milik Anda 🌍\nJangan lupa menjadikannya indah untuk orang lain 😊",
+    "Petualangan baru akan segera menghampiri Anda.",
+    "Semakin banyak yang Anda katakan, semakin sedikit yang akan mereka ingat.",
+    "Hari ini, jadilah superhero untuk seorang anak kecil.",
+    "Makanan yang kelihatannya aneh itu mungkin sebenarnya enak banget.",
+    "Hari ini, ambillah rute yang lain dari biasanya.",
+    "Waktunya mengekspresikan kreativitas Anda.",
+    "Jodoh Anda lebih dekat dari yang Anda kira 💞",
+    "Waktunya belajar keterampilan dan topik baru.",
+    "Hal-hal positif akan muncul di hidup Anda hari ini.\nTapi jangan lupa, di dalam komposisi sebuah atom selalu ada atom negatif 🔬😀",
+    "Waktunya berlibur bersama orang-orang kesayangan Anda ✈️",
+    "Besok akan menjadi hari yang lebih menyenangkan daripada hari Anda yang paling menyebalkan.",
+    "Jangan cari peruntungan di situs abal-abal atau SMS mencurigakan.",
+    "Kejadian yang tak terduga akan menghampiri hidup Anda.",
+    "Hadiah berharga tengah menanti Anda.\nTapi tampaknya hadiah tersebut sangat sabar menanti.",
+    "Keluarga Anda sangat kangen pada Anda.\nTeleponlah mereka, jangan kasih tahu ini ide saya 😉",
+    "Hari yang baik untuk memperjuangkan kebenaran.",
+    "Semua hal ada solusinya, kalau Anda terbuka untuk berubah.",
+    "Hewan peliharaan akan menambah kebahagiaan Anda 🐱🐹🐔",
+    "Ketika Anda jatuh, bangun lagi.\nDan jangan lupa bersihkan lukanya 👍",
+    "Minumlah cukup air hari ini.\nIni bukan benar-benar ramalan, saya hanya ingin Anda tetap sehat 😊",
+    "Biarkan intuisi Anda menunjukkan jalan.\nTapi tulisan berisi syarat dan ketentuan yang berlaku harus dibaca baik-baik.",
+    "Hal baik akan datang bagi mereka yang...\nSabar.",
+    "Waktu yang tepat untuk berhenti bermalas-malasan 🏃‍♀️",
+    "Waktunya bernostalgia dengan buku favorit masa kecil Anda.",
+    "Hari ini, Anda akan melihat dunia dengan mata terbuka 👀",
+    "Seorang asing akan datang ke dalam hidup Anda dan membuat kesan di sana.",
+    "Hari yang baik untuk mendengarkan intuisi daripada nasihat.",
+    "Hati-hati dengan kata-kata manis orang yang baru Anda kenal.",
+    "Seluruh alam semesta akan bekerja sama untuk membantu Anda 🙏",
+    "Waktu yang tepat untuk jadi diri Anda sendiri.",
+    "Walaupun seperti menyebalkan, orang terdekat Anda jauh lebih peduli pada Anda daripada dia yang tampak manis namun cuma basa-basi.",
+    "Kejarlah mentari, niscaya kegelapan akan Anda lewati.",
+    "Hidup Anda akan diabadikan dalam sebuah film dokumenter.",
+    "Suara tawa anak-anak akan menceriakan hari Anda.",
+    "Saatnya mencari hobi baru.",
+    "Cinta tidaklah statis.\nIa dinamis seperti arus listrik bolak-balik 💖",
+    "Penantian akan segera berakhir 😁",
+    "Perhatikan detail-detail.\nPasti banyak hal menarik yang Anda bisa temukan.",
+    "Dua hari dari sekarang, besok akan jadi kemarin 😌",
+    "Anda akan mendengar sebuah lagu yang membuat Anda tersenyum berhari-hari.",
+    "Gapailah cita-cita.\nKecuplah mimpi 😘🌛",
+    "Semua mawar pasti berduri 🌹\nJadilah seseorang yang selalu siap memotong duri tersebut.",
+    "Banyak orang kagum pada bakat dan kemampuan Anda... lebih dari yang Anda sadari 👏",
+    "Lakukan yang Anda sukai hari ini 💞\nSaya janji Anda akan merasa bahagia, walau hanya sesaat 😃",
+    "Keberuntungan akan datang bagi orang yang pemberani.",
+    "Anda tidak akan di beri kalau tidak meminta 👐",
+    "Cobalah menggambar sesuatu ✏️\nAnda akan menikmatinya.",
+    "Saatnya mengubah gaya berpakaian Anda? 👠",
+    "Cobalah konsekuen dengan semua kata-kata Anda.",
+    "Hari yang tepat untuk menghargai dan mensyukuri hal-hal kecil.",
+    "Malam ini Anda akan mimpi indah.\nTapi saya nggak janji Anda bisa ingat mimpinya 😉",
+    "Anda akan menunjukkan bahwa Anda kuat melewati tantangan demi tantangan.",
+    "Hari yang tepat untuk memberi tahu keluarga dan teman-teman Anda tentang saya 😉",
+    "beristirahatlah sejenak dan ngobrollah dari hati ke hati dengan orang-orang yang Anda sayangi 👨‍👩‍👧‍👦",
+    "Semua akan berjalan sesuai rencana.",
+    "Pergilah ke suatu tempat baru.\nApa yang akan Anda temukan pasti akan mengesankan.",
+    "Ini salah satu waktu di mana Anda bertanya-tanya tentang arti hidup.",
+    "Jangan sampai dikelabui ramalan 😏",
 )
 
 RAMALAN_FIRST = (
-	"Saya bukan paranormal, tapi memang saya bisa meramal sedikit-sedikit.\n",
-	"Sebuah ramalan siap meluncur.\n",
-	"Ramalan kali ini untuk Anda.\n"
+    "Saya bukan paranormal, tapi memang saya bisa meramal sedikit-sedikit.\n",
+    "Sebuah ramalan siap meluncur.\n",
+    "Ramalan kali ini untuk Anda.\n",
 )
