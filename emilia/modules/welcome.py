@@ -89,7 +89,7 @@ def send(update, message, keyboard, backup_message):
 																	  "kustom. Harap perbarui.")),
 													  reply_to_message_id=reply, 
 													  parse_mode=ParseMode.MARKDOWN)
-				LOGGER.exception()
+				LOGGER.exception("ERROR!")
 			except BadRequest:
 				print("Cannot send welcome msg, bot is muted!")
 				return ""

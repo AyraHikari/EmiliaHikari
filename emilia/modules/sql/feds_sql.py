@@ -107,6 +107,7 @@ FEDERATION_BANNED_USERID = {}
 
 FEDERATION_NOTIFICATION = {}
 FEDS_SUBSCRIBER = {}
+MYFEDS_SUBSCRIBER = {}
 
 
 def get_fed_info(fed_id):
@@ -582,7 +583,7 @@ def subs_fed(fed_id, my_fed):
 
 def unsubs_fed(fed_id, my_fed):
 	with FEDS_SUBSCRIBER_LOCK:
-		getsubs = SESSION.query(FedSubs).get(fed_id, my_fed)
+		getsubs = SESSION.query(FedSubs).get((fed_id, my_fed))
 		if getsubs:
 			if my_fed in FEDS_SUBSCRIBER.get(fed_id, set()):  # sanity check
 				FEDS_SUBSCRIBER.get(fed_id, set()).remove(my_fed)
@@ -604,15 +605,7 @@ def get_spec_subs(fed_id, fed_target):
 		return FEDS_SUBSCRIBER.get(fed_id, fed_target)
 
 def get_mysubs(my_fed):
-	allfed = list(FEDS_SUBSCRIBER)
-	mysubs = []
-	for x in allfed:
-		if x == my_fed:
-			continue
-		getsub = FEDS_SUBSCRIBER.get(x, my_fed)
-		if getsub:
-			mysubs.append(x)
-	return mysubs
+	return list(MYFEDS_SUBSCRIBER.get(my_fed))
 
 def get_subscriber(fed_id):
 	return FEDS_SUBSCRIBER.get(fed_id, set())
@@ -692,16 +685,20 @@ def __load_all_feds_settings():
 
 def __load_feds_subscriber():
 	global FEDS_SUBSCRIBER
+	global MYFEDS_SUBSCRIBER
 	try:
 		feds = SESSION.query(FedSubs.fed_id).distinct().all()
 		for (fed_id,) in feds:  # remove tuple by ( ,)
 			FEDS_SUBSCRIBER[fed_id] = []
+			MYFEDS_SUBSCRIBER[fed_id] = []
 
 		all_fedsubs = SESSION.query(FedSubs).all()
 		for x in all_fedsubs:
 			FEDS_SUBSCRIBER[x.fed_id] += [x.fed_subs]
+			MYFEDS_SUBSCRIBER[x.fed_subs] += [x.fed_id]
 
 		FEDS_SUBSCRIBER = {x: set(y) for x, y in FEDS_SUBSCRIBER.items()}
+		MYFEDS_SUBSCRIBER = {x: set(y) for x, y in MYFEDS_SUBSCRIBER.items()}
 
 	finally:
 		SESSION.close()
