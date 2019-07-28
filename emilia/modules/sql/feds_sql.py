@@ -389,8 +389,9 @@ def fban_user(fed_id, user_id, first_name, last_name, user_name, reason, time):
 
 
 def multi_fban_user(multi_fed_id, multi_user_id, multi_first_name, multi_last_name, multi_user_name, multi_reason):
-	with FEDS_LOCK:
+	if True: #with FEDS_LOCK:
 		counter = 0
+		time = 0
 		for x in range(len(multi_fed_id)):
 			fed_id = multi_fed_id[x]
 			user_id = multi_user_id[x]

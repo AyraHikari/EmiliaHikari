@@ -1282,6 +1282,12 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 			return
 		fileformat = msg.reply_to_message.document.file_name.split('.')[-1]
 		if fileformat == 'json':
+			multi_fed_id = []
+			multi_import_userid = []
+			multi_import_firstname = []
+			multi_import_lastname = []
+			multi_import_username = []
+			multi_import_reason = []
 			with BytesIO() as file:
 				file_info.download(out=file)
 				file.seek(0)
@@ -1323,12 +1329,17 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					if int(import_userid) in WHITELIST_USERS:
 						failed += 1
 						continue
-					addtodb = sql.fban_user(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason, int(time.time()))
-					if addtodb:
-						success += 1
+					multi_fed_id.append(fed_id)
+					multi_import_userid.append(str(import_userid))
+					multi_import_firstname.append(import_firstname)
+					multi_import_lastname.append(import_lastname)
+					multi_import_username.append(import_username)
+					multi_import_reason.append(import_reason)
+					success += 1
+				sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason)
 			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(success)
 			if failed >= 1:
-				tekt += tl(update.effective_message, " {} gagal di impor.").format(failed)
+				text += tl(update.effective_message, " {} gagal di impor.").format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
 			if get_fedlog:
 				if eval(get_fedlog):
@@ -1381,18 +1392,19 @@ def fed_import_bans(bot: Bot, update: Update, chat_data):
 					multi_import_lastname.append(import_lastname)
 					multi_import_username.append(import_username)
 					multi_import_reason.append(import_reason)
+					success += 1
 					# t = ThreadWithReturnValue(target=sql.fban_user, args=(fed_id, str(import_userid), import_firstname, import_lastname, import_username, import_reason,))
 					# t.start()
-				addtodb = sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason, int(time.time()))
+				sql.multi_fban_user(multi_fed_id, multi_import_userid, multi_import_firstname, multi_import_lastname, multi_import_username, multi_import_reason)
 			csvFile.close()
 			os.remove("fban_{}.csv".format(msg.reply_to_message.document.file_id))
-			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(addtodb)
+			text = tl(update.effective_message, "Berkas blokir berhasil diimpor. {} orang diblokir.").format(success)
 			if failed >= 1:
 				text += tl(update.effective_message, " {} gagal di impor.").format(failed)
 			get_fedlog = sql.get_fed_log(fed_id)
 			if get_fedlog:
 				if eval(get_fedlog):
-					teks = tl(update.effective_message, "Federasi *{}* telah berhasil mengimpor data. {} di blokir").format(getfed['fname'], addtodb)
+					teks = tl(update.effective_message, "Federasi *{}* telah berhasil mengimpor data. {} di blokir").format(getfed['fname'], success)
 					if failed >= 1:
 						teks += tl(update.effective_message, " {} gagal di impor.").format(failed)
 					bot.send_message(get_fedlog, teks, parse_mode="markdown")
