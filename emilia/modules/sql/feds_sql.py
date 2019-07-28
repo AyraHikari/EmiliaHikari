@@ -196,6 +196,18 @@ def del_fed(fed_id):
 			FEDERATION_BANNED_USERID.pop(fed_id)
 		if FEDERATION_BANNED_FULL.get(fed_id):
 			FEDERATION_BANNED_FULL.pop(fed_id)
+		# Delete fedsubs
+		getall = MYFEDS_SUBSCRIBER.get(fed_id)
+		if getall:
+			for x in getall:
+				getsubs = SESSION.query(FedSubs).get((fed_id, str(x)))
+				if getsubs:
+					SESSION.delete(getsubs)
+					SESSION.commit()
+		if FEDS_SUBSCRIBER.get(fed_id):
+			FEDS_SUBSCRIBER.pop(fed_id)
+		if MYFEDS_SUBSCRIBER.get(fed_id):
+			MYFEDS_SUBSCRIBER.pop(fed_id)
 		# Delete from database
 		curr = SESSION.query(Federations).get(fed_id)
 		if curr:
