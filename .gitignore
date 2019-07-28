@@ -21,6 +21,8 @@ emilia/modules/sql/__pycache__
 .pgpass
 .python_history
 backupdb
+hourly_backupdb
+*-Emilia.backup
 
 # Remove some configs
 emilia/config.py
