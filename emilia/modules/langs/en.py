@@ -495,6 +495,7 @@ Note:
 	"Saat ini Anda tidak terhubung dengan grup.\n": "You are currently not connected in any group.\n",
 	"ID Obrolan tidak valid!": "Invalid Chat ID!",
 	"Berhasil tersambung ke *{}*. Gunakan /connection untuk informasi perintah apa saja yang tersedia.": "Successfully connected to *{}*. Use /connection for see current available commands.",
+	"Berhasil tersambung ke *{}*.": "Successfully connected to *{}*.",
 	"Koneksi gagal!": "Connection failed!",
 	"Sambungan ke obrolan ini tidak diizinkan!": "Connection to this chat is not allowed!",
 	"Anda telah terkoneksi pada *{}* (`{}`)": "You are connected to *{}* (`{}`)",

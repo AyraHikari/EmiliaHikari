@@ -146,7 +146,7 @@ def connect_chat(bot, update, args):
             connection_status = sql.connect(update.effective_message.from_user.id, chat.id)
             if connection_status:
                 chat_name = dispatcher.bot.getChat(chat.id).title
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Berhasil tersambung ke *{}*. Gunakan /connection untuk informasi perintah apa saja yang tersedia.").format(chat_name), parse_mode=ParseMode.MARKDOWN)
+                update.effective_message.reply_text(languages.tl(update.effective_message, "Berhasil tersambung ke *{}*.").format(chat_name), parse_mode=ParseMode.MARKDOWN)
                 try:
                     sql.add_history_conn(user.id, str(chat.id), chat_name)
                     bot.send_message(update.effective_message.from_user.id, languages.tl(update.effective_message, "Anda telah terhubung dengan *{}*. Gunakan /connection untuk informasi perintah apa saja yang tersedia.").format(chat_name), parse_mode="markdown")
@@ -252,7 +252,7 @@ def connect_button(bot: Bot, update: Update) -> str:
            bot.answer_callback_query(query.id, languages.tl(update.effective_message, "Anda tidak terkoneksi!"), show_alert=True)
     elif clear_match:
         sql.clear_history_conn(query.from_user.id)
-        query.message.edit_text(languages.tl(update.effective_message, "Riwayat yang terhubung telah dihapus"))
+        query.message.edit_text(languages.tl(update.effective_message, "Riwayat yang terhubung telah dihapus!"))
 
 
 __help__ = "connection_help"
