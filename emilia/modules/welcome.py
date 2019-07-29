@@ -17,7 +17,6 @@ from emilia.modules.helper_funcs.string_handling import markdown_parser, \
 	escape_invalid_curly_brackets, extract_time
 from emilia.modules.log_channel import loggable
 
-import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules.languages import tl
 
 
@@ -102,19 +101,6 @@ def new_member(bot: Bot, update: Update):
 
 	should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
 	cleanserv = sql.clean_service(chat.id)
-	# Federation security
-	fed_id = fedsql.get_fed_id(chat.id)
-	if fed_id:
-		new_members = update.effective_message.new_chat_members
-		for new_mem in new_members:
-			fban, fbanreason, fbantime = fedsql.get_fban_user(fed_id, new_mem.id)
-			if fban:
-				update.effective_message.reply_text(tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
-				try:
-					  bot.kick_chat_member(chat.id, new_mem.id)
-				except:
-					  print("Fban: cannot banned this user")
-				return
 	if cleanserv:
 		new_members = update.effective_message.new_chat_members
 		for new_mem in new_members:

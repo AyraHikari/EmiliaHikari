@@ -818,7 +818,7 @@ def unfban(bot: Bot, update: Update, args: List[str]):
 
 	banner = update.effective_user  # type: Optional[User]
 
-	message.reply_text(tl(update.effective_message, "Saya akan memberi {} kesempatan kedua dalam federasi ini.").format(user_target))
+	message.reply_text(tl(update.effective_message, "Saya akan memberi {} kesempatan kedua dalam federasi ini.").format(user_target), parse_mode="HTML")
 
 	chat_list = sql.all_fed_chats(fed_id)
 	# Will send to current chat
