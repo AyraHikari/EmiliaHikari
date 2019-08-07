@@ -47,7 +47,7 @@ if is_module_loaded(FILENAME):
                 command = update.effective_message.text_html.split(None, 1)[0][1:].split('@')[0]
                 
                 # disabled, admincmd, user admin
-                if sql.is_command_disabled(chat.id, command):
+                if sql.is_command_disabled(chat.id, command.lower()):
                     return command in ADMIN_CMDS and is_user_admin(chat, user.id)
 
                 # not disabled
