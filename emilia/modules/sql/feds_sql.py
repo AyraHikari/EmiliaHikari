@@ -708,7 +708,13 @@ def __load_feds_subscriber():
 		all_fedsubs = SESSION.query(FedSubs).all()
 		for x in all_fedsubs:
 			FEDS_SUBSCRIBER[x.fed_id] += [x.fed_subs]
-			MYFEDS_SUBSCRIBER[x.fed_subs] += [x.fed_id]
+			try:
+				MYFEDS_SUBSCRIBER[x.fed_subs] += [x.fed_id]
+			except KeyError:
+				getsubs = SESSION.query(FedSubs).get((x.fed_id, x.fed_subs))
+				if getsubs:
+					SESSION.delete(getsubs)
+					SESSION.commit()
 
 		FEDS_SUBSCRIBER = {x: set(y) for x, y in FEDS_SUBSCRIBER.items()}
 		MYFEDS_SUBSCRIBER = {x: set(y) for x, y in MYFEDS_SUBSCRIBER.items()}
