@@ -7,7 +7,7 @@ from telegram.error import BadRequest, Unauthorized
 from telegram.ext import CommandHandler, RegexHandler, run_async, Filters, CallbackQueryHandler
 from telegram.utils.helpers import mention_html, mention_markdown
 
-from emilia import dispatcher, LOGGER, spamfilters
+from emilia import dispatcher, LOGGER, spamfilters, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
 from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
@@ -251,6 +251,12 @@ def buttonask(bot, update):
 	key = CURRENT_REPORT.get(str(report_chat)+"key")
 
 	if isyes == "y":
+		a, b = user_protection_checker(report_target)
+		if not a:
+			bot.edit_message_text(text=msg + b,
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+			return
 		if splitter[0] == "1":
 			try:
 				bot.unbanChatMember(report_chat, report_target)
@@ -292,6 +298,25 @@ def buttonask(bot, update):
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 							  reply_markup=key)
+
+
+def user_protection_checker(user_id):
+	if not user_id:
+		return False, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna.")
+
+	if int(user_id) == OWNER_ID:
+		return False, "Error: This one is my owner!"
+
+	if int(user_id) in SUDO_USERS:
+		return False, "Error: User is under protection"
+
+	# if int(user_id) in SUPPORT_USERS:
+	# 	return False, "Error: User is under protection"
+
+	if int(user_id) == bot.id:
+		return False, "Error: This is myself!"
+
+	return True, ""
 
 
 def __migrate__(old_chat_id, new_chat_id):
