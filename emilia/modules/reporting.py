@@ -71,6 +71,11 @@ def report(bot: Bot, update: Update) -> str:
 	if chat and message.reply_to_message and sql.chat_should_report(chat.id):
 		reported_user = message.reply_to_message.from_user  # type: Optional[User]
 		chat_name = chat.title or chat.first or chat.username
+
+		a, b = user_protection_checker(bot, message.reply_to_message.from_user.id)
+		if not a:
+			return ""
+
 		admin_list = chat.get_administrators()
 
 		if chat.username and chat.type == Chat.SUPERGROUP:
@@ -251,7 +256,7 @@ def buttonask(bot, update):
 	key = CURRENT_REPORT.get(str(report_chat)+"key")
 
 	if isyes == "y":
-		a, b = user_protection_checker(report_target)
+		a, b = user_protection_checker(bot, report_target)
 		if not a:
 			bot.edit_message_text(text=msg + b,
 							  chat_id=query.message.chat_id,
@@ -300,21 +305,21 @@ def buttonask(bot, update):
 							  reply_markup=key)
 
 
-def user_protection_checker(user_id):
+def user_protection_checker(bot, user_id):
 	if not user_id:
 		return False, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna.")
 
 	if int(user_id) == OWNER_ID:
-		return False, "Error: This one is my owner!"
+		return False, "\n\nError: This one is my owner!"
 
 	if int(user_id) in SUDO_USERS:
-		return False, "Error: User is under protection"
+		return False, "\n\nError: User is under protection"
 
 	# if int(user_id) in SUPPORT_USERS:
 	# 	return False, "Error: User is under protection"
 
 	if int(user_id) == bot.id:
-		return False, "Error: This is myself!"
+		return False, "\n\nError: This is myself!"
 
 	return True, ""
 

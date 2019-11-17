@@ -20,6 +20,7 @@ from emilia.modules.log_channel import loggable
 from emilia.modules.languages import tl
 
 
+OWNER_SPECIAL = False
 VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'count', 'chatname', 'mention']
 
 ENUM_FUNC_MAP = {
@@ -113,7 +114,7 @@ def new_member(bot: Bot, update: Update):
 		new_members = update.effective_message.new_chat_members
 		for new_mem in new_members:
 			# Give the owner a special welcome
-			if new_mem.id == OWNER_ID:
+			if OWNER_SPECIAL and new_mem.id == OWNER_ID:
 				if cleanserv:
 					bot.send_message(chat.id, tl(update.effective_message, "Master telah pulang! Mari kita mulai pesta ini! 😆"))
 				else:
@@ -370,7 +371,7 @@ def left_member(bot: Bot, update: Update):
 				return
 
 			# Give the owner a special goodbye
-			if left_mem.id == OWNER_ID:
+			if OWNER_SPECIAL and left_mem.id == OWNER_ID:
 				update.effective_message.reply_text(tl(update.effective_message, "Selamat jalan master 😢"))
 				return
 
