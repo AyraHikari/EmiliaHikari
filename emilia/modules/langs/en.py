@@ -692,6 +692,9 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"\nUntuk info federasi, ketik `/fedinfo <fedid>`. Untuk berhenti berlangganan ketik `/unsubfed <fedid>`.": "\nTo get fed info `/fedinfo <fedid>`. To unsubscribe `/unsubfed <fedid>`.",
 	"Federasi `{}` telah mengikuti federasi `{}`": "Federation `{}` has subscribe the federation `{}`",
 	"Federasi `{}` sudah tidak mengikuti `{}`": "Federation `{}` has unsubscribe fed `{}`.",
+	"*Ini adalah federasi milik anda:\n*": "*You are owner of feds:\n*",
+	"*Anda tidak mempunyai federasi!*": "*You are not have any feds!*",
+	"\n\n<b>Pengguna ini adalah pemilik federasi ini:</b>\n<code>": "\n\n<b>This user is a owner fed in the current federation:</b>\n<code>",
 	"feds_help": """
 Ah, group management. It's all fun and games, until you start getting spammers in, and you need to ban them. Then you need to start banning more, and more, and it gets painful.
 But then you have multiple groups, and you don't want these spammers in any of your groups - how can you deal? Do you have to ban them manually, in all your groups?
@@ -706,7 +709,7 @@ You can even appoint federation admins, so that your trustworthiest admins can b
  - /joinfed <FedID>: Joins the current chat to the federation. Each chat can only be in one federation. Only chat owners can do this.
  - /leavefed <FedID>: Leaves the current federation. Only chat owners can do this.
 
-*Only federated admin:*
+*Only federation admin:*
  - /newfed <fedname>: Creates a new federation with the given name. Users are only allowed to own one federation. Using this method when you already have a fed will simply change the federation name. (max 64 characters)
  - /delfed: Deletes your federation, and any information relating to it. Will not unban any banned users.
  - /fedinfo <FedID>: Information about the specified federation.
@@ -719,6 +722,7 @@ You can even appoint federation admins, so that your trustworthiest admins can b
  - /fedadmins: Show federated admin.
  - /fednotif <on/off>: Set federation notified in PM when user is fban/unfban.
  - /fedchats: Get all chat connected in federation.
+ - /myfeds: Get all your feds, only for feds owner
 
 *Only federation owner:*
  - /fpromote <user>: Promotes the user to fed admin in your fed.

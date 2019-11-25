@@ -23,6 +23,7 @@ from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 
 from emilia.modules.languages import tl
 from emilia.modules.sql import languages_sql as lang_sql
+import emilia.modules.sql.feds_sql as feds_sql
 
 # Change language locale to Indonesia
 # Install language:
@@ -284,6 +285,16 @@ def info(bot: Bot, update: Update, args: List[str]):
             if user.id in WHITELIST_USERS:
                 text += tl(update.effective_message, "\n\nOrang ini telah dimasukkan dalam daftar putih! " \
                         "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka.")
+
+    fedowner = feds_sql.get_user_owner_fed_name(user.id)
+    if fedowner:
+        text += tl(update.effective_message, "\n\n<b>Pengguna ini adalah pemilik federasi ini:</b>\n<code>")
+        text += "</code>, <code>".join(fedowner)
+        text += "</code>"
+    # fedadmin = feds_sql.get_user_admin_fed_name(user.id)
+    # if fedadmin:
+    #     text += tl(update.effective_message, "\n\nThis user is a fed admin in the current federation:\n")
+    #     text += ", ".join(fedadmin)
 
     for mod in USER_INFO:
         mod_info = mod.__user_info__(user.id, chat.id).strip()

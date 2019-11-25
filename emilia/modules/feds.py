@@ -1697,6 +1697,25 @@ def get_myfedsubs(bot, update, args):
 		listfed += tl(update.effective_message, "\nUntuk info federasi, ketik `/fedinfo <fedid>`. Untuk berhenti berlangganan ketik `/unsubfed <fedid>`.")
 		msg.reply_text(listfed, parse_mode="markdown")
 
+@run_async
+def get_myfeds_list(bot, update):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+	if spam == True:
+		return
+
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+	msg = update.effective_message  # type: Optional[Message]
+
+	fedowner = sql.get_user_owner_fed_full(user.id)
+	if fedowner:
+		text = tl(update.effective_message, "*Ini adalah federasi milik anda:\n*")
+		for f in fedowner:
+			text += "- `{}`: *{}*\n".format(f['fed_id'], f['fed']['fname'])
+	else:
+		text = tl(update.effective_message, "*Anda tidak mempunyai federasi!*")
+	msg.reply_text(text, parse_mode="markdown")
+
 
 def is_user_fed_admin(fed_id, user_id):
 	fed_admins = sql.all_fed_users(fed_id)
@@ -1811,6 +1830,7 @@ UNSET_FED_LOG = CommandHandler("unsetfedlog", unset_fed_log, pass_args=True)
 SUBS_FED = CommandHandler("subfed", subs_feds, pass_args=True)
 UNSUBS_FED = CommandHandler("unsubfed", unsubs_feds, pass_args=True)
 MY_SUB_FED = CommandHandler("fedsubs", get_myfedsubs, pass_args=True)
+MY_FEDS_LIST = CommandHandler("myfeds", get_myfeds_list)
 
 DELETEBTN_FED_HANDLER = CallbackQueryHandler(del_fed_button, pattern=r"rmfed_")
 
@@ -1838,5 +1858,6 @@ dispatcher.add_handler(UNSET_FED_LOG)
 dispatcher.add_handler(SUBS_FED)
 dispatcher.add_handler(UNSUBS_FED)
 dispatcher.add_handler(MY_SUB_FED)
+dispatcher.add_handler(MY_FEDS_LIST)
 
 dispatcher.add_handler(DELETEBTN_FED_HANDLER)

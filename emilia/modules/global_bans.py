@@ -156,6 +156,8 @@ def ungban(bot: Bot, update: Update, args: List[str]):
                                                    mention_html(user_chat.id, user_chat.first_name)),
                  html=True)
 
+    sql.ungban_user(user_id)
+
     chats = get_all_chats()
     for chat in chats:
         chat_id = chat.chat_id
@@ -178,8 +180,6 @@ def ungban(bot: Bot, update: Update, args: List[str]):
                 return
         except TelegramError:
             pass
-
-    sql.ungban_user(user_id)
 
     send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Menghapus larangan global selesai!"))
 

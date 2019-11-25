@@ -283,7 +283,6 @@ Anda bahkan dapat menunjuk admin federasi, sehingga admin tepercaya Anda dapat m
  - /fednotif <on/off>: Atur federasi notif di PM ketika ada pengguna yang di fban/unfban.
  - /fedchats: Dapatkan semua chat yang terhubung di federasi.
 
-
 *Hanya pemilik federasi:*
  - /fpromote <user>: mempromosikan pengguna untuk memberi fed admin. Pemilik fed saja.
  - /fdemote <user>: menurunkan pengguna dari admin federasi ke pengguna normal. Pemilik fed saja.
@@ -292,6 +291,7 @@ Anda bahkan dapat menunjuk admin federasi, sehingga admin tepercaya Anda dapat m
  - /subfed <fedid>: untuk berlangganan federasi, dapat berlangganan beberapa federasi.
  - /unsubfed <fedid>: berhenti berlangganan federasi itu.
  - /fedsubs: periksa semua yang berlangganan federasi saat ini.
+ - /myfeds: dapatkan semua feds Anda, hanya untuk pemilik feds
 """,
     "globalbans_help": """
 *Hanya admin:*
