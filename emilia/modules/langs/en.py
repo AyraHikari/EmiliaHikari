@@ -109,6 +109,12 @@ If you really are interested in donating, please visit paypal.me/AyraHikari, Tha
 	"Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM.": "Wrong markdown text!\nIf you don't know what markdown is, please type `/markdownhelp` in PM.",
 	"Saya tidak punya akses untuk pin pesan!": "I don't have access to pin message!",
 	"\n\nKamu adalah *{}*": "\n\nYou are *{}*",
+	"Permanen pin saat ini di atur: `{}`": "Current permanent pin: `{}`",
+	"\nUntuk menonaktifkan permanen pin: `/permanentpin off`": "\nTo disable permanent pin: `/permanentpin off`",
+	"\n\n[Pesan permanen pin ada disini]({})": "\n\n[Permanent pin message is here]({})",
+	"Permanen pin telah di nonaktifkan!": "Permanent pin has been disabled!",
+	"Permanent pin berhasil di atur!": "Successfully set permanent pin!",
+	"*Permanent pin error:*\nI can't pin messages here!\nMake sure I'm admin and can pin messages.\n\nPermanent pin disabled now, [here is your old pinned message]({})": "*Permanen pin error:*\nSaya tidak bisa menyematkan pesan di sini!\nPastikan saya admin dan dapat pin pesan.\n\nPermanen pin di nonaktifkan, [pesan permanen pin lama ada disini]({})",
 	"admin_help": """
  - /adminlist | /admins: list of admins in the chat
 *Admin only:*

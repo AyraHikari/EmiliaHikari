@@ -428,14 +428,14 @@ def permanent_pin_set(bot: Bot, update: Update, args: List[str]) -> str:
         chat_name = dispatcher.bot.getChat(conn).title
         if not args:
             get_permapin = sql.get_permapin(chat_id)
-            text_maker = "Permanen pin saat ini di atur: `{}`".format(bool(int(get_permapin)))
+            text_maker = tl(update.effective_message, "Permanen pin saat ini di atur: `{}`").format(bool(int(get_permapin)))
             if get_permapin:
                 if chat.username:
                     old_pin = "https://t.me/{}/{}".format(chat.username, get_permapin)
                 else:
                     old_pin = "https://t.me/c/{}/{}".format(str(chat.id)[4:], get_permapin)
-                text_maker += "\nUntuk menonaktifkan permanen pin: `/permanentpin off`"
-                text_maker += "\n\n[Pesan permanen pin ada disini]({})".format(old_pin)
+                text_maker += tl(update.effective_message, "\nUntuk menonaktifkan permanen pin: `/permanentpin off`")
+                text_maker += tl(update.effective_message, "\n\n[Pesan permanen pin ada disini]({})").format(old_pin)
             update.effective_message.reply_text(tl(update.effective_message, text_maker), parse_mode="markdown")
             return ""
         prev_message = args[0]
@@ -459,16 +459,16 @@ def permanent_pin_set(bot: Bot, update: Update, args: List[str]) -> str:
             update.effective_message.reply_text(tl(update.effective_message, "Permanen pin telah di nonaktifkan!"))
             return
         else:
-            get_permapin = sql.get_permapin(chat.id)
-            text_maker = "Permanen pin saat ini di atur: `{}`".format(bool(int(get_permapin)))
+            get_permapin = sql.get_permapin(chat_id)
+            text_maker = tl(update.effective_message, "Permanen pin saat ini di atur: `{}`").format(bool(int(get_permapin)))
             if get_permapin:
                 if chat.username:
                     old_pin = "https://t.me/{}/{}".format(chat.username, get_permapin)
                 else:
                     old_pin = "https://t.me/c/{}/{}".format(str(chat.id)[4:], get_permapin)
-                text_maker += "\nUntuk menonaktifkan permanen pin: `/permanentpin off`"
-                text_maker += "\n\n[Pesan permanen pin ada disini]({})".format(old_pin)
-            update.effective_message.reply_text(tl(update.effective_message, text_maker), parse_mode="markdown")
+                text_maker += tl(update.effective_message, "\nUntuk menonaktifkan permanen pin: `/permanentpin off`")
+                text_maker += tl(update.effective_message, "\n\n[Pesan permanen pin ada disini]({})").format(old_pin)
+            update.effective_message.reply_text(text_maker, parse_mode="markdown")
             return ""
 
     is_group = chat.type != "private" and chat.type != "channel"
@@ -499,7 +499,7 @@ def permanent_pin(bot: Bot, update: Update):
                 old_pin = "https://t.me/{}/{}".format(chat.username, get_permapin)
             else:
                 old_pin = "https://t.me/c/{}/{}".format(str(chat.id)[4:], get_permapin)
-            message.reply_text("*Permanent pin error:*\nI can't pin messages here!\nMake sure I'm admin and can pin messages.\n\nPermanent pin disabled now, [here is your old pinned message]({})".format(old_pin), parse_mode="markdown")
+            message.reply_text(tl(update.effective_message, "*Permanen pin error:*\nSaya tidak bisa menyematkan pesan di sini!\nPastikan saya admin dan dapat pin pesan.\n\nPermanen pin di nonaktifkan, [pesan permanen pin lama ada disini]({})").format(old_pin), parse_mode="markdown")
             return
 
         if to_del:
