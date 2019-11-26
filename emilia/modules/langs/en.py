@@ -121,6 +121,7 @@ If you really are interested in donating, please visit paypal.me/AyraHikari, Tha
  - /pin: silently pins the message replied to - add 'loud' or 'notify' to give notifs to users.
  - /unpin: unpins the currently pinned message
  - /permapin <teks>: Pin a custom messages via bots. This message can contain markdown, and can be used in replies to the media include additional buttons and text.
+ - /permanentpin: Set a permanent pin for supergroup chat, when an admin or telegram channel change pinned message, bot will change pinned message immediatelly
  - /invitelink: gets invitelink
  - /promote: promotes the user replied to
  - /demote: demotes the user replied to
