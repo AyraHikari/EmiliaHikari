@@ -3,49 +3,40 @@ from typing import Union
 
 from sqlalchemy import Column, Integer, String, Boolean
 
-from tg_bot.modules.sql import SESSION, BASE
+from emilia.modules.sql import SESSION, BASE
 
 
-class CommandReactionChatSettings(BASE):
-    __tablename__ = "comm_react_setting"
+class PermanentPin(BASE):
+    __tablename__ = "permanent_pin"
     chat_id = Column(String(14), primary_key=True)
-    comm_reaction = Column(Boolean, default=True)
+    message_id = Column(Integer)
 
     def __init__(self, chat_id):
         self.chat_id = str(chat_id)
 
     def __repr__(self):
-        return "<Chat report settings ({})>".format(self.chat_id)
+        return "<Permanent pin for ({})>".format(self.chat_id)
 
-CommandReactionChatSettings.__table__.create(checkfirst=True)
+PermanentPin.__table__.create(checkfirst=True)
 
-CHAT_LOCK = threading.RLock()
+PERMPIN_LOCK = threading.RLock()
 
-def command_reaction(chat_id: Union[str, int]) -> bool:
+
+def set_permapin(chat_id, message_id):
+    with PERMPIN_LOCK:
+        permpin = SESSION.query(PermanentPin).get(str(chat_id))
+        if not permpin:
+            permpin = PermanentPin(chat_id)
+
+        permpin.message_id = int(message_id)
+        SESSION.add(permpin)
+        SESSION.commit()
+
+def get_permapin(chat_id):
     try:
-        chat_setting = SESSION.query(CommandReactionChatSettings).get(str(chat_id))
-        if chat_setting:
-            return chat_setting.comm_reaction
-        return False
+        permapin = SESSION.query(PermanentPin).get(str(chat_id))
+        if permapin:
+            return permapin.message_id
+        return 0
     finally:
         SESSION.close()
-
-
-def set_command_reaction(chat_id: Union[int, str], setting: bool):
-    with CHAT_LOCK:
-        chat_setting = SESSION.query(CommandReactionChatSettings).get(str(chat_id))
-        if not chat_setting:
-            chat_setting = CommandReactionChatSettings(chat_id)
-
-        chat_setting.comm_reaction = setting
-        SESSION.add(chat_setting)
-        SESSION.commit()
-
-
-def migrate_chat(old_chat_id, new_chat_id):
-    with CHAT_LOCK:
-        chat_notes = SESSION.query(CommandReactionChatSettings).filter(
-            CommandReactionChatSettings.chat_id == str(old_chat_id)).all()
-        for note in chat_notes:
-            note.chat_id = str(new_chat_id)
-        SESSION.commit()
