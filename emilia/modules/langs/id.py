@@ -229,7 +229,7 @@ Catatan:
 -> `/nowarn` | `/stopwarn`
 -> `/warnlist` | `/warnfilters`
 -> `/warnlimit`
--> `/strongwarn`
+-> `/warnmode`
 """,
 	"connection_help": """
 Atur grup anda via PM dengan mudah.
@@ -433,8 +433,7 @@ sebagai balasan.
 menjadi kalimat, mencakup dengan tanda kutip, seperti: `/addwarn "sangat marah" Ini adalah pengguna yang marah`. 
  - /nowarn <keyword>: hentikan filter peringatan
  - /warnlimit <num>: mengatur batas peringatan
- - /strongwarn <on/yes/off/no>: Jika diatur ke on, maka melebihi batas peringatan akan menghasilkan pemblokiran. \
-Sedangkan off, hanya akan menendang.
+ - /warnmode <kick/ban/mute>: Jika diatur, ketika pengguna maka melebihi batas peringatan akan menghasilkan mode tersebut.
 """,
 	"weather_lang": "id",
 	"weather_help": """

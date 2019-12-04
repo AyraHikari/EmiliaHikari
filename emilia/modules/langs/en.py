@@ -491,7 +491,7 @@ Note:
 -> `/nowarn` | `/stopwarn`
 -> `/warnlist` | `/warnfilters`
 -> `/warnlimit`
--> `/strongwarn`
+-> `/warnmode`
 """,
 	"Sambungan telah dinonaktifkan untuk obrolan ini": "Connection has been disabled for this chat",
 	"Koneksi di aktifkan untuk obrolan ini": "Connection has been enabled for this chat",
@@ -1173,7 +1173,7 @@ NOTE: In groups, only admins can add/remove RSS links to the group's subscriptio
 be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is an angry user`. 
  - /nowarn <keyword>: stop a warning filter
  - /warnlimit <num>: set the warning limit
- - /strongwarn <on/yes/off/no>: If set to on, exceeding the warn limit will result in a ban. Else, will just kick.
+ - /warnmode <kick/ban/mute>: Set warn mode, when user exceeding the warn limit will result in that mode.
 """,
 
 # weather
