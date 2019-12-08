@@ -1,5 +1,7 @@
 import html, time
 import re
+import threading
+import requests
 from typing import Optional, List
 
 from telegram import Message, Chat, Update, Bot, User, CallbackQuery
@@ -17,6 +19,7 @@ from emilia.modules.helper_funcs.string_handling import markdown_parser, \
 	escape_invalid_curly_brackets, extract_time
 from emilia.modules.log_channel import loggable
 
+import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules.languages import tl
 
 
@@ -247,6 +250,12 @@ def new_member(bot: Bot, update: Update):
 
 			if sent:
 				sql.set_clean_welcome(chat.id, sent.message_id)
+
+	new_members = update.effective_message.new_chat_members
+	for new_mem in new_members:
+		# CAS Security thread
+		t = threading.Thread(target=check_cas, args=(bot, new_mem.id, new_mem, update.effective_message,))
+		t.start()
 
 
 @run_async
@@ -1000,6 +1009,32 @@ def WELC_EDITBTN(bot: Bot, update: Update):
 								  reply_markup=InlineKeyboardMarkup(button))
 		bot.answer_callback_query(query.id)
 """
+
+
+CAS_URL = "https://combot.org/api/cas/check"
+
+def check_cas(bot: Bot, user_id, user, message):
+	json = requests.get(CAS_URL, params={"user_id": str(user_id)}).json()
+	if json.get("ok"):
+		if json["result"]["offenses"] > 0:
+			is_success = False
+			try:
+				bot.kickChatMember(message.chat.id, user_id)
+				is_success = True
+			except:
+				bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from [CAS ban](https://combot.org/cas/query?u={}) and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
+			if is_success:
+				bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: [CAS ban](https://combot.org/cas/query?u={}).".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
+			fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
+			if fed_id:
+				x = fedsql.fban_user("TeamNusantaraDevs", user_id, user.first_name, user.last_name, user.username, "CAS-Banned", int(time.time()))
+				if not x:
+					LOGGER.warning("Cannot fban spammer user!")
+					return
+				text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [CAS ban](https://combot.org/cas/query?u={})".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name), user_id, user_id)
+				bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
+				print(">>> NEW FBAN: {} {} in {}".format(user.first_name, user_id, message.chat.title))
+
 
 
 __help__ = "welcome_help"
