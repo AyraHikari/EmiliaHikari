@@ -183,25 +183,36 @@ def rss_update(bot, job):
                         bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
                     except error.Unauthorized:
                         print("Cannot send msg bcz bot is kicked")
+                        sql.remove_url(tg_chat_id, tg_feed_link)
                 else:
                     try:
                         bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
                                      parse_mode=ParseMode.HTML)
                     except error.Unauthorized:
                         print("Cannot send msg bcz bot is kicked")
+                        sql.remove_url(tg_chat_id, tg_feed_link)
         else:
             for link, title in zip(reversed(new_entry_links[-5:]), reversed(new_entry_titles[-5:])):
                 final_message = "<b>{}</b>\n\n{}".format(html.escape(title), html.escape(link))
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
-                    bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                    try:
+                        bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                    except error.Unauthorized:
+                        sql.remove_url(tg_chat_id, tg_feed_link)
                 else:
-                    bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
+                    try:
+                        bot.send_message(chat_id=tg_chat_id, text=tl(tg_chat_id, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"),
                                      parse_mode=ParseMode.HTML)
+                    except error.Unauthorized:
+                        sql.remove_url(tg_chat_id, tg_feed_link)
 
-            bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
+            try:
+                bot.send_message(chat_id=tg_chat_id, parse_mode=ParseMode.HTML,
                              text=tl(tg_chat_id, "<b>Peringatan: </b>{} kejadian telah ditinggalkan untuk mencegah spam")
                              .format(len(new_entry_links) - 5))
+            except error.Unauthorized:
+                sql.remove_url(tg_chat_id, tg_feed_link)
 
 
 def rss_set(bot, job):
