@@ -417,7 +417,7 @@ def left_member(bot: Bot, update: Update):
 				keyboard = InlineKeyboardMarkup(keyb)
 				# Send message
 				try:
-					ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=cust_goodbye, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
+					ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
 				except BadRequest:
 					update.effective_message.reply_text(tl(update.effective_message, "Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui."))
 				return
