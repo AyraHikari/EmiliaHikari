@@ -111,51 +111,7 @@ def filters(bot: Bot, update: Update):
 		return
 	# set trigger -> lower, so as to avoid adding duplicate filters with different cases
 	keyword = extracted[0].lower()
-
-	is_sticker = False
-	is_document = False
-	is_image = False
-	is_voice = False
-	is_audio = False
-	is_video = False
-	buttons = []
-
-	# determine what the contents of the filter are - text, image, sticker, etc
-	if len(extracted) >= 2:
-		offset = len(extracted[1]) - len(msg.text)  # set correct offset relative to command + notename
-		content, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
-		content = content.strip()
-		if not content:
-			msg.reply_text(tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
-			return
-
-	elif msg.reply_to_message and msg.reply_to_message.sticker:
-		content = msg.reply_to_message.sticker.file_id
-		is_sticker = True
-
-	elif msg.reply_to_message and msg.reply_to_message.document:
-		content = msg.reply_to_message.document.file_id
-		is_document = True
-
-	elif msg.reply_to_message and msg.reply_to_message.photo:
-		content = msg.reply_to_message.photo[-1].file_id  # last elem = best quality
-		is_image = True
-
-	elif msg.reply_to_message and msg.reply_to_message.audio:
-		content = msg.reply_to_message.audio.file_id
-		is_audio = True
-
-	elif msg.reply_to_message and msg.reply_to_message.voice:
-		content = msg.reply_to_message.voice.file_id
-		is_voice = True
-
-	elif msg.reply_to_message and msg.reply_to_message.video:
-		content = msg.reply_to_message.video.file_id
-		is_video = True
-
-	else:
-		msg.reply_text(tl(update.effective_message, "Anda tidak menentukan apa yang harus dibalas!"))
-		return
+	
 
 	# Add the filter
 	# Note: perhaps handlers can be removed somehow using sql.get_chat_filters
@@ -164,6 +120,21 @@ def filters(bot: Bot, update: Update):
 			dispatcher.remove_handler(handler, HANDLER_GROUP)
 
 	text, file_type, file_id = get_filter_type(msg)
+	if len(extracted) >= 2:
+		offset = len(extracted[1]) - len(msg.text)  # set correct offset relative to command + notename
+		text, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
+		text = text.strip()
+		if not text:
+			msg.reply_text(tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
+			return
+
+	elif not text and not file_type:
+		msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
+
+	else:
+		msg.reply_text(tl(update.effective_message, "Anda tidak menentukan apa yang harus dibalas!"))
+		return
+
 	sql.new_add_filter(chat_id, keyword, text, file_type, file_id, buttons)
 	# This is an old method
 	# sql.add_filter(chat_id, keyword, content, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
@@ -233,21 +204,21 @@ def reply_filter(bot: Bot, update: Update):
 				keyboard = InlineKeyboardMarkup(keyb)
 				if filt.file_type in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
 					try:
-						bot.send_message(chat.id, filt.text, reply_to_message_id=message.message_id,
+						bot.send_message(chat.id, filt.reply_text, reply_to_message_id=message.message_id,
 										 parse_mode="markdown", disable_web_page_preview=True,
 										 reply_markup=keyboard)
 					except BadRequest as excp:
-						error_catch = get_exception(excp)
+						error_catch = get_exception(excp, filt, chat)
 						if error_catch == "noreply":
 							try:
-								bot.send_message(chat.id, filt.text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
+								bot.send_message(chat.id, filt.reply_text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
 							except BadRequest as excp:
 								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
-								message.reply_text(tl(update.effective_message, get_exception(excp)))
+								message.reply_text(tl(update.effective_message, get_exception(excp, filt, chat)))
 								pass
 						else:
 							try:
-								message.reply_text(tl(update.effective_message, get_exception(excp)))
+								message.reply_text(tl(update.effective_message, get_exception(excp, filt, chat)))
 							except BadRequest as excp:
 								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
 								pass
@@ -312,7 +283,7 @@ def reply_filter(bot: Bot, update: Update):
 				break
 
 
-def get_exception(excp):
+def get_exception(excp, filt, chat):
 	if excp.message == "Unsupported url protocol":
 		return "Anda tampaknya mencoba menggunakan protokol url yang tidak didukung. Telegram tidak mendukung tombol untuk beberapa protokol, seperti tg://. Silakan coba lagi."
 	elif excp.message == "Reply message not found":

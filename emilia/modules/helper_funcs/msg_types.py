@@ -224,12 +224,12 @@ def get_message_type(msg: Message):
 
 def get_filter_type(msg: Message):
 
-    if msg.text:
+    if msg.text and len(msg.text.split()) >= 3:
         content = None
-        text = msg.text
+        text = msg.text.split(None, 2)[2]
         data_type = Types.TEXT
 
-    if msg.reply_to_message and msg.reply_to_message.sticker:
+    elif msg.reply_to_message and msg.reply_to_message.sticker:
         content = msg.reply_to_message.sticker.file_id
         text = None
         data_type = Types.STICKER
@@ -263,5 +263,10 @@ def get_filter_type(msg: Message):
         content = msg.reply_to_message.video_note.file_id
         text = None
         data_type = Types.VIDEO_NOTE
+
+    else:
+        text = None
+        data_type = None
+        content = None
 
     return text, data_type, content
