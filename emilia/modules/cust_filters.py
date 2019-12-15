@@ -140,10 +140,16 @@ def filters(bot: Bot, update: Update):
 		return
 
 	elif msg.reply_to_message:
-		offset = len(msg.reply_to_message.text if msg.reply_to_message.text != None else msg.reply_to_message.caption)  # set correct offset relative to command + notename
-		text, buttons = button_markdown_parser(msg.reply_to_message.text if msg.reply_to_message.text != None else msg.reply_to_message.caption, entities=msg.parse_entities(), offset=offset)
+		if msg.reply_to_message.text:
+			text_to_parsing = msg.reply_to_message.text
+		elif msg.reply_to_message.caption:
+			text_to_parsing = msg.reply_to_message.caption
+		else:
+			text_to_parsing = ""
+		offset = len(text_to_parsing)  # set correct offset relative to command + notename
+		text, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
 		text = text.strip()
-		if not text:
+		if (msg.reply_to_message.text or msg.reply_to_message.caption) and not text:
 			msg.reply_text(tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
 			return
 
