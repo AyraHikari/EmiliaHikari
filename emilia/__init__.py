@@ -156,6 +156,9 @@ except ModuleNotFoundError:
 	LOGGER.info("Note: Can't load antispam module. This is an optional.")
 
 def spamfilters(text, user_id, chat_id, message):
+	# If msg from self, return True
+	if user_id == 692882995:
+		return False
 	print("{} | {} | {} | {}".format(text, user_id, message.chat.title, chat_id))
 	if antispam_module:
 		parsing_date = time.mktime(message.date.timetuple())

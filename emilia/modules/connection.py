@@ -113,7 +113,7 @@ def connect_chat(bot, update, args):
         else:
             gethistory = sql.get_history_conn(user.id)
             if gethistory:
-                buttons = [InlineKeyboardButton(text=languages.tl(update.effective_message, "🧹 Hapus riwayat"), callback_data="connect_clear")]
+                buttons = [InlineKeyboardButton(text=languages.tl(update.effective_message, "❎ Close button"), callback_data="connect_close"), InlineKeyboardButton(text=languages.tl(update.effective_message, "🧹 Hapus riwayat"), callback_data="connect_clear")]
             else:
                 buttons = []
             conn = connected(bot, update, chat, user.id, need_admin=False)
@@ -125,11 +125,16 @@ def connect_chat(bot, update, args):
                 text = languages.tl(update.effective_message, "Tulis ID obrolan atau tagnya untuk terhubung!")
             if gethistory:
                 text += languages.tl(update.effective_message, "\n\n*Riwayat koneksi:*\n")
+                text += languages.tl(update.effective_message, "╒═══「 *Info* 」\n")
+                text += languages.tl(update.effective_message, "│  Sorted: `Newest`\n")
+                text += "│\n"
                 buttons = [buttons]
-                for x in gethistory:
+                for x in sorted(gethistory.keys(), reverse=True):
                     htime = time.strftime("%d/%m/%Y", time.localtime(x))
-                    text += "- *{}* (`{}`)\n- `{}`\n".format(gethistory[x]['chat_name'], gethistory[x]['chat_id'], htime)
+                    text += "╞═「 *{}* 」\n│   `{}`\n│   `{}`\n".format(gethistory[x]['chat_name'], gethistory[x]['chat_id'], htime)
+                    text += "│\n"
                     buttons.append([InlineKeyboardButton(text=gethistory[x]['chat_name'], callback_data="connect({})".format(gethistory[x]['chat_id']))])
+                text += "╘══「 Total {} Chats 」".format(str(len(gethistory)) + " (max)" if len(gethistory) == 5 else str(len(gethistory)))
                 conn_hist = InlineKeyboardMarkup(buttons)
             elif buttons:
                 conn_hist = InlineKeyboardMarkup([buttons])
@@ -226,6 +231,7 @@ def connect_button(bot: Bot, update: Update) -> str:
     connect_match = re.match(r"connect\((.+?)\)", query.data)
     disconnect_match = query.data == "connect_disconnect"
     clear_match = query.data == "connect_clear"
+    connect_close = query.data == "connect_close"
 
     if connect_match:
         target_chat = connect_match.group(1)
@@ -253,6 +259,8 @@ def connect_button(bot: Bot, update: Update) -> str:
     elif clear_match:
         sql.clear_history_conn(query.from_user.id)
         query.message.edit_text(languages.tl(update.effective_message, "Riwayat yang terhubung telah dihapus!"))
+    elif connect_close:
+        query.message.edit_text(languages.tl(update.effective_message, "Closed.\nTo open again, type /connect"))
     else:
         connect_chat(bot, update, [])
 
