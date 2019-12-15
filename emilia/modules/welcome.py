@@ -1031,7 +1031,7 @@ def check_cas(bot: Bot, user_id, user, message):
 				if not x:
 					LOGGER.warning("Cannot fban spammer user!")
 					return
-				text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [CAS ban](https://combot.org/cas/query?u={})".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name), user_id, user_id)
+				text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [CAS ban](https://combot.org/cas/query?u={})".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name + (" " + user.last_name if user.last_name != None else "")), user_id, user_id)
 				bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
 				print(">>> NEW FBAN: {} {} in {}".format(user.first_name, user_id, message.chat.title))
 

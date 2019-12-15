@@ -102,15 +102,22 @@ def filters(bot: Bot, update: Update):
 		else:
 			chat_name = chat.title
 
-	if len(args) < 2:
+	if not msg.reply_to_message and len(args) < 2:
 		msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
 		return
 
-	extracted = split_quotes(args[1])
-	if len(extracted) < 1:
-		return
-	# set trigger -> lower, so as to avoid adding duplicate filters with different cases
-	keyword = extracted[0].lower()
+	if msg.reply_to_message:
+		if len(args) < 2:
+			msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
+			return
+		else:
+			keyword = args[1]
+	else:
+		extracted = split_quotes(args[1])
+		if len(extracted) < 1:
+			return
+		# set trigger -> lower, so as to avoid adding duplicate filters with different cases
+		keyword = extracted[0].lower()
 	
 
 	# Add the filter
@@ -120,7 +127,7 @@ def filters(bot: Bot, update: Update):
 			dispatcher.remove_handler(handler, HANDLER_GROUP)
 
 	text, file_type, file_id = get_filter_type(msg)
-	if len(extracted) >= 2:
+	if not msg.reply_to_message and len(extracted) >= 2:
 		offset = len(extracted[1]) - len(msg.text)  # set correct offset relative to command + notename
 		text, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
 		text = text.strip()
@@ -130,9 +137,18 @@ def filters(bot: Bot, update: Update):
 
 	elif not text and not file_type:
 		msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
+		return
+
+	elif msg.reply_to_message:
+		offset = len(msg.reply_to_message.text if msg.reply_to_message.text != None else msg.reply_to_message.caption)  # set correct offset relative to command + notename
+		text, buttons = button_markdown_parser(msg.reply_to_message.text if msg.reply_to_message.text != None else msg.reply_to_message.caption, entities=msg.parse_entities(), offset=offset)
+		text = text.strip()
+		if not text:
+			msg.reply_text(tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
+			return
 
 	else:
-		msg.reply_text(tl(update.effective_message, "Anda tidak menentukan apa yang harus dibalas!"))
+		msg.reply_text(tl(update.effective_message, "Invalid filter!"))
 		return
 
 	sql.new_add_filter(chat_id, keyword, text, file_type, file_id, buttons)

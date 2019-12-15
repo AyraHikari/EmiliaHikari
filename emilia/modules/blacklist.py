@@ -274,6 +274,12 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
 	return ""
 
 
+def findall(p, s):
+	i = s.find(p)
+	while i != -1:
+		yield i
+		i = s.find(p, i+1)
+
 @run_async
 @user_not_admin
 def del_blacklist(bot: Bot, update: Update):
