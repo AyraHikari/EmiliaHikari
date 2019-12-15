@@ -21,6 +21,9 @@ from emilia.modules.helper_funcs.chat_status import is_user_admin
 from emilia.modules.helper_funcs.misc import paginate_modules
 from emilia.modules.sql import languages_sql as langsql
 
+from emilia.modules.connection import connect_button
+from emilia.modules.languages import set_language
+
 PM_START_TEXT = "start_text"
 
 HELP_STRINGS = "help_text"#.format(dispatcher.bot.first_name, "" if not ALLOW_EXCL else "\nAll commands can either be used with / or !.\n")
@@ -130,12 +133,25 @@ def start(bot: Bot, update: Update, args: List[str]):
 
         else:
             first_name = update.effective_user.first_name
+            buttons = InlineKeyboardMarkup(
+                [[InlineKeyboardButton(text="💭 Language", callback_data="main_setlang"), InlineKeyboardButton(text="⚙️ Connect Group", callback_data="main_connect")],
+                [InlineKeyboardButton(text="👥 Support Group", url="https://t.me/EmiliaOfficial"), InlineKeyboardButton(text="🔔 Update Channel", url="https://t.me/AyraBotNews"), InlineKeyboardButton(text="💖 Donate", url="http://ayrahikari.github.io/donations.html")]])
             update.effective_message.reply_text(
                 tl(update.effective_message, PM_START_TEXT).format(escape_markdown(first_name), escape_markdown(bot.first_name), OWNER_ID),
-                parse_mode=ParseMode.MARKDOWN)
+                disable_web_page_preview=True,
+                parse_mode=ParseMode.MARKDOWN,
+                reply_markup=buttons)
     else:
         update.effective_message.reply_text(tl(update.effective_message, "Ada yang bisa saya bantu? 😊"))
 
+
+def m_connect_button(bot, update):
+    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
+    connect_button(bot, update)
+
+def m_change_langs(bot, update):
+    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
+    set_language(bot, update)
 
 # for test purposes
 def error_callback(bot, update, error):
@@ -433,6 +449,9 @@ def main():
     settings_callback_handler = CallbackQueryHandler(settings_button, pattern=r"stngs_")
 
     donate_handler = CommandHandler("donate", donate)
+    M_CONNECT_BTN_HANDLER = CallbackQueryHandler(m_connect_button, pattern=r"main_connect")
+    M_SETLANG_BTN_HANDLER = CallbackQueryHandler(m_change_langs, pattern=r"main_setlang")
+
     migrate_handler = MessageHandler(Filters.status_update.migrate, migrate_chats)
 
     # dispatcher.add_handler(test_handler)
@@ -443,6 +462,8 @@ def main():
     dispatcher.add_handler(settings_callback_handler)
     dispatcher.add_handler(migrate_handler)
     dispatcher.add_handler(donate_handler)
+    dispatcher.add_handler(M_CONNECT_BTN_HANDLER)
+    dispatcher.add_handler(M_SETLANG_BTN_HANDLER)
 
     # dispatcher.add_error_handler(error_callback)
 

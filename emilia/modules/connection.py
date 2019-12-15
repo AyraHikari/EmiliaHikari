@@ -128,7 +128,7 @@ def connect_chat(bot, update, args):
                 buttons = [buttons]
                 for x in gethistory:
                     htime = time.strftime("%d/%m/%Y", time.localtime(x))
-                    text += "- *{}* (`{}`): `{}`\n".format(gethistory[x]['chat_name'], gethistory[x]['chat_id'], htime)
+                    text += "- *{}* (`{}`)\n- `{}`\n".format(gethistory[x]['chat_name'], gethistory[x]['chat_id'], htime)
                     buttons.append([InlineKeyboardButton(text=gethistory[x]['chat_name'], callback_data="connect({})".format(gethistory[x]['chat_id']))])
                 conn_hist = InlineKeyboardMarkup(buttons)
             elif buttons:
@@ -253,6 +253,8 @@ def connect_button(bot: Bot, update: Update) -> str:
     elif clear_match:
         sql.clear_history_conn(query.from_user.id)
         query.message.edit_text(languages.tl(update.effective_message, "Riwayat yang terhubung telah dihapus!"))
+    else:
+        connect_chat(bot, update, [])
 
 
 __help__ = "connection_help"
