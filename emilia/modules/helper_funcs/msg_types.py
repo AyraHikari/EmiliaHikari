@@ -229,6 +229,11 @@ def get_filter_type(msg: Message):
         text = msg.text.split(None, 2)[2]
         data_type = Types.TEXT
 
+    elif msg.reply_to_message and len(msg.text.split()) >= 2:
+        content = None
+        text = msg.reply_to_message.text
+        data_type = Types.TEXT
+
     elif msg.reply_to_message and msg.reply_to_message.sticker:
         content = msg.reply_to_message.sticker.file_id
         text = None

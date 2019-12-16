@@ -135,6 +135,17 @@ def filters(bot: Bot, update: Update):
 			msg.reply_text(tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
 			return
 
+	elif msg.reply_to_message and len(args) >= 2:
+		if msg.reply_to_message.text:
+			text_to_parsing = msg.reply_to_message.text
+		elif msg.reply_to_message.caption:
+			text_to_parsing = msg.reply_to_message.caption
+		else:
+			text_to_parsing = ""
+		offset = len(text_to_parsing)  # set correct offset relative to command + notename
+		text, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
+		text = text.strip()
+
 	elif not text and not file_type:
 		msg.reply_text(tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
 		return
