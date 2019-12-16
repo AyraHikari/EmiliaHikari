@@ -115,6 +115,17 @@ def set_rules(bot: Bot, update: Update):
         else:
             update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk grup ini."))
 
+    elif msg.reply_to_message and len(args) == 1:
+        txt = msg.reply_to_message.text
+        offset = len(txt) - len(raw_text)  # set correct offset relative to command
+        markdown_rules = markdown_parser(txt, entities=msg.parse_entities(), offset=offset)
+
+        sql.set_rules(chat_id, markdown_rules)
+        if conn:
+            update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk *{}*.").format(chat_name), parse_mode="markdown")
+        else:
+            update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk grup ini."))
+
 
 @run_async
 @user_admin
