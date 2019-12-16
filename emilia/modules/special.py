@@ -253,6 +253,7 @@ def wiki(bot: Bot, update: Update):
 		pagewiki = wikipedia.page(teks)
 	except wikipedia.exceptions.PageError:
 		update.effective_message.reply_text(tl(update.effective_message, "Hasil tidak ditemukan"))
+		return
 	except wikipedia.exceptions.DisambiguationError as refer:
 		rujuk = str(refer).split("\n")
 		if len(rujuk) >= 6:
