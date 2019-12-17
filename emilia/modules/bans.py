@@ -109,7 +109,7 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
             send_message(update.effective_message, tl(update.effective_message, "Terbanned pada *{}*! 😝").format(chat_name), parse_mode="markdown")
         else:
             chat.kick_member(user_id)
-            if message.text.split(None, 1)[0] == "/sban":
+            if message.text.split(None, 1)[0][1:] == "sban":
                 update.effective_message.delete()
             else:
                 bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
@@ -350,7 +350,7 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
             text = tl(update.effective_message, "Tertendang pada *{}*! 😝").format(chat_name)
             send_message(update.effective_message, text, parse_mode="markdown")
         else:
-            if message.text.split(None, 1)[0] == "/skick":
+            if message.text.split(None, 1)[0][1:] == "skick":
                 update.effective_message.delete()
             else:
                 bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
