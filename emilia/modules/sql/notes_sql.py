@@ -44,12 +44,28 @@ class Buttons(BASE):
         self.url = url
         self.same_line = same_line
 
+class PrivateNote(BASE):
+    __tablename__ = "note_private"
+
+    chat_id = Column(UnicodeText, primary_key=True)
+    is_private = Column(Boolean, default=False)
+    is_delete = Column(Boolean, default=False)
+
+    def __init__(self, chat_id, is_private=False, is_delete=True):
+        self.chat_id = chat_id
+        self.is_private = is_private
+        self.is_delete = is_delete
+
+    def __repr__(self):
+        return "note_private for {}".format(self.chat_id)
 
 Notes.__table__.create(checkfirst=True)
 Buttons.__table__.create(checkfirst=True)
+PrivateNote.__table__.create(checkfirst=True)
 
 NOTES_INSERTION_LOCK = threading.RLock()
 BUTTONS_INSERTION_LOCK = threading.RLock()
+PMNOTE_INSERTION_LOCK = threading.RLock()
 
 
 def add_note_to_db(chat_id, note_name, note_data, msgtype, buttons=None, file=None):
@@ -120,6 +136,23 @@ def get_buttons(chat_id, note_name):
     finally:
         SESSION.close()
 
+def private_note(chat_id, is_private, is_delete):
+    with PMNOTE_INSERTION_LOCK:
+        curr = SESSION.query(PrivateNote).get(str(chat_id))
+        if curr:
+            SESSION.delete(curr)
+        
+        curr = PrivateNote(str(chat_id), is_private, is_delete)
+
+        SESSION.add(curr)
+        SESSION.commit()
+
+def get_private_note(chat_id):
+    curr = SESSION.query(PrivateNote).get(str(chat_id))
+    if curr:
+        return curr.is_private, curr.is_delete
+    else:
+        return False, False
 
 def num_notes():
     try:

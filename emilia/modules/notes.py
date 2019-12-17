@@ -4,7 +4,7 @@ from typing import Optional, List
 
 from telegram import MAX_MESSAGE_LENGTH, ParseMode, InlineKeyboardMarkup
 from telegram import Message, Update, Bot
-from telegram.error import BadRequest
+from telegram.error import BadRequest, Unauthorized
 from telegram.ext import CommandHandler, RegexHandler
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
@@ -102,9 +102,17 @@ def get(bot, update, notename, show_none=True, no_format=False):
 			keyboard = InlineKeyboardMarkup(keyb)
 
 			try:
+				is_private, is_delete = sql.get_private_note(chat.id)
 				if note.msgtype in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
 					try:
-						bot.send_message(send_id, text, reply_to_message_id=reply_id,
+						if is_delete:
+							update.effective_message.delete()
+						if is_private:
+							bot.send_message(user.id, text,
+										 parse_mode=parseMode, disable_web_page_preview=True,
+										 reply_markup=keyboard)
+						else:
+							bot.send_message(send_id, text, reply_to_message_id=reply_id,
 										 parse_mode=parseMode, disable_web_page_preview=True,
 										 reply_markup=keyboard)
 					except BadRequest as excp:
@@ -116,12 +124,29 @@ def get(bot, update, notename, show_none=True, no_format=False):
 							failtext = tl(update.effective_message, "Kesalahan: URL pada tombol tidak valid! Harap perbaruhi catatan ini.")
 							failtext += "\n\n```\n{}```".format(note.value + revert_buttons(buttons))
 							send_message(update.effective_message, failtext, parse_mode="markdown")
-						LOGGER.warning("Gagal mengirim catatan: " + excp.message)
+						elif excp.message == "Message can't be deleted":
+							pass
+						elif excp.message == "Have no rights to send a message":
+							pass
+					except Unauthorized as excp:
+						send_message(update.effective_message, tl(update.effective_message, "Hubungi saya di PM dulu untuk mendapatkan catatan ini."), parse_mode="markdown")
 						pass
 				else:
-					ENUM_FUNC_MAP[note.msgtype](send_id, note.file, caption=text, reply_to_message_id=reply_id,
-												parse_mode=parseMode, disable_web_page_preview=True,
-												reply_markup=keyboard)
+					try:
+						if is_delete:
+							update.effective_message.delete()
+						if is_private:
+							ENUM_FUNC_MAP[note.msgtype](user.id, note.file, caption=text, parse_mode=parseMode, disable_web_page_preview=True, reply_markup=keyboard)
+						else:
+							ENUM_FUNC_MAP[note.msgtype](send_id, note.file, caption=text, reply_to_message_id=reply_id, parse_mode=parseMode, disable_web_page_preview=True, reply_markup=keyboard)
+					except BadRequest as excp:
+						if excp.message == "Message can't be deleted":
+							pass
+						elif excp.message == "Have no rights to send a message":
+							pass
+					except Unauthorized as excp:
+						send_message(update.effective_message, tl(update.effective_message, "Hubungi saya di PM dulu untuk mendapatkan catatan ini."), parse_mode="markdown")
+						pass
 					
 			except BadRequest as excp:
 				if excp.message == "Entity_mention_user_invalid":
@@ -307,6 +332,48 @@ def clear(bot: Bot, update: Update, args: List[str]):
 		send_message(update.effective_message, tl(update.effective_message, "Apa yang ingin dihapus?"))
 
 @run_async
+@user_admin
+def private_note(bot: Bot, update: Update, args: List[str]):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+	if spam == True:
+		return
+	chat = update.effective_chat  # type: Optional[Chat]
+	user = update.effective_user  # type: Optional[User]
+	conn = connected(bot, update, chat, user.id)
+	if conn:
+		chat_id = conn
+		chat_name = dispatcher.bot.getChat(conn).title
+	else:
+		chat_id = update.effective_chat.id
+		if chat.type == "private":
+			chat_name = "local notes"
+		else:
+			chat_name = chat.title
+
+	if len(args) >= 1:
+		if args[0] in ("yes", "on", "ya"):
+			if len(args) >= 2:
+				if args[1] == "del":
+					sql.private_note(str(chat_id), True, True)
+					send_message(update.effective_message, tl(update.effective_message, "Private Note di *aktifkan*, ketika pengguna mengambil catatan, pesan catatan akan dikirim ke PM dan pesan pengguna akan segera di hapus."), parse_mode="markdown")
+				else:
+					sql.private_note(str(chat_id), True, False)
+					send_message(update.effective_message, tl(update.effective_message, "Private Note di *aktifkan*, ketika pengguna mengambil catatan, pesan catatan akan dikirim ke PM."), parse_mode="markdown")
+			else:
+				sql.private_note(str(chat_id), True, False)
+				send_message(update.effective_message, tl(update.effective_message, "Private Note di *aktifkan*, ketika pengguna mengambil catatan, pesan catatan akan dikirim ke PM."), parse_mode="markdown")
+		elif args[0] in ("no", "off"):
+			sql.private_note(str(chat_id), False, False)
+			send_message(update.effective_message, tl(update.effective_message, "Private Note di *non-aktifkan*, pesan catatan akan di kirim di grup."), parse_mode="markdown")
+		else:
+			send_message(update.effective_message, tl(update.effective_message, "Argumen tidak dikenal - harap gunakan 'yes', atau 'no'."))
+	else:
+		is_private, is_delete = sql.get_private_note(chat_id)
+		print(is_private, is_delete)
+		send_message(update.effective_message, tl(update.effective_message, "Pengaturan Private Note di grup ini: *{}*{}").format("Enabled" if is_private else "Disabled", " - *Hash will be deleted*" if is_delete else ""), parse_mode="markdown")
+
+
+@run_async
 def list_notes(bot: Bot, update: Update):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
@@ -469,10 +536,13 @@ HASH_GET_HANDLER = RegexHandler(r"^#[^\s]+", hash_get)
 SAVE_HANDLER = CommandHandler("save", save)
 DELETE_HANDLER = CommandHandler("clear", clear, pass_args=True)
 
+PMNOTE_HANDLER = CommandHandler("privatenote", private_note, pass_args=True)
+
 LIST_HANDLER = DisableAbleCommandHandler(["notes", "saved"], list_notes, admin_ok=True)
 
 dispatcher.add_handler(GET_HANDLER)
 dispatcher.add_handler(SAVE_HANDLER)
 dispatcher.add_handler(LIST_HANDLER)
 dispatcher.add_handler(DELETE_HANDLER)
+dispatcher.add_handler(PMNOTE_HANDLER)
 dispatcher.add_handler(HASH_GET_HANDLER)

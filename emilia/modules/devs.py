@@ -1,4 +1,6 @@
 import os
+import sys
+import traceback
 
 from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity
@@ -36,8 +38,10 @@ def executor(bot: Bot, update: Update):
 		chat = msg.chat.id
 		try:
 			exec(code)
-		except Exception as error:
-			send_message(update.effective_message, "*Gagal:* {}".format(error), parse_mode="markdown")
+		except:
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			errors = traceback.format_exception(etype=exc_type, value=exc_obj, tb=exc_tb)
+			send_message(update.effective_message, "**Execute**\n`{}`\n\n*Failed:*\n```{}```".format(code, "".join(errors)), parse_mode="markdown")
 
 
 REBOOT_HANDLER = CommandHandler("emreboot", reboot, filters=Filters.user(OWNER_ID))
