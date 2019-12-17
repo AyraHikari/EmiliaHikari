@@ -109,8 +109,11 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
             send_message(update.effective_message, tl(update.effective_message, "Terbanned pada *{}*! 😝").format(chat_name), parse_mode="markdown")
         else:
             chat.kick_member(user_id)
-            bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
-            send_message(update.effective_message, tl(update.effective_message, "Terbanned! 😝"))
+            if message.text.split(None, 1)[0] == "/sban":
+                update.effective_message.delete()
+            else:
+                bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
+                send_message(update.effective_message, tl(update.effective_message, "Terbanned! 😝"))
         return log
 
     except BadRequest as excp:
@@ -118,6 +121,8 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
             # Do not reply
             send_message(update.effective_message, tl(update.effective_message, "Terbanned! 😝"), quote=False)
             return log
+        elif excp.message == "Message can't be deleted":
+            pass
         else:
             LOGGER.warning(update)
             LOGGER.exception("ERROR membanned pengguna %s di obrolan %s (%s) disebabkan oleh %s", user_id, chat.title, chat.id,
@@ -343,10 +348,14 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
         if conn:
             bot.send_sticker(currentchat.id, BAN_STICKER)  # banhammer marie sticker
             text = tl(update.effective_message, "Tertendang pada *{}*! 😝").format(chat_name)
+            send_message(update.effective_message, text, parse_mode="markdown")
         else:
-            bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
-            text = tl(update.effective_message, "Tertendang! 😝")
-        send_message(update.effective_message, text, parse_mode="markdown")
+            if message.text.split(None, 1)[0] == "/skick":
+                update.effective_message.delete()
+            else:
+                bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
+                text = tl(update.effective_message, "Tertendang! 😝")
+                send_message(update.effective_message, text, parse_mode="markdown")
         log = "<b>{}:</b>" \
               "\n#KICKED" \
               "\n<b>Admin:</b> {}" \
@@ -480,9 +489,9 @@ __help__ = "bans_help"
 
 __mod_name__ = "Bans"
 
-BAN_HANDLER = CommandHandler("ban", ban, pass_args=True)#, filters=Filters.group)
+BAN_HANDLER = CommandHandler(["ban", "sban"], ban, pass_args=True)#, filters=Filters.group)
 TEMPBAN_HANDLER = CommandHandler(["tban", "tempban"], temp_ban, pass_args=True)#, filters=Filters.group)
-KICK_HANDLER = CommandHandler("kick", kick, pass_args=True)#, filters=Filters.group)
+KICK_HANDLER = CommandHandler(["kick", "skick"], kick, pass_args=True)#, filters=Filters.group)
 UNBAN_HANDLER = CommandHandler("unban", unban, pass_args=True)#, filters=Filters.group)
 KICKME_HANDLER = DisableAbleCommandHandler("kickme", kickme, filters=Filters.group)
 
