@@ -9,7 +9,8 @@ from telegram.utils.helpers import escape_markdown
 import emilia.modules.sql.rules_sql as sql
 from emilia import dispatcher, spamfilters, OWNER_ID
 from emilia.modules.helper_funcs.chat_status import user_admin
-from emilia.modules.helper_funcs.string_handling import markdown_parser
+from emilia.modules.helper_funcs.misc import build_keyboard_alternate
+from emilia.modules.helper_funcs.string_handling import markdown_parser, button_markdown_parser
 from emilia.modules.connection import connected
 
 from emilia.modules.languages import tl
@@ -45,7 +46,7 @@ def send_rules(update, chat_id, from_pm=False):
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
 
-    rules = sql.get_rules(chat_id)
+    rules, buttons = button_markdown_parser(sql.get_rules(chat_id))
     try:
         text = tl(update.effective_message, "Peraturan untuk *{}* adalah:\n\n{}").format(escape_markdown(chat.title), rules)
     except TypeError:
@@ -53,7 +54,7 @@ def send_rules(update, chat_id, from_pm=False):
         return ""
 
     if from_pm and rules:
-        bot.send_message(user.id, text, parse_mode=ParseMode.MARKDOWN)
+        bot.send_message(user.id, text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(build_keyboard_alternate(buttons)))
     elif from_pm:
         if conn:
             bot.send_message(user.id, tl(update.effective_message, "Admin grup belum menetapkan aturan apa pun untuk *{}*. "
