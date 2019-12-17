@@ -13,6 +13,7 @@ from emilia.modules.helper_funcs.string_handling import markdown_parser
 from emilia.modules.connection import connected
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
