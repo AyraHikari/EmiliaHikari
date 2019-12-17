@@ -5,6 +5,7 @@ from emilia import spamfilters, OWNER_ID
 from emilia.modules.helper_funcs.misc import is_module_loaded
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 FILENAME = __name__.rsplit(".", 1)[-1]
 
@@ -73,13 +74,13 @@ if is_module_loaded(FILENAME):
         log_channel = sql.get_chat_log_channel(chat.id)
         if log_channel:
             log_channel_info = bot.get_chat(log_channel)
-            message.reply_text(
+            send_message(update.effective_message, 
                 tl(update.effective_message, "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)").format(escape_markdown(log_channel_info.title),
                                                                          log_channel),
                 parse_mode=ParseMode.MARKDOWN)
 
         else:
-            message.reply_text(tl(update.effective_message, "Tidak ada saluran log yang telah ditetapkan untuk grup ini!"))
+            send_message(update.effective_message, tl(update.effective_message, "Tidak ada saluran log yang telah ditetapkan untuk grup ini!"))
 
 
     @run_async
@@ -91,7 +92,7 @@ if is_module_loaded(FILENAME):
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == chat.CHANNEL:
-            message.reply_text(tl(update.effective_message, "Sekarang, teruskan /setlog ke grup yang Anda ingin ikat saluran ini!"))
+            send_message(update.effective_message, tl(update.effective_message, "Sekarang, teruskan /setlog ke grup yang Anda ingin ikat saluran ini!"))
 
         elif message.forward_from_chat:
             sql.set_chat_log_channel(chat.id, message.forward_from_chat.id)
@@ -118,7 +119,7 @@ if is_module_loaded(FILENAME):
             bot.send_message(chat.id, tl(update.effective_message, "Berhasil mengatur saluran log!"))
 
         else:
-            message.reply_text(tl(update.effective_message, "Langkah-langkah untuk mengatur saluran log adalah:\n"
+            send_message(update.effective_message, tl(update.effective_message, "Langkah-langkah untuk mengatur saluran log adalah:\n"
                                " - tambahkan bot ke saluran yang diinginkan\n"
                                " - Kirimkan /setlog ke saluran\n"
                                " - Teruskan /setlog ke grup\n"))
@@ -136,10 +137,10 @@ if is_module_loaded(FILENAME):
         log_channel = sql.stop_chat_logging(chat.id)
         if log_channel:
             bot.send_message(log_channel, tl(update.effective_message, "Channel telah dibatalkan tautannya {}").format(chat.title))
-            message.reply_text(tl(update.effective_message, "Log saluran telah dinonaktifkan."))
+            send_message(update.effective_message, tl(update.effective_message, "Log saluran telah dinonaktifkan."))
 
         else:
-            message.reply_text(tl(update.effective_message, "Belum ada saluran log yang ditetapkan!"))
+            send_message(update.effective_message, tl(update.effective_message, "Belum ada saluran log yang ditetapkan!"))
 
 
     def __stats__():

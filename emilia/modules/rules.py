@@ -48,7 +48,7 @@ def send_rules(update, chat_id, from_pm=False):
     try:
         text = tl(update.effective_message, "Peraturan untuk *{}* adalah:\n\n{}").format(escape_markdown(chat.title), rules)
     except TypeError:
-        update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+        send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
         return ""
 
     if from_pm and rules:
@@ -64,17 +64,17 @@ def send_rules(update, chat_id, from_pm=False):
         if update.effective_message.chat.type == "private" and rules:
             bot.send_message(user.id, text, parse_mode=ParseMode.MARKDOWN)
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Hubungi saya di PM untuk mendapatkan aturan grup ini"),
+            send_message(update.effective_message, tl(update.effective_message, "Hubungi saya di PM untuk mendapatkan aturan grup ini"),
                                                 reply_markup=InlineKeyboardMarkup(
                                                     [[InlineKeyboardButton(text=tl(update.effective_message, "Peraturan"),
                                                                            url="t.me/{}?start={}".format(bot.username,
                                                                                                          chat_id))]]))
     else:
         if conn:
-            update.effective_message.reply_text(tl(update.effective_message, "Admin grup belum menetapkan aturan apa pun untuk *{}*. "
+            send_message(update.effective_message, tl(update.effective_message, "Admin grup belum menetapkan aturan apa pun untuk *{}*. "
                                                 "Bukan berarti obrolan ini tanpa hukum...!").format(chat_name), parse_mode="markdown")
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Admin grup belum menetapkan aturan apa pun untuk obrolan ini. "
+            send_message(update.effective_message, tl(update.effective_message, "Admin grup belum menetapkan aturan apa pun untuk obrolan ini. "
                                                 "Bukan berarti obrolan ini tanpa hukum...!"))
 
 
@@ -98,7 +98,7 @@ def set_rules(bot: Bot, update: Update):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+            send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
             return ""
         chat = update.effective_chat
         chat_id = update.effective_chat.id
@@ -111,9 +111,9 @@ def set_rules(bot: Bot, update: Update):
 
         sql.set_rules(chat_id, markdown_rules)
         if conn:
-            update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk *{}*.").format(chat_name), parse_mode="markdown")
+            send_message(update.effective_message, tl(update.effective_message, "Berhasil mengatur aturan untuk *{}*.").format(chat_name), parse_mode="markdown")
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk grup ini."))
+            send_message(update.effective_message, tl(update.effective_message, "Berhasil mengatur aturan untuk grup ini."))
 
     elif msg.reply_to_message and len(args) == 1:
         txt = msg.reply_to_message.text
@@ -122,9 +122,9 @@ def set_rules(bot: Bot, update: Update):
 
         sql.set_rules(chat_id, markdown_rules)
         if conn:
-            update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk *{}*.").format(chat_name), parse_mode="markdown")
+            send_message(update.effective_message, tl(update.effective_message, "Berhasil mengatur aturan untuk *{}*.").format(chat_name), parse_mode="markdown")
         else:
-            update.effective_message.reply_text(tl(update.effective_message, "Berhasil mengatur aturan untuk grup ini."))
+            send_message(update.effective_message, tl(update.effective_message, "Berhasil mengatur aturan untuk grup ini."))
 
 
 @run_async
@@ -144,7 +144,7 @@ def clear_rules(bot: Bot, update: Update):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+            send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
             return ""
         chat = update.effective_chat
         chat_id = update.effective_chat.id
@@ -152,7 +152,7 @@ def clear_rules(bot: Bot, update: Update):
 
     chat_id = update.effective_chat.id
     sql.set_rules(chat_id, "")
-    update.effective_message.reply_text(tl(update.effective_message, "Berhasil membersihkan aturan!"))
+    send_message(update.effective_message, tl(update.effective_message, "Berhasil membersihkan aturan!"))
 
 
 def __stats__():

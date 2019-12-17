@@ -35,6 +35,7 @@ from emilia.modules.connection import connected
 
 from emilia.modules.helper_funcs.msg_types import Types
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
 @user_admin
@@ -55,7 +56,7 @@ def import_data(bot: Bot, update):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -64,12 +65,12 @@ def import_data(bot: Bot, update):
 	if msg.reply_to_message and msg.reply_to_message.document:
 		filetype = msg.reply_to_message.document.file_name
 		if filetype.split('.')[-1] not in ("backup", "json", "txt"):
-			msg.reply_text(tl(update.effective_message, "File cadangan tidak valid!"))
+			send_message(update.effective_message, tl(update.effective_message, "File cadangan tidak valid!"))
 			return
 		try:
 			file_info = bot.get_file(msg.reply_to_message.document.file_id)
 		except BadRequest:
-			msg.reply_text(tl(update.effective_message, "Coba unduh dan unggah ulang file seperti Anda sendiri sebelum mengimpor - yang ini sepertinya rusak!"))
+			send_message(update.effective_message, tl(update.effective_message, "Coba unduh dan unggah ulang file seperti Anda sendiri sebelum mengimpor - yang ini sepertinya rusak!"))
 			return
 
 		with BytesIO() as file:
@@ -423,9 +424,9 @@ def import_data(bot: Bot, update):
 				if imp_warn_filter:
 					text += tl(update.effective_message, "- {} filter peringatan\n").format(imp_warn_filter)
 				try:
-					msg.reply_text(text, parse_mode="markdown")
+					send_message(update.effective_message, text, parse_mode="markdown")
 				except BadRequest:
-					msg.reply_text(text, parse_mode="markdown", quote=False)
+					send_message(update.effective_message, text, parse_mode="markdown", quote=False)
 				if NOT_IMPORTED_INT:
 					f = open("{}-notimported.txt".format(chat_id), "w")
 					f.write(str(NOT_IMPORTED))
@@ -434,7 +435,7 @@ def import_data(bot: Bot, update):
 					os.remove("{}-notimported.txt".format(chat_id))
 				return
 		except Exception as err:
-			msg.reply_text(tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
+			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
 			LOGGER.exception("An error when importing from Emilia base!")
 			return
 
@@ -648,9 +649,9 @@ def import_data(bot: Bot, update):
 					if imp_warn:
 						text += tl(update.effective_message, "- Pengaturan peringatan\n")
 					try:
-						msg.reply_text(text, parse_mode="markdown")
+						send_message(update.effective_message, text, parse_mode="markdown")
 					except BadRequest:
-						msg.reply_text(text, parse_mode="markdown", quote=False)
+						send_message(update.effective_message, text, parse_mode="markdown", quote=False)
 					if NOT_IMPORTED_INT:
 						f = open("{}-notimported.txt".format(chat_id), "w")
 						f.write(str(NOT_IMPORTED))
@@ -659,13 +660,13 @@ def import_data(bot: Bot, update):
 						os.remove("{}-notimported.txt".format(chat_id))
 					return
 		except Exception as err:
-			msg.reply_text(tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Rose!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
+			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Rose!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
 			LOGGER.exception("An error when importing from Rose base!")
 			return
 
 		# only import one group
 		if len(data) > 1 and str(chat_id) not in data:
-			msg.reply_text(tl(update.effective_message, "Ada lebih dari satu grup di file ini, dan tidak ada yang memiliki id obrolan yang sama dengan"
+			send_message(update.effective_message, tl(update.effective_message, "Ada lebih dari satu grup di file ini, dan tidak ada yang memiliki id obrolan yang sama dengan"
 						   "grup ini - bagaimana cara memilih apa yang akan diimpor?"))
 			return
 
@@ -676,14 +677,14 @@ def import_data(bot: Bot, update):
 					text = tl(update.effective_message, "Backup berasal chat lain, Saya tidak bisa mengembalikan chat lain kedalam chat *{}*").format(chat_name)
 				else:
 					text = tl(update.effective_message, "Backup berasal chat lain, Saya tidak bisa mengembalikan chat lain kedalam chat ini")
-				return msg.reply_text(text, parse_mode="markdown")
+				return send_message(update.effective_message, text, parse_mode="markdown")
 		except:
-			return msg.reply_text(tl(update.effective_message, "Telah terjadi error dalam pengecekan data, silahkan laporkan kepada pembuat saya "
+			return send_message(update.effective_message, tl(update.effective_message, "Telah terjadi error dalam pengecekan data, silahkan laporkan kepada pembuat saya "
 								  "untuk masalah ini untuk membuat saya lebih baik! Terima kasih! 🙂"))
 		# Check if backup is from self
 		try:
 			if str(bot.id) != str(data[str(chat_id)]['bot']):
-				return msg.reply_text(tl(update.effective_message, "Backup berasal dari bot lain, dokumen, foto, video, audio, suara tidak akan "
+				return send_message(update.effective_message, tl(update.effective_message, "Backup berasal dari bot lain, dokumen, foto, video, audio, suara tidak akan "
 							   "bekerja, jika file anda tidak ingin hilang, import dari bot yang dicadangkan."
 							   "jika masih tidak bekerja, laporkan pada pembuat bot tersebut untuk "
 							   "membuat saya lebih baik! Terima kasih! 🙂"))
@@ -699,7 +700,7 @@ def import_data(bot: Bot, update):
 			for mod in DATA_IMPORT:
 				mod.__import_data__(str(chat_id), data)
 		except Exception:
-			msg.reply_text(tl(update.effective_message, "Kesalahan terjadi saat memulihkan data Anda. Prosesnya mungkin tidak lengkap. Jika "
+			send_message(update.effective_message, tl(update.effective_message, "Kesalahan terjadi saat memulihkan data Anda. Prosesnya mungkin tidak lengkap. Jika "
 						   "Anda mengalami masalah dengan ini, pesan @AyraHikari dengan file cadangan Anda, jadi "
 						   "masalah bisa di-debug. Pemilik saya akan dengan senang hati membantu, dan setiap bug "
 						   "dilaporkan membuat saya lebih baik! Terima kasih! 🙂"))
@@ -712,7 +713,7 @@ def import_data(bot: Bot, update):
 			text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan pada *{}*. Selamat datang kembali! 😀").format(chat_name)
 		else:
 			text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan. Selamat datang kembali! 😀").format(chat_name)
-		msg.reply_text(text, parse_mode="markdown")
+		send_message(update.effective_message, text, parse_mode="markdown")
 
 
 @run_async
@@ -735,7 +736,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -747,7 +748,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 	if cek.get('status'):
 		if jam <= int(cek.get('value')):
 			waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
-			update.effective_message.reply_text(tl(update.effective_message, "Anda dapat mencadangan data sekali dalam 12 jam!\n[Orang ini](tg://user?id={}) sudah mencadangan data\nAnda dapat mencadangan data lagi pada `{}`").format(cek.get('user'), waktu), parse_mode=ParseMode.MARKDOWN)
+			send_message(update.effective_message, tl(update.effective_message, "Anda dapat mencadangan data sekali dalam 12 jam!\n[Orang ini](tg://user?id={}) sudah mencadangan data\nAnda dapat mencadangan data lagi pada `{}`").format(cek.get('user'), waktu), parse_mode=ParseMode.MARKDOWN)
 			return
 		else:
 			if user.id != OWNER_ID:

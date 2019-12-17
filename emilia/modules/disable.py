@@ -11,6 +11,7 @@ from emilia.modules.helper_funcs.misc import is_module_loaded
 from emilia.modules.connection import connected
 
 from emilia.modules import languages
+from emilia.modules.helper_funcs.alternate import send_message
 
 FILENAME = __name__.rsplit(".", 1)[-1]
 
@@ -85,7 +86,7 @@ if is_module_loaded(FILENAME):
             chat_name = dispatcher.bot.getChat(conn).title
         else:
             if update.effective_message.chat.type == "private":
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+                send_message(update.effective_message, languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
                 return ""
             chat = update.effective_chat
             chat_id = update.effective_chat.id
@@ -102,13 +103,13 @@ if is_module_loaded(FILENAME):
                     text = languages.tl(update.effective_message, "Menonaktifkan penggunaan `{}` pada *{}*").format(disable_cmd, chat_name)
                 else:
                     text = languages.tl(update.effective_message, "Menonaktifkan penggunaan `{}`").format(disable_cmd)
-                update.effective_message.reply_text(text,
+                send_message(update.effective_message, text,
                                                     parse_mode=ParseMode.MARKDOWN)
             else:
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Perintah itu tidak bisa dinonaktifkan"))
+                send_message(update.effective_message, languages.tl(update.effective_message, "Perintah itu tidak bisa dinonaktifkan"))
 
         else:
-            update.effective_message.reply_text(languages.tl(update.effective_message, "Apa yang harus saya nonaktifkan?"))
+            send_message(update.effective_message, languages.tl(update.effective_message, "Apa yang harus saya nonaktifkan?"))
 
 
     @run_async
@@ -127,7 +128,7 @@ if is_module_loaded(FILENAME):
             chat_name = dispatcher.bot.getChat(conn).title
         else:
             if update.effective_message.chat.type == "private":
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+                send_message(update.effective_message, languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
                 return ""
             chat = update.effective_chat
             chat_id = update.effective_chat.id
@@ -143,13 +144,13 @@ if is_module_loaded(FILENAME):
                     text = languages.tl(update.effective_message, "Diaktifkan penggunaan `{}` pada *{}*").format(enable_cmd, chat_name)
                 else:
                     text = languages.tl(update.effective_message, "Diaktifkan penggunaan `{}`").format(enable_cmd)
-                update.effective_message.reply_text(text,
+                send_message(update.effective_message, text,
                                                     parse_mode=ParseMode.MARKDOWN)
             else:
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Apakah itu bahkan dinonaktifkan?"))
+                send_message(update.effective_message, languages.tl(update.effective_message, "Apakah itu bahkan dinonaktifkan?"))
 
         else:
-            update.effective_message.reply_text(languages.tl(update.effective_message, "Apa yang harus saya aktifkan?"))
+            send_message(update.effective_message, languages.tl(update.effective_message, "Apa yang harus saya aktifkan?"))
 
 
     @run_async
@@ -163,10 +164,10 @@ if is_module_loaded(FILENAME):
             result = ""
             for cmd in set(DISABLE_CMDS + DISABLE_OTHER):
                 result += " - `{}`\n".format(escape_markdown(cmd))
-            update.effective_message.reply_text(languages.tl(update.effective_message, "Perintah berikut dapat diubah:\n{}").format(result),
+            send_message(update.effective_message, languages.tl(update.effective_message, "Perintah berikut dapat diubah:\n{}").format(result),
                                                 parse_mode=ParseMode.MARKDOWN)
         else:
-            update.effective_message.reply_text(languages.tl(update.effective_message, "Tidak ada perintah yang dapat dinonaktifkan."))
+            send_message(update.effective_message, languages.tl(update.effective_message, "Tidak ada perintah yang dapat dinonaktifkan."))
 
 
     # do not async
@@ -196,14 +197,14 @@ if is_module_loaded(FILENAME):
             chat_name = dispatcher.bot.getChat(conn).title
         else:
             if update.effective_message.chat.type == "private":
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+                send_message(update.effective_message, languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
                 return ""
             chat = update.effective_chat
             chat_id = update.effective_chat.id
             chat_name = update.effective_message.chat.title
 
         text = build_curr_disabled(chat.id)
-        update.effective_message.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+        send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
 
 
     def __stats__():

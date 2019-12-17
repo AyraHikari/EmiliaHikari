@@ -12,6 +12,7 @@ from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
@@ -31,13 +32,13 @@ def about_me(bot: Bot, update: Update, args: List[str]):
     info = sql.get_user_me_info(user.id)
 
     if info:
-        update.effective_message.reply_text("*{}*:\n{}".format(user.first_name, escape_markdown(info)),
+        send_message(update.effective_message, "*{}*:\n{}".format(user.first_name, escape_markdown(info)),
                                             parse_mode=ParseMode.MARKDOWN)
     elif message.reply_to_message:
         username = message.reply_to_message.from_user.first_name
-        update.effective_message.reply_text(username + tl(update.effective_message, " belum mengatur pesan info tentang diri mereka!"))
+        send_message(update.effective_message, username + tl(update.effective_message, " belum mengatur pesan info tentang diri mereka!"))
     else:
-        update.effective_message.reply_text(tl(update.effective_message, "Anda belum mengatur pesan info tentang diri Anda!"))
+        send_message(update.effective_message, tl(update.effective_message, "Anda belum mengatur pesan info tentang diri Anda!"))
 
 
 @run_async
@@ -53,9 +54,9 @@ def set_about_me(bot: Bot, update: Update):
     if len(info) == 2:
         if len(info[1]) < MAX_MESSAGE_LENGTH // 4:
             sql.set_user_me_info(user_id, info[1])
-            message.reply_text(tl(update.effective_message, "Info Anda Diperbarui!"))
+            send_message(update.effective_message, tl(update.effective_message, "Info Anda Diperbarui!"))
         else:
-            message.reply_text(
+            send_message(update.effective_message, 
                 tl(update.effective_message, "Info Anda harus di bawah {} karakter! Kamu punya {}.").format(MAX_MESSAGE_LENGTH // 4, len(info[1])))
 
 
@@ -76,13 +77,13 @@ def about_bio(bot: Bot, update: Update, args: List[str]):
     info = sql.get_user_bio(user.id)
 
     if info:
-        update.effective_message.reply_text("*{}*:\n{}".format(user.first_name, escape_markdown(info)),
+        send_message(update.effective_message, "*{}*:\n{}".format(user.first_name, escape_markdown(info)),
                                             parse_mode=ParseMode.MARKDOWN)
     elif message.reply_to_message:
         username = user.first_name
-        update.effective_message.reply_text(tl(update.effective_message, "{} belum memiliki pesan tentang dirinya sendiri!").format(username))
+        send_message(update.effective_message, tl(update.effective_message, "{} belum memiliki pesan tentang dirinya sendiri!").format(username))
     else:
-        update.effective_message.reply_text(tl(update.effective_message, "Anda belum memiliki bio set tentang diri Anda!"))
+        send_message(update.effective_message, tl(update.effective_message, "Anda belum memiliki bio set tentang diri Anda!"))
 
 
 @run_async
@@ -97,10 +98,10 @@ def set_about_bio(bot: Bot, update: Update):
         repl_message = message.reply_to_message
         user_id = repl_message.from_user.id
         if user_id == message.from_user.id:
-            message.reply_text(tl(update.effective_message, "Ha, Anda tidak dapat mengatur bio Anda sendiri! Anda berada di bawah belas kasihan orang lain di sini..."))
+            send_message(update.effective_message, tl(update.effective_message, "Ha, Anda tidak dapat mengatur bio Anda sendiri! Anda berada di bawah belas kasihan orang lain di sini..."))
             return
         elif user_id == bot.id and sender.id not in SUDO_USERS:
-            message.reply_text(tl(update.effective_message, "Umm ... yah, saya hanya mempercayai pengguna sudo untuk mengatur bio saya."))
+            send_message(update.effective_message, tl(update.effective_message, "Umm ... yah, saya hanya mempercayai pengguna sudo untuk mengatur bio saya."))
             return
 
         text = message.text
@@ -108,13 +109,13 @@ def set_about_bio(bot: Bot, update: Update):
         if len(bio) == 2:
             if len(bio[1]) < MAX_MESSAGE_LENGTH // 4:
                 sql.set_user_bio(user_id, bio[1])
-                message.reply_text(tl(update.effective_message, "Bio {} diperbarui!").format(repl_message.from_user.first_name))
+                send_message(update.effective_message, tl(update.effective_message, "Bio {} diperbarui!").format(repl_message.from_user.first_name))
             else:
-                message.reply_text(
+                send_message(update.effective_message, 
                     tl(update.effective_message, "Biografi harus di bawah {} karakter! Anda mencoba mengatur {}.").format(
                         MAX_MESSAGE_LENGTH // 4, len(bio[1])))
     else:
-        message.reply_text(tl(update.effective_message, "Balas pesan seseorang untuk mengatur bio mereka!"))
+        send_message(update.effective_message, tl(update.effective_message, "Balas pesan seseorang untuk mengatur bio mereka!"))
 
 
 def __user_info__(user_id, chat_id):

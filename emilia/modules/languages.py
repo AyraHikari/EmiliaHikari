@@ -12,6 +12,7 @@ from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin_no_reply, user_admin
 
 from emilia.modules.sql import languages_sql as sql
+from emilia.modules.helper_funcs.alternate import send_message
 
 LOADED_LANGS_ID = []
 LANGS_TEXT = {}
@@ -122,7 +123,7 @@ def set_language(bot, update):
 		else:
 			chatname = tl(update.effective_message, "obrolan saat ini")
 
-	msg.reply_text(tl(msg, "Bahasa di *{}* saat ini adalah:\n{}.\n\nPilih bahasa:").format(chatname, LANGS_TEXT[getlang]), parse_mode="markdown", reply_markup=keyboard)
+	send_message(update.effective_message, tl(msg, "Bahasa di *{}* saat ini adalah:\n{}.\n\nPilih bahasa:").format(chatname, LANGS_TEXT[getlang]), parse_mode="markdown", reply_markup=keyboard)
 
 @run_async
 @user_admin_no_reply

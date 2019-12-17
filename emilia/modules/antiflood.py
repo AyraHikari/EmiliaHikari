@@ -14,6 +14,7 @@ from emilia.modules.sql import antiflood_sql as sql
 from emilia.modules.connection import connected
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 FLOOD_GROUP = 3
 
@@ -62,7 +63,7 @@ def check_flood(bot: Bot, update: Update) -> str:
             bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
             execstrings = tl(update.effective_message, "Sekarang kamu diam selama {}!").format(getvalue)
             tag = "TMUTE"
-        msg.reply_text(tl(update.effective_message, "Saya tidak suka orang yang mengirim pesan beruntun. Tapi kamu hanya membuat "
+        send_message(update.effective_message, tl(update.effective_message, "Saya tidak suka orang yang mengirim pesan beruntun. Tapi kamu hanya membuat "
                        "saya kecewa. {}").format(execstrings))
 
         return "<b>{}:</b>" \
@@ -72,7 +73,7 @@ def check_flood(bot: Bot, update: Update) -> str:
                                              mention_html(user.id, user.first_name))
 
     except BadRequest:
-        msg.reply_text(tl(update.effective_message, "Saya tidak bisa menendang orang di sini, beri saya izin terlebih dahulu! Sampai saat itu, saya akan menonaktifkan antiflood."))
+        send_message(update.effective_message, tl(update.effective_message, "Saya tidak bisa menendang orang di sini, beri saya izin terlebih dahulu! Sampai saat itu, saya akan menonaktifkan antiflood."))
         sql.set_flood(chat.id, 0)
         return "<b>{}:</b>" \
                "\n#INFO" \
@@ -96,7 +97,7 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+            send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
             return ""
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
@@ -109,7 +110,7 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
                 text = tl(update.effective_message, "Antiflood telah dinonaktifkan di *{}*.").format(chat_name)
             else:
                 text = tl(update.effective_message, "Antiflood telah dinonaktifkan.")
-            message.reply_text(text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode="markdown")
 
         elif val.isdigit():
             amount = int(val)
@@ -125,7 +126,7 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
                        "\nDisable antiflood.".format(html.escape(chat_name), mention_html(user.id, user.first_name))
 
             elif amount < 3:
-                message.reply_text(tl(update.effective_message, "Antiflood harus baik 0 (dinonaktifkan), atau nomor lebih besar dari 3!"))
+                send_message(update.effective_message, tl(update.effective_message, "Antiflood harus baik 0 (dinonaktifkan), atau nomor lebih besar dari 3!"))
                 return ""
 
             else:
@@ -134,7 +135,7 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
                     text = tl(update.effective_message, "Antiflood telah diperbarui dan diatur menjadi *{}* pada *{}*").format(amount, chat_name)
                 else:
                     text = tl(update.effective_message, "Antiflood telah diperbarui dan diatur menjadi *{}*").format(amount)
-                message.reply_text(text, parse_mode="markdown")
+                send_message(update.effective_message, text, parse_mode="markdown")
                 return "<b>{}:</b>" \
                        "\n#SETFLOOD" \
                        "\n<b>Admin:</b> {}" \
@@ -142,9 +143,9 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
                                                                     mention_html(user.id, user.first_name), amount)
 
         else:
-            message.reply_text(tl(update.effective_message, "Argumen tidak dikenal - harap gunakan angka, 'off', atau 'no'."))
+            send_message(update.effective_message, tl(update.effective_message, "Argumen tidak dikenal - harap gunakan angka, 'off', atau 'no'."))
     else:
-        message.reply_text(tl(update.effective_message, "Gunakan `/setflood nomor` untuk menyetel anti pesan beruntun.\nAtau gunakan `/setflood off` untuk menonaktifkan anti pesan beruntun."), parse_mode="markdown")
+        send_message(update.effective_message, tl(update.effective_message, "Gunakan `/setflood nomor` untuk menyetel anti pesan beruntun.\nAtau gunakan `/setflood off` untuk menonaktifkan anti pesan beruntun."), parse_mode="markdown")
     return ""
 
 
@@ -162,7 +163,7 @@ def flood(bot: Bot, update: Update):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+            send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
             return
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
@@ -173,13 +174,13 @@ def flood(bot: Bot, update: Update):
             text = tl(update.effective_message, "Saat ini saya tidak memberlakukan pengendalian pesan beruntun pada *{}*!").format(chat_name)
         else:
             text = tl(update.effective_message, "Saat ini saya tidak memberlakukan pengendalian pesan beruntun")
-        update.effective_message.reply_text(text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode="markdown")
     else:
         if conn:
             text = tl(update.effective_message, "Saat ini saya melarang pengguna jika mereka mengirim lebih dari *{}* pesan berturut-turut pada *{}*.").format(limit, chat_name)
         else:
             text = tl(update.effective_message, "Saat ini saya melarang pengguna jika mereka mengirim lebih dari *{}* pesan berturut-turut.").format(limit)
-        update.effective_message.reply_text(text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode="markdown")
 
 
 @run_async
@@ -199,7 +200,7 @@ def set_flood_mode(bot: Bot, update: Update, args: List[str]):
         chat_name = dispatcher.bot.getChat(conn).title
     else:
         if update.effective_message.chat.type == "private":
-            update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+            send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
             return ""
         chat = update.effective_chat
         chat_id = update.effective_chat.id
@@ -220,7 +221,7 @@ def set_flood_mode(bot: Bot, update: Update, args: List[str]):
                 teks = tl(update.effective_message, """Sepertinya Anda mencoba menetapkan nilai sementara untuk anti-banjir, tetapi belum menentukan waktu; gunakan `/setfloodmode tban <timevalue>`.
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
-                msg.reply_text(teks, parse_mode="markdown")
+                send_message(update.effective_message, teks, parse_mode="markdown")
                 return
             settypeflood = tl(update.effective_message, "blokir sementara selama {}").format(args[1])
             sql.set_flood_strength(chat_id, 4, str(args[1]))
@@ -229,18 +230,18 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
                 teks = tl(update.effective_message, """Sepertinya Anda mencoba menetapkan nilai sementara untuk anti-banjir, tetapi belum menentukan waktu; gunakan `/setfloodmode tban <timevalue>`.
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
-                msg.reply_text(teks, parse_mode="markdown")
+                send_message(update.effective_message, teks, parse_mode="markdown")
                 return
             settypeflood = tl(update.effective_message, 'bisukan sementara selama {}').format(args[1])
             sql.set_flood_strength(chat_id, 5, str(args[1]))
         else:
-            msg.reply_text(tl(update.effective_message, "Saya hanya mengerti ban/kick/mute/tban/tmute!"))
+            send_message(update.effective_message, tl(update.effective_message, "Saya hanya mengerti ban/kick/mute/tban/tmute!"))
             return
         if conn:
             text = tl(update.effective_message, "Terlalu banyak mengirim pesan sekarang akan menghasilkan `{}` pada *{}*!").format(settypeflood, chat_name)
         else:
             text = tl(update.effective_message, "Terlalu banyak mengirim pesan sekarang akan menghasilkan `{}`!").format(settypeflood)
-        msg.reply_text(text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode="markdown")
         return "<b>{}:</b>\n" \
                 "<b>Admin:</b> {}\n" \
                 "Has changed antiflood mode. User will {}.".format(settypeflood, html.escape(chat.title),
@@ -261,7 +262,7 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
             text = tl(update.effective_message, "Jika member mengirim pesan beruntun, maka dia akan *di {}* pada *{}*.").format(settypeflood, chat_name)
         else:
             text = tl(update.effective_message, "Jika member mengirim pesan beruntun, maka dia akan *di {}*.").format(settypeflood)
-        msg.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+        send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
     return ""
 
 

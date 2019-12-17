@@ -14,6 +14,7 @@ from emilia.modules.helper_funcs.filters import CustomFilters
 
 import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules import languages
+from emilia.modules.helper_funcs.alternate import send_message
 
 USERS_GROUP = 4
 
@@ -64,7 +65,7 @@ def broadcast(bot: Bot, update: Update):
                 failed += 1
                 LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
 
-        update.effective_message.reply_text("Siaran selesai. {} grup gagal menerima pesan, mungkin "
+        send_message(update.effective_message, "Siaran selesai. {} grup gagal menerima pesan, mungkin "
                                             "karena ditendang.".format(failed))
 
 
@@ -78,7 +79,7 @@ def log_user(bot: Bot, update: Update):
         if user:
             fban, fbanreason, fbantime = fedsql.get_fban_user(fed_id, user.id)
             if fban:
-                update.effective_message.reply_text(languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
+                send_message(update.effective_message, languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
                 try:
                      bot.kick_chat_member(chat.id, user.id)
                 except:

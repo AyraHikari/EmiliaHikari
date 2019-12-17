@@ -10,6 +10,7 @@ from emilia import dispatcher, updater, API_WEATHER, API_ACCUWEATHER, spamfilter
 from emilia.modules.disable import DisableAbleCommandHandler
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
 def cuaca(bot, update, args):
@@ -18,7 +19,7 @@ def cuaca(bot, update, args):
         return
     location = " ".join(args)
     if location.lower() == bot.first_name.lower():
-        update.effective_message.reply_text(tl(update.effective_message, "Saya akan terus mengawasi di saat senang maupun sedih!"))
+        send_message(update.effective_message, tl(update.effective_message, "Saya akan terus mengawasi di saat senang maupun sedih!"))
         bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
@@ -58,13 +59,13 @@ def cuaca(bot, update, args):
 
         cuacabsk = besok.get_weather_code()
 
-        update.message.reply_text(tl(update.effective_message, "{} hari ini sedang {}, sekitar {}°C.\n").format(lokasinya,
+        send_message(update.effective_message, tl(update.effective_message, "{} hari ini sedang {}, sekitar {}°C.\n").format(lokasinya,
                 statusnya, temperatur))
 
     except pyowm.exceptions.api_call_error.APICallError:
-        update.effective_message.reply_text(tl(update.effective_message, "Tulis lokasi untuk mengecek cuacanya"))
+        send_message(update.effective_message, tl(update.effective_message, "Tulis lokasi untuk mengecek cuacanya"))
     except pyowm.exceptions.api_response_error.NotFoundError:
-        update.effective_message.reply_text(tl(update.effective_message, "Maaf, lokasi tidak ditemukan 😞"))
+        send_message(update.effective_message, tl(update.effective_message, "Maaf, lokasi tidak ditemukan 😞"))
     else:
         return
 
@@ -76,10 +77,10 @@ def accuweather(bot, update, args):
     if spam == True:
         return
     if args == []:
-        return update.effective_message.reply_text(tl(update.effective_message, "Masukan nama lokasinya untuk mengecek cuacanya!"))
+        return send_message(update.effective_message, tl(update.effective_message, "Masukan nama lokasinya untuk mengecek cuacanya!"))
     location = " ".join(args)
     if location.lower() == bot.first_name.lower():
-        update.effective_message.reply_text(tl(update.effective_message, "Saya akan terus mengawasi di saat senang maupun sedih!"))
+        send_message(update.effective_message, tl(update.effective_message, "Saya akan terus mengawasi di saat senang maupun sedih!"))
         bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
@@ -90,7 +91,7 @@ def accuweather(bot, update, args):
         try:
             data = r.json()[0]
         except:
-            return update.effective_message.reply_text(tl(update.effective_message, "Maaf, lokasi tidak ditemukan 😞"))
+            return send_message(update.effective_message, tl(update.effective_message, "Maaf, lokasi tidak ditemukan 😞"))
         locid = data.get('Key')
         weatherlang = tl(update.effective_message, "weather_lang")
         urls = "http://api.accuweather.com/currentconditions/v1/{}.json?apikey={}&language={}&details=true&getphotos=true".format(locid, API_ACCUWEATHER, weatherlang)
@@ -164,7 +165,7 @@ def accuweather(bot, update, args):
         # try:
         #     bot.send_photo(chat_id, photo=datas.get('Photos')[0].get('LandscapeLink'), caption=teks, parse_mode="markdown", reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="More info", url=datas.get('Link'))]]))
         # except:
-        update.message.reply_text(teks, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="More info", url=datas.get('Link'))]]))
+        send_message(update.effective_message, teks, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="More info", url=datas.get('Link'))]]))
 
 
 __help__ = "weather_help"

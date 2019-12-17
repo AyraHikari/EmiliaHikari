@@ -16,6 +16,7 @@ from emilia.modules.helper_funcs.misc import send_to_list
 from emilia.modules.sql.users_sql import get_all_chats
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 GBAN_ENFORCE_GROUP = 6
 
@@ -52,48 +53,48 @@ def gban(bot: Bot, update: Update, args: List[str]):
     user_id, reason = extract_user_and_text(message, args)
 
     if not user_id:
-        message.reply_text(tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
+        send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
         return
 
     if int(user_id) in SUDO_USERS:
-        message.reply_text(tl(update.effective_message, "Saya memata-matai, dengan mata kecil saya... perang pengguna sudo! Mengapa kalian saling berpaling? 😱"))
+        send_message(update.effective_message, tl(update.effective_message, "Saya memata-matai, dengan mata kecil saya... perang pengguna sudo! Mengapa kalian saling berpaling? 😱"))
         return
 
     if int(user_id) in SUPPORT_USERS:
-        message.reply_text(tl(update.effective_message, "OOOH seseorang mencoba untuk memblokir secara global pengguna dukungan! 😄 *mengambil popcorn*"))
+        send_message(update.effective_message, tl(update.effective_message, "OOOH seseorang mencoba untuk memblokir secara global pengguna dukungan! 😄 *mengambil popcorn*"))
         return
 
     if user_id == bot.id:
-        message.reply_text(tl(update.effective_message, "😑 Sangat lucu, mari kita blokir secara global diri saya sendiri? Usaha yang bagus 😒"))
+        send_message(update.effective_message, tl(update.effective_message, "😑 Sangat lucu, mari kita blokir secara global diri saya sendiri? Usaha yang bagus 😒"))
         return
 
     try:
         user_chat = bot.get_chat(user_id)
     except BadRequest as excp:
-        message.reply_text(excp.message)
+        send_message(update.effective_message, excp.message)
         return
 
     if user_chat.type != 'private':
-        message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
+        send_message(update.effective_message, tl(update.effective_message, "Itu bukan pengguna!"))
         return
 
     if sql.is_user_gbanned(user_id):
         if not reason:
-            message.reply_text(tl(update.effective_message, "Pengguna ini sudah dilarang secara global; Saya akan mengubah alasannya, tetapi Anda belum memberi saya satu..."))
+            send_message(update.effective_message, tl(update.effective_message, "Pengguna ini sudah dilarang secara global; Saya akan mengubah alasannya, tetapi Anda belum memberi saya satu..."))
             return
 
         old_reason = sql.update_gban_reason(user_id, user_chat.username or user_chat.first_name, reason)
         if old_reason:
-            message.reply_text(tl(update.effective_message, "Pengguna ini sudah gbanned, karena alasan berikut:\n"
+            send_message(update.effective_message, tl(update.effective_message, "Pengguna ini sudah gbanned, karena alasan berikut:\n"
                                "<code>{}</code>\n"
                                "Saya telah melakukan dan memperbaruinya dengan alasan baru Anda!").format(html.escape(old_reason)),
                                parse_mode=ParseMode.HTML)
         else:
-            message.reply_text(tl(update.effective_message, "Pengguna ini sudah gbanned, tetapi tidak ada alasan yang ditetapkan; Saya telah melakukan dan memperbaruinya!"))
+            send_message(update.effective_message, tl(update.effective_message, "Pengguna ini sudah gbanned, tetapi tidak ada alasan yang ditetapkan; Saya telah melakukan dan memperbaruinya!"))
 
         return
 
-    message.reply_text(tl(update.effective_message, "*It's global banned time* 😉"))
+    send_message(update.effective_message, tl(update.effective_message, "*It's global banned time* 😉"))
 
     banner = update.effective_user  # type: Optional[User]
     send_to_list(bot, SUDO_USERS + SUPPORT_USERS,
@@ -118,7 +119,7 @@ def gban(bot: Bot, update: Update, args: List[str]):
             if excp.message in GBAN_ERRORS:
                 pass
             else:
-                message.reply_text(tl(update.effective_message, "Tidak dapat melarang secara global karena: {}").format(excp.message))
+                send_message(update.effective_message, tl(update.effective_message, "Tidak dapat melarang secara global karena: {}").format(excp.message))
                 send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Tidak dapat melarang secara global karena: {}").format(excp.message))
                 sql.ungban_user(user_id)
                 return
@@ -126,7 +127,7 @@ def gban(bot: Bot, update: Update, args: List[str]):
             pass
 
     send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Melarang secara global selesai!"))
-    message.reply_text(tl(update.effective_message, "Orang ini telah dilarang secara global."))
+    send_message(update.effective_message, tl(update.effective_message, "Orang ini telah dilarang secara global."))
 
 
 @run_async
@@ -135,21 +136,21 @@ def ungban(bot: Bot, update: Update, args: List[str]):
 
     user_id = extract_user(message, args)
     if not user_id:
-        message.reply_text(tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
+        send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
         return
 
     user_chat = bot.get_chat(user_id)
     if user_chat.type != 'private':
-        message.reply_text(tl(update.effective_message, "Itu bukan pengguna!"))
+        send_message(update.effective_message, tl(update.effective_message, "Itu bukan pengguna!"))
         return
 
     if not sql.is_user_gbanned(user_id):
-        message.reply_text(tl(update.effective_message, "Pengguna ini tidak dilarang secara global!"))
+        send_message(update.effective_message, tl(update.effective_message, "Pengguna ini tidak dilarang secara global!"))
         return
 
     banner = update.effective_user  # type: Optional[User]
 
-    message.reply_text(tl(update.effective_message, "Saya akan berikan {} kesempatan kedua, secara global.").format(user_chat.first_name))
+    send_message(update.effective_message, tl(update.effective_message, "Saya akan berikan {} kesempatan kedua, secara global.").format(user_chat.first_name))
 
     send_to_list(bot, SUDO_USERS + SUPPORT_USERS,
                  tl(update.effective_message, "{} telah menghapus larangan global untuk pengguna {}").format(mention_html(banner.id, banner.first_name),
@@ -175,7 +176,7 @@ def ungban(bot: Bot, update: Update, args: List[str]):
             if excp.message in UNGBAN_ERRORS:
                 pass
             else:
-                message.reply_text(tl(update.effective_message, "Tidak dapat menghapus larangan secara global karena: {}").format(excp.message))
+                send_message(update.effective_message, tl(update.effective_message, "Tidak dapat menghapus larangan secara global karena: {}").format(excp.message))
                 bot.send_message(OWNER_ID, tl(update.effective_message, "Tidak dapat menghapus larangan secara global karena: {}").format(excp.message))
                 return
         except TelegramError:
@@ -183,7 +184,7 @@ def ungban(bot: Bot, update: Update, args: List[str]):
 
     send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Menghapus larangan global selesai!"))
 
-    message.reply_text(tl(update.effective_message, "Orang ini telah dihapus larangannya."))
+    send_message(update.effective_message, tl(update.effective_message, "Orang ini telah dihapus larangannya."))
 
 
 @run_async
@@ -191,7 +192,7 @@ def gbanlist(bot: Bot, update: Update):
     banned_users = sql.get_gban_list()
 
     if not banned_users:
-        update.effective_message.reply_text(tl(update.effective_message, "Tidak ada pengguna yang dilarang global! Anda lebih baik dari yang saya harapkan..."))
+        update.effective_send_message(update.effective_message, tl(update.effective_message, "Tidak ada pengguna yang dilarang global! Anda lebih baik dari yang saya harapkan..."))
         return
 
     banfile = tl(update.effective_message, 'Persetan orang-orang ini.\n')
@@ -210,7 +211,7 @@ def check_and_ban(update, user_id, should_message=True):
     if sql.is_user_gbanned(user_id):
         update.effective_chat.kick_member(user_id)
         if should_message:
-            update.effective_message.reply_text(tl(update.effective_message, "Ini orang jahat, mereka seharusnya tidak ada di sini!"))
+            update.effective_send_message(update.effective_message, tl(update.effective_message, "Ini orang jahat, mereka seharusnya tidak ada di sini!"))
 
 
 @run_async
@@ -244,14 +245,14 @@ def gbanstat(bot: Bot, update: Update, args: List[str]):
     if len(args) > 0:
         if args[0].lower() in ["on", "yes"]:
             sql.enable_gbans(update.effective_chat.id)
-            update.effective_message.reply_text(tl(update.effective_message, "Saya telah mengaktifkan larangan global dalam grup ini. Ini akan membantu melindungi Anda "
+            update.effective_send_message(update.effective_message, tl(update.effective_message, "Saya telah mengaktifkan larangan global dalam grup ini. Ini akan membantu melindungi Anda "
                                                 "dari spammer, karakter tidak menyenangkan, dan troll terbesar."))
         elif args[0].lower() in ["off", "no"]:
             sql.disable_gbans(update.effective_chat.id)
-            update.effective_message.reply_text(tl(update.effective_message, "Saya telah menonaktifkan larangan global dalam grup ini. Larangan global tidak akan memengaruhi pengguna Anda "
+            update.effective_send_message(update.effective_message, tl(update.effective_message, "Saya telah menonaktifkan larangan global dalam grup ini. Larangan global tidak akan memengaruhi pengguna Anda "
                                                 "lagi. Anda akan kurang terlindungi dari troll dan spammer sekalipun"))
     else:
-        update.effective_message.reply_text(tl(update.effective_message, "Berikan saya beberapa argumen untuk memilih pengaturan! on/off, yes/no!\n\n"
+        update.effective_send_message(update.effective_message, tl(update.effective_message, "Berikan saya beberapa argumen untuk memilih pengaturan! on/off, yes/no!\n\n"
                                             "Pengaturan Anda saat ini: {}\n"
                                             "Ketika Benar, setiap larangan global yang terjadi juga akan terjadi di grup Anda. "
                                             "Ketika Salah, mereka tidak akan meninggalkan Anda pada belas kasihan yang mungkin dari "

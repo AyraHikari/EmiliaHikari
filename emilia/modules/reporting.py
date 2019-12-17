@@ -13,6 +13,7 @@ from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 REPORT_GROUP = 5
 
@@ -32,27 +33,27 @@ def report_setting(bot: Bot, update: Update, args: List[str]):
 		if len(args) >= 1:
 			if args[0] in ("yes", "on"):
 				sql.set_user_setting(chat.id, True)
-				msg.reply_text(tl(update.effective_message, "Menghidupkan pelaporan! Anda akan diberi tahu setiap kali ada yang melaporkan sesuatu."))
+				send_message(update.effective_message, tl(update.effective_message, "Menghidupkan pelaporan! Anda akan diberi tahu setiap kali ada yang melaporkan sesuatu."))
 
 			elif args[0] in ("no", "off"):
 				sql.set_user_setting(chat.id, False)
-				msg.reply_text(tl(update.effective_message, "Mematikan pelaporan! Anda tidak akan mendapatkan laporan apa pun."))
+				send_message(update.effective_message, tl(update.effective_message, "Mematikan pelaporan! Anda tidak akan mendapatkan laporan apa pun."))
 		else:
-			msg.reply_text(tl(update.effective_message, "Preferensi laporan Anda saat ini: `{}`").format(sql.user_should_report(chat.id)),
+			send_message(update.effective_message, tl(update.effective_message, "Preferensi laporan Anda saat ini: `{}`").format(sql.user_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 
 	else:
 		if len(args) >= 1:
 			if args[0] in ("yes", "on"):
 				sql.set_chat_setting(chat.id, True)
-				msg.reply_text(tl(update.effective_message, "Menghidupkan pelaporan! Admin yang telah mengaktifkan laporan akan diberi tahu ketika seseorang menyebut /report "
+				send_message(update.effective_message, tl(update.effective_message, "Menghidupkan pelaporan! Admin yang telah mengaktifkan laporan akan diberi tahu ketika seseorang menyebut /report "
 							   "atau @admin."))
 
 			elif args[0] in ("no", "off"):
 				sql.set_chat_setting(chat.id, False)
-				msg.reply_text(tl(update.effective_message, "Mematikan pelaporan! Tidak ada admin yang akan diberitahukan ketika seseorang menyebut /report atau @admin."))
+				send_message(update.effective_message, tl(update.effective_message, "Mematikan pelaporan! Tidak ada admin yang akan diberitahukan ketika seseorang menyebut /report atau @admin."))
 		else:
-			msg.reply_text(tl(update.effective_message, "Pengaturan obrolan saat ini adalah: `{}`").format(sql.chat_should_report(chat.id)),
+			send_message(update.effective_message, tl(update.effective_message, "Pengaturan obrolan saat ini adalah: `{}`").format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 
 

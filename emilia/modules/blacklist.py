@@ -20,6 +20,7 @@ from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.connection import connected
 
 from emilia.modules.languages import tl
+from emilia.modules.helper_funcs.alternate import send_message
 
 BLACKLIST_GROUP = 11
 
@@ -62,9 +63,9 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
 	split_text = split_message(filter_list)
 	for text in split_text:
 		if filter_list == tl(update.effective_message, "<b>Kata daftar hitam saat ini di {}:</b>\n").format(chat_name):
-			msg.reply_text(tl(update.effective_message, "Tidak ada pesan daftar hitam di <b>{}</b>!").format(chat_name), parse_mode=ParseMode.HTML)
+			send_message(update.effective_message, tl(update.effective_message, "Tidak ada pesan daftar hitam di <b>{}</b>!").format(chat_name), parse_mode=ParseMode.HTML)
 			return
-		msg.reply_text(text, parse_mode=ParseMode.HTML)
+		send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
 
 
 @run_async
@@ -97,14 +98,14 @@ def add_blacklist(bot: Bot, update: Update):
 			sql.add_to_blacklist(chat_id, trigger.lower())
 
 		if len(to_blacklist) == 1:
-			msg.reply_text(tl(update.effective_message, "<code>{}</code> ditambahkan ke daftar hitam di <b>{}</b>!").format(html.escape(to_blacklist[0]), chat_name),
+			send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> ditambahkan ke daftar hitam di <b>{}</b>!").format(html.escape(to_blacklist[0]), chat_name),
 				parse_mode=ParseMode.HTML)
 
 		else:
-			msg.reply_text(tl(update.effective_message, "<code>{}</code> Pemicu ditambahkan ke daftar hitam di <b>{}</b>!").format(len(to_blacklist), chat_name), parse_mode=ParseMode.HTML)
+			send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> Pemicu ditambahkan ke daftar hitam di <b>{}</b>!").format(len(to_blacklist), chat_name), parse_mode=ParseMode.HTML)
 
 	else:
-		msg.reply_text(tl(update.effective_message, "Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam."))
+		send_message(update.effective_message, tl(update.effective_message, "Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam."))
 
 
 @run_async
@@ -142,25 +143,25 @@ def unblacklist(bot: Bot, update: Update):
 
 		if len(to_unblacklist) == 1:
 			if successful:
-				msg.reply_text(tl(update.effective_message, "<code>{}</code> dihapus dari daftar hitam di <b>{}</b>!").format(html.escape(to_unblacklist[0]), chat_name),
+				send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> dihapus dari daftar hitam di <b>{}</b>!").format(html.escape(to_unblacklist[0]), chat_name),
 							   parse_mode=ParseMode.HTML)
 			else:
-				msg.reply_text("Ini bukan pemicu daftar hitam...!")
+				send_message(update.effective_message, "Ini bukan pemicu daftar hitam...!")
 
 		elif successful == len(to_unblacklist):
-			msg.reply_text(tl(update.effective_message, "<code>{}</code> Pemicu dihapus dari daftar hitam di <b>{}</b>!").format(
+			send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> Pemicu dihapus dari daftar hitam di <b>{}</b>!").format(
 					successful, chat_name), parse_mode=ParseMode.HTML)
 
 		elif not successful:
-			msg.reply_text(tl(update.effective_message, "Tidak satu pun pemicu ini ada, sehingga tidak dapat dihapus.").format(
+			send_message(update.effective_message, tl(update.effective_message, "Tidak satu pun pemicu ini ada, sehingga tidak dapat dihapus.").format(
 					successful, len(to_unblacklist) - successful), parse_mode=ParseMode.HTML)
 
 		else:
-			msg.reply_text(tl(update.effective_message, "Pemicu <code>{}</code> dihapus dari daftar hitam. {} Tidak ada, "
+			send_message(update.effective_message, tl(update.effective_message, "Pemicu <code>{}</code> dihapus dari daftar hitam. {} Tidak ada, "
 				"jadi tidak dihapus.").format(successful, len(to_unblacklist) - successful),
 				parse_mode=ParseMode.HTML)
 	else:
-		msg.reply_text(tl(update.effective_message, "Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam."))
+		send_message(update.effective_message, tl(update.effective_message, "Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam."))
 
 
 @run_async
@@ -181,7 +182,7 @@ def blacklist_mode(bot: Bot, update: Update, args: List[str]):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			update.effective_message.reply_text(tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -211,13 +212,13 @@ def blacklist_mode(bot: Bot, update: Update, args: List[str]):
 				teks = tl(update.effective_message, """Sepertinya Anda mencoba menetapkan nilai sementara untuk blacklist, tetapi belum menentukan waktu; gunakan `/blacklistmode tban <timevalue>`.
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
-				msg.reply_text(teks, parse_mode="markdown")
+				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
 			restime = extract_time(msg, args[1])
 			if not restime:
 				teks = tl(update.effective_message, """Nilai waktu tidak valid!
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
-				msg.reply_text(teks, parse_mode="markdown")
+				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
 			settypeblacklist = tl(update.effective_message, 'di blokir sementara selama {}').format(args[1])
 			sql.set_blacklist_strength(chat_id, 6, str(args[1]))
@@ -226,24 +227,24 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
 				teks = tl(update.effective_message, """Sepertinya Anda mencoba menetapkan nilai sementara untuk blacklist, tetapi belum menentukan waktu; gunakan `/blacklistmode tmute <timevalue>`.
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
-				msg.reply_text(teks, parse_mode="markdown")
+				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
 			restime = extract_time(msg, args[1])
 			if not restime:
 				teks = tl(update.effective_message, """Nilai waktu tidak valid!
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
-				msg.reply_text(teks, parse_mode="markdown")
+				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
 			settypeblacklist = tl(update.effective_message, 'di bisukan sementara selama {}').format(args[1])
 			sql.set_blacklist_strength(chat_id, 7, str(args[1]))
 		else:
-			msg.reply_text(tl(update.effective_message, "Saya hanya mengerti off/del/warn/ban/kick/mute/tban/tmute!"))
+			send_message(update.effective_message, tl(update.effective_message, "Saya hanya mengerti off/del/warn/ban/kick/mute/tban/tmute!"))
 			return ""
 		if conn:
 			text = tl(update.effective_message, "Mode blacklist diubah, Pengguna akan `{}` pada *{}*!").format(settypeblacklist, chat_name)
 		else:
 			text = tl(update.effective_message, "Mode blacklist diubah, Pengguna akan `{}`!").format(settypeblacklist)
-		msg.reply_text(text, parse_mode="markdown")
+		send_message(update.effective_message, text, parse_mode="markdown")
 		return "<b>{}:</b>\n" \
 				"<b>Admin:</b> {}\n" \
 				"Changed the blacklist mode. will {}.".format(html.escape(chat.title),
@@ -270,7 +271,7 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
 			text = tl(update.effective_message, "Mode blacklist saat ini disetel ke *{}* pada *{}*.").format(settypeblacklist, chat_name)
 		else:
 			text = tl(update.effective_message, "Mode blacklist saat ini disetel ke *{}*.").format(settypeblacklist)
-		msg.reply_text(text, parse_mode=ParseMode.MARKDOWN)
+		send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
 	return ""
 
 

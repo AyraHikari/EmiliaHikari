@@ -1,7 +1,11 @@
+import sys
+import traceback
+
 from functools import wraps
 from typing import Optional
 
 from telegram import User, Chat, ChatMember, Update, Bot
+from telegram import error
 
 from emilia import DEL_CMDS, SUDO_USERS, WHITELIST_USERS
 
@@ -159,3 +163,27 @@ def user_not_admin(func):
             return func(bot, update, *args, **kwargs)
 
     return is_not_admin
+
+# This is unused code
+def no_reply_handler(func):
+    @wraps(func)
+    def error_catcher(bot: Bot, update: Update, *args, **kwargs):
+        try:
+            func(bot, update, *args,**kwargs)
+        except error.BadRequest as err:
+            if str(err) == "Reply message not found":
+                print('Error')
+                print(err)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                log_errors = traceback.format_exception(etype=exc_type, value=exc_obj, tb=exc_tb)
+                tl = languages.tl
+                for x in log_errors:
+                    if " update.effective_message" in x:
+                        do_func = x.split("update.effective_message", 1)[1].split(")", 1)
+                        do_func = "".join(do_func)
+                        exec("update.effective_message" + do_func + ", quote=False)")
+                    elif "message.reply_text(" in x:
+                        do_func = x.split("message.reply_text", 1)[1].split(")", 1)
+                        do_func = "".join(do_func)
+                        exec("update.effective_message.reply_text" + do_func + ", quote=False)")
+    return error_catcher
