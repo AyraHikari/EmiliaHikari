@@ -49,9 +49,9 @@ def set_blue_text_must_click(bot: Bot, update: Update, args):
 		if val == "off" or val == "no":
 			sql.set_cleanbt(chat_id, False)
 			if conn:
-				text = tl(update.effective_message, "Penghapus pesan biru telah di non-aktifkan di *{}*.").format(chat_name)
+				text = tl(update.effective_message, "Penghapus pesan biru telah di *non-aktifka*n di *{}*.").format(chat_name)
 			else:
-				text = tl(update.effective_message, "Penghapus pesan biru telah di non-aktifkan.")
+				text = tl(update.effective_message, "Penghapus pesan biru telah di *non-aktifkan*.")
 			send_message(update.effective_message, text, parse_mode="markdown")
 
 		elif val == "yes" or val == "ya" or val == "on":
@@ -65,8 +65,12 @@ def set_blue_text_must_click(bot: Bot, update: Update, args):
 		else:
 			send_message(update.effective_message, tl(update.effective_message, "Argumen tidak dikenal - harap gunakan 'yes', atau 'no'."))
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Pengaturan untuk penghapus pesan biru saat ini: *{}*").format("Enabled" if sql.is_enable(chat_id) else "Disabled"), parse_mode="markdown")
+		send_message(update.effective_message, tl(update.effective_message, "Pengaturan untuk penghapus pesan biru saat ini di {}: *{}*").format(chat_name, "Enabled" if sql.is_enable(chat_id) else "Disabled"), parse_mode="markdown")
 
+
+__help__ = "cleaner_help"
+
+__mod_name__ = "Cleaner"
 
 SET_CLEAN_BLUE_TEXT_HANDLER = DisableAbleCommandHandler("cleanbluetext", set_blue_text_must_click, pass_args=True)
 CLEAN_BLUE_TEXT_HANDLER = MessageHandler(Filters.command & Filters.group, clean_blue_text_must_click)

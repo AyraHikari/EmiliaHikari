@@ -255,6 +255,7 @@ CATATAN: semua filter kata kunci dalam huruf kecil. Jika Anda ingin kata kunci A
  - /enable <cmd name>: aktifkan perintah itu
  - /disable <cmd name>: nonaktifkan perintah itu
  - /listcmds: daftar semua perintah toggleable yang memungkinkan
+ - /disabledel: hapus pesan jika perintah dinonaktifkan
     """,
     "feds_help": """
 Ah, manajemen grup. Semuanya menyenangkan, sampai mulai spammer masuk grup anda, dan Anda harus mencekalnya. Maka Anda perlu mulai melarang lebih banyak, dan lebih banyak lagi, dan itu terasa menyakitkan.
@@ -386,6 +387,7 @@ Sebuah tombol dapat ditambahkan ke catatan dengan menggunakan sintaks markdown s
 bagian `buttonurl:`, Seperti: `[tulisannya](buttonurl:contoh.com)`. Cek /markdownhelp untuk info lebih lanjut.
  - /save <notename>: simpan pesan yang dijawab sebagai catatan dengan nama nama file
  - /clear <notename>: hapus catatan dengan nama ini
+ - /privatenote <on/yes/off/no> <?del>: apakah atau tidak untuk mengirim catatan di PM. Tulis `del` di samping on/off untuk menghapus pesan hashtag pada grup.
 """,
 	"reporting_help": """
  - /report <alasan>: membalas pesan untuk melaporkannya ke admin.
@@ -466,6 +468,13 @@ Balas pesan stiker atau data apa pun yang Anda inginkan dengan teks `/setwelcome
 Tip: gunakan `/welcome noformat` untuk mengambil pesan sambutan yang belum diformat.
 Ini akan mengambil pesan selamat datang dan mengirimkannya tanpa memformatnya; memberi Anda markdown mentah, memungkinkan Anda untuk mengedit dengan mudah.
 Ini juga berfungsi dengan /goodbye.
+""",
+	"cleaner_help": """
+*Admin only:*
+ - /cleanbluetext <on/off>: Hapus semua pesan biru.
+
+Catatan:
+- Fitur ini dapat merusak bot orang lain
 """,
 	"exclusive_help": """
  - /stickerid: balas pesan stiker di PM untuk mendapatkan id stiker

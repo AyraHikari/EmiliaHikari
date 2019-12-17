@@ -569,6 +569,9 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
 	"{} item yang dinonaktifkan, pada {} obrolan.": "{} disabled items, across {} chats.",
 	"Perintah-perintah berikut saat ini dibatasi:\n{}": "The following commands are currently restricted:\n{}",
 	"Tidak ada perintah yang dinonaktifkan!": "No commands are disabled!",
+	"Ketika command di nonaktifkan, maka saya *akan menghapus* pesan command tsb.": "When command was disabled, I *will delete* that message.",
+	"Saya *tidak akan menghapus* pesan dari command yang di nonaktifkan.": "When command was disabled, I *will not delete* that message.",
+	"Opsi disable del saat ini: *{}*": "Current disable del settings: *{}*",
 	"disable_help": """
  - /cmds: check the current status of disabled commands
 
@@ -576,6 +579,7 @@ NOTE: all filter keywords are in lowercase. If you want your keyword to be a sen
  - /enable <cmd name>: enable that command
  - /disable <cmd name>: disable that command
  - /listcmds: list all possible toggleable commands
+ - /disabledel: delete message when command is disabled
     """,
 
 # Federation
@@ -976,6 +980,10 @@ Keep in mind that your message <b>MUST</b> contain some text other than just a b
 	"File/foto ini gagal diimpor karena berasal dari bot lain. Ini adalah pembatasan API telegram, dan tidak bisa dihindari. Maaf untuk ketidaknyamanannya!": "These files/photos failed to import due to originating from another bot. This is a telegram API restriction, and can't be avoided. Sorry for the inconvenience!",
 	"{} catatan, pada {} obrolan.": "`{}` notes, accross {} chats.",
 	"Ada catatan `{}` dalam obrolan ini.": "There are `{}` notes in this chat.",
+	"Private Note di *aktifkan*, ketika pengguna mengambil catatan, pesan catatan akan dikirim ke PM dan pesan pengguna akan segera di hapus.": "Private Note was *enabled*, when users get notes, the message will be sent to the PM and the hashtag message will be deleted.",
+	"Private Note di *aktifkan*, ketika pengguna mengambil catatan, pesan catatan akan dikirim ke PM.": "Private Note was *enabled*, when users get notes, the message will be sent to the PM.",
+	"Private Note di *non-aktifkan*, pesan catatan akan di kirim di grup.": "Private Note was *disabled*, notes will be sent to group.",
+	"Pengaturan Private Note di {}: *{}*{}": "Current Private Note settings at {}: *{}*{}",
 	"notes_help": """
  - /get <notename>: get the note with this notename
  - #<notename>: same as /get
@@ -990,6 +998,7 @@ A button can be added to a note by using standard markdown link syntax - the lin
 `buttonurl:` section, as such: `[somelink](buttonurl:example.com)`. Check /markdownhelp for more info.
  - /save <notename>: save the replied message as a note with name notename
  - /clear <notename>: clear note with this name
+  - /privatenote <on/yes/off/no> <? del>: whether or not to send the note in PM. Write `del` besides on/off to delete hashtag message on group.
 """,
 	"Menghidupkan pelaporan! Anda akan diberi tahu setiap kali ada yang melaporkan sesuatu.": "Turned on reporting! You'll be notified whenever anyone reports something.",
 	"Mematikan pelaporan! Anda tidak akan mendapatkan laporan apa pun.": "Turned off reporting! You wont get any reports.",
@@ -1206,6 +1215,20 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui.": "Note: An error occurred while sending custom messages. Please update.",
 	"Kamu telah disuarakan!": "You've been unmuted!",
 	"Kamu bukan pengguna baru!": "You are not a new member!",
+
+# cleaner
+	"Penghapus pesan biru telah di *non-aktifkan* di *{}*.": "Blue text cleaner was *disabled* in *{}*.",
+	"Penghapus pesan biru telah di *non-aktifkan*.": "Blue text cleaner was *disabled*.",
+	"Penghapus pesan biru telah di *aktifkan* di *{}*.": "Blue text cleaner was *enabled* in *{}*.",
+	"Penghapus pesan biru telah di *aktifkan*.": "Blue text cleaner was *enabled*.",
+	"Pengaturan untuk penghapus pesan biru saat ini di {}: *{}*": "Curent settings for Blue text cleaner at {}: *{}*",
+	"cleaner_help": """
+*Admin only:*
+ - /cleanbluetext <on/off>: Delete all blue text message.
+
+Note:
+- This feature may broke others bot
+""",
 
 	# This is optional since it disabled by default
 	"Kamu bukan pengguna yang di tuju!": "You are not the intended user!",
