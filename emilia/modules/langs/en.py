@@ -270,9 +270,11 @@ Note that files/photos from other bots can't be imported due to telegram restric
 
 *Admin only:*
  - /ban <userhandle>: bans a user. (via handle, or reply)
+ - /sban <userhandle>: silent ban a user, bot will not reply and delete your sban message.
  - /tban <userhandle> x(m/h/d): bans a user for x time. (via handle, or reply). m = minutes, h = hours, d = days.
  - /unban <userhandle>: unbans a user. (via handle, or reply)
  - /kick <userhandle>: kicks a user, (via handle, or reply)
+ - /skick <userhandle>: silent kick a user, bot will not reply and delete your skick message.
 """,
 
 # Blacklist

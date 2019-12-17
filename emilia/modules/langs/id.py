@@ -98,9 +98,11 @@ Ketika ditandai sebagai AFK, sebutan apa pun akan dibalas dengan pesan untuk men
 
 *Hanya admin:*
  - /ban <userhandle>: banned seorang pengguna. (via pegangan, atau balasan)
+ - /sban <userhandle>: silent ban seorang pengguna, bot tidak akan membalas dan menghapus pesan sban Anda.
  - /tban <userhandle> x(m/h/d): melarang pengguna untuk x waktu. (via pegangan, atau balasan). m = menit, h = jam, d = hari.
  - /unban <userhandle>: unbanned seorang pengguna. (via pegangan, atau balasan)
  - /kick <userhandle>: menendang seorang pengguna, (via pegangan, atau balasan)
+ - /skick <userhandle>: silent kick seorang pengguna, bot tidak akan membalas dan menghapus pesan skick Anda.
 """,
 	"blacklist_help": """
 Blacklist digunakan untuk menghentikan pemicu tertentu dari yang dikatakan dalam kelompok. Kapan pun pemicu disebutkan, \
