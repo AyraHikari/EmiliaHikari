@@ -11,7 +11,7 @@ class CleanerBlueText(BASE):
     chat_id = Column(UnicodeText, primary_key=True)
     is_enable = Column(Boolean, default=False)
 
-    def __init__(self, chat_id, is_enable=True):
+    def __init__(self, chat_id, is_enable=False):
         self.chat_id = chat_id
         self.is_enable = is_enable
 
@@ -32,10 +32,10 @@ def is_enable(chat_id):
 def set_cleanbt(chat_id, is_enable):
     with INSERTION_LOCK:
         curr = SESSION.query(CleanerBlueText).get(str(chat_id))
-        if not curr:
-            curr = CleanerBlueText(str(chat_id), is_enable)
-        else:
-            curr.is_afk = is_enable
+        if curr:
+            SESSION.delete(curr)
+        
+        curr = CleanerBlueText(str(chat_id), is_enable)
 
         if is_enable:
             if str(chat_id) not in CLEANER_BT_CHATS:
@@ -53,7 +53,8 @@ def __load_cleaner_chats():
     try:
         all_chats = SESSION.query(CleanerBlueText).all()
         for x in all_chats:
-            CLEANER_BT_CHATS.append(str(x.chat_id))
+            if x.is_enable:
+                CLEANER_BT_CHATS.append(str(x.chat_id))
     finally:
         SESSION.close()
 

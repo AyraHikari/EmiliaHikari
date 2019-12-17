@@ -1,6 +1,6 @@
 import threading
 
-from sqlalchemy import Column, String, UnicodeText, func, distinct
+from sqlalchemy import Column, String, UnicodeText, Boolean, func, distinct
 
 from emilia.modules.sql import SESSION, BASE
 
@@ -17,12 +17,28 @@ class Disable(BASE):
     def __repr__(self):
         return "Disabled cmd {} in {}".format(self.command, self.chat_id)
 
+class DisableDelete(BASE):
+    __tablename__ = "disabled_del"
+
+    chat_id = Column(UnicodeText, primary_key=True)
+    is_enable = Column(Boolean, default=False)
+
+    def __init__(self, chat_id, is_enable=False):
+        self.chat_id = chat_id
+        self.is_enable = is_enable
+
+    def __repr__(self):
+        return "disable del status for {}".format(self.chat_id)
+
 
 Disable.__table__.create(checkfirst=True)
+DisableDelete.__table__.create(checkfirst=True)
 DISABLE_INSERTION_LOCK = threading.RLock()
+DISABLEDEL_INSERTION_LOCK = threading.RLock()
 
 DISABLED = {}
 DISABLEABLE = []
+DISABLEDEL = []
 
 
 def disable_command(chat_id, disable):
@@ -56,6 +72,26 @@ def enable_command(chat_id, enable):
         SESSION.close()
         return False
 
+def disabledel_set(chat_id, is_enable):
+    with DISABLEDEL_INSERTION_LOCK:
+        curr = SESSION.query(DisableDelete).get(str(chat_id))
+        if curr:
+            SESSION.delete(curr)
+
+        curr = DisableDelete(str(chat_id), is_enable)
+
+        if is_enable:
+            if str(chat_id) not in DISABLEDEL:
+                DISABLEDEL.append(str(chat_id))
+        else:
+            if str(chat_id) in DISABLEDEL:
+                DISABLEDEL.remove(str(chat_id))
+
+        SESSION.add(curr)
+        SESSION.commit()
+
+def is_disable_del(chat_id):
+    return str(chat_id) in DISABLEDEL
 
 def is_command_disabled(chat_id, cmd):
     return cmd in DISABLED.get(str(chat_id), set())
@@ -112,5 +148,17 @@ def __load_disabled_commands():
     finally:
         SESSION.close()
 
+def __load_disabledel():
+    global DISABLEDEL
+    try:
+        all_disabledel = SESSION.query(DisableDelete).all()
+        for x in all_disabledel:
+            if x.is_enable:
+                DISABLEDEL.append(str(x.chat_id))
+
+    finally:
+        SESSION.close()
+
 
 __load_disabled_commands()
+__load_disabledel()
