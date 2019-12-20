@@ -86,6 +86,7 @@ If you really are interested in donating, please visit ayrahikari.github.io/dona
 	"Saya sudah PM Anda tentang donasi untuk pencipta saya!": "I've PM'ed you about donating to my creator!",
 	"Hubungi saya di PM dulu untuk mendapatkan informasi donasi.": "Contact me in PM first to get donation information.",
 	"Ini bantuan untuk modul *{}*:\n": "Here is the help for the *{}* module:\n",
+	"Anda sekarang dapat mengambil catatan di grup.": "Now you can get notes in group.",
 
 # admin
 	"Bagaimana saya ingin menaikan jabatan seseorang yang sudah menjadi admin?": "How am I meant to promote someone that's already an admin?",
@@ -1065,6 +1066,8 @@ NOTE: neither of these will get triggered if used by admins
 
 NOTE: In groups, only admins can add/remove RSS links to the group's subscription
 """,
+
+# rules
 	"Pintasan aturan untuk obrolan ini belum diatur dengan benar! Mintalah admin untuk perbaiki ini.": "The rules shortcut for this chat hasn't been set properly! Ask admins to fix this.",
 	"Peraturan untuk *{}* adalah:\n\n{}": "The rules for *{}* are:\n\n{}",
 	"Admin grup belum menetapkan aturan apa pun untuk obrolan ini. Bukan berarti obrolan ini tanpa hukum...!": "The group admins haven't set any rules for this chat yet. This probably doesn't mean it's lawless though...!",
@@ -1076,6 +1079,9 @@ NOTE: In groups, only admins can add/remove RSS links to the group's subscriptio
 	"Berhasil membersihkan aturan!": "Successfully cleared rules!",
 	"{} obrolan memiliki aturan yang ditetapkan.": "{} chats have rules set.",
 	"Obrolan ini memiliki aturan yang ditetapkan: `{}`": "This chat has had it's rules set: `{}`",
+	"Private Rules di *aktifkan*, pesan peraturan akan di kirim di PM.": "Private Rules was *enabled*, rules message will send to PM.",
+	"Private Rules di *non-aktifkan*, pesan peraturan akan di kirim di grup.": "Private Rules was *disabled*, rules message will send to group.",
+	"Pengaturan Private Rules di {}: *{}*": "Private Rules Settings in {}: *{}*",
 	"rules_help": """
  - /rules: get the rules for this chat.
 

@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from telegram import Message, Update, Bot, User
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
@@ -53,6 +53,8 @@ def send_rules(update, chat_id, from_pm=False):
         send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
         return ""
 
+    is_private = sql.get_private_rules(chat_id)
+
     if from_pm and rules:
         bot.send_message(user.id, text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(build_keyboard_alternate(buttons)))
     elif from_pm:
@@ -63,8 +65,11 @@ def send_rules(update, chat_id, from_pm=False):
             bot.send_message(user.id, tl(update.effective_message, "Admin grup belum menetapkan aturan apa pun untuk obrolan ini. "
                                       "Bukan berarti obrolan ini tanpa hukum...!"))
     elif rules:
-        if update.effective_message.chat.type == "private" and rules:
-            bot.send_message(user.id, text, parse_mode=ParseMode.MARKDOWN)
+        if (update.effective_message.chat.type == "private" or not is_private) and rules:
+            if not is_private:
+                send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(build_keyboard_alternate(buttons)))
+            else:
+                bot.send_message(user.id, text, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(build_keyboard_alternate(buttons)))
         else:
             send_message(update.effective_message, tl(update.effective_message, "Hubungi saya di PM untuk mendapatkan aturan grup ini"),
                                                 reply_markup=InlineKeyboardMarkup(
@@ -157,6 +162,39 @@ def clear_rules(bot: Bot, update: Update):
     send_message(update.effective_message, tl(update.effective_message, "Berhasil membersihkan aturan!"))
 
 
+@run_async
+@user_admin
+def private_rules(bot: Bot, update: Update, args: List[str]):
+    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+    if spam == True:
+        return
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
+    conn = connected(bot, update, chat, user.id)
+    if conn:
+        chat_id = conn
+        chat_name = dispatcher.bot.getChat(conn).title
+    else:
+        chat_id = update.effective_chat.id
+        if chat.type == "private":
+            chat_name = chat.title
+        else:
+            chat_name = chat.title
+
+    if len(args) >= 1:
+        if args[0] in ("yes", "on", "ya"):
+            sql.private_rules(str(chat_id), True)
+            send_message(update.effective_message, tl(update.effective_message, "Private Rules di *aktifkan*, pesan peraturan akan di kirim di PM."), parse_mode="markdown")
+        elif args[0] in ("no", "off"):
+            sql.private_rules(str(chat_id), False)
+            send_message(update.effective_message, tl(update.effective_message, "Private Rules di *non-aktifkan*, pesan peraturan akan di kirim di grup."), parse_mode="markdown")
+        else:
+            send_message(update.effective_message, tl(update.effective_message, "Argumen tidak dikenal - harap gunakan 'yes', atau 'no'."))
+    else:
+        is_private = sql.get_private_rules(chat_id)
+        send_message(update.effective_message, tl(update.effective_message, "Pengaturan Private Rules di {}: *{}*").format(chat_name, "Enabled" if is_private else "Disabled"), parse_mode="markdown")
+
+
 def __stats__():
     return tl(OWNER_ID, "{} obrolan memiliki aturan yang ditetapkan.").format(sql.num_chats())
 
@@ -182,7 +220,9 @@ __mod_name__ = "Rules"
 GET_RULES_HANDLER = CommandHandler("rules", get_rules)#, filters=Filters.group)
 SET_RULES_HANDLER = CommandHandler("setrules", set_rules)#, filters=Filters.group)
 RESET_RULES_HANDLER = CommandHandler("clearrules", clear_rules)#, filters=Filters.group)
+PRIVATERULES_HANDLER = CommandHandler("privaterules", private_rules, pass_args=True)
 
 dispatcher.add_handler(GET_RULES_HANDLER)
 dispatcher.add_handler(SET_RULES_HANDLER)
 dispatcher.add_handler(RESET_RULES_HANDLER)
+dispatcher.add_handler(PRIVATERULES_HANDLER)
