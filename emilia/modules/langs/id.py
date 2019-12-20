@@ -415,6 +415,7 @@ CATATAN: Dalam grup, hanya admin yang dapat menambah/menghapus tautan RSS ke lan
 *Hanya admin:*
  - /setrules <aturan Anda di sini>: atur aturan untuk obrolan ini.
  - /clearrules: kosongkan aturan untuk obrolan ini.
+ - /privaterules <yes/no/on/off>: apakah peraturan akan di kirim ke PM. Default: aktif.
 """,
 	"userinfo_help": """
  - /setbio <text>: saat membalas, akan menyimpan bio pengguna lain

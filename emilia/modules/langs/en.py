@@ -1088,6 +1088,7 @@ NOTE: In groups, only admins can add/remove RSS links to the group's subscriptio
 *Admin only:*
  - /setrules <your rules here>: set the rules for this chat.
  - /clearrules: clear the rules for this chat.
+ - /privaterules <yes/no/on/off>: should the rules be sent to private chat. Default: yes.
 """,
 
 # userinfo
