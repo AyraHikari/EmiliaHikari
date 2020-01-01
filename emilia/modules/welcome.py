@@ -148,10 +148,13 @@ def new_member(bot: Bot, update: Update):
 						username = "@" + escape_markdown(new_mem.username)
 					else:
 						username = mention
-					formatted_text = cust_welcome.format(first=escape_markdown(first_name),
+					if cust_welcome:
+						formatted_text = cust_welcome.format(first=escape_markdown(first_name),
 											  last=escape_markdown(new_mem.last_name or first_name),
 											  fullname=escape_markdown(fullname), username=username, mention=mention,
 											  count=count, chatname=escape_markdown(chat.title), id=new_mem.id)
+					else:
+						formatted_text = ""
 					# Build keyboard
 					buttons = sql.get_welc_buttons(chat.id)
 					keyb = build_keyboard(buttons)
@@ -203,10 +206,13 @@ def new_member(bot: Bot, update: Update):
 						username = mention
 
 					valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
-					res = valid_format.format(first=escape_markdown(first_name),
+					if valid_format:
+						res = valid_format.format(first=escape_markdown(first_name),
 											  last=escape_markdown(new_mem.last_name or first_name),
 											  fullname=escape_markdown(fullname), username=username, mention=mention,
 											  count=count, chatname=escape_markdown(chat.title), id=new_mem.id)
+					else:
+						res = ""
 					buttons = sql.get_welc_buttons(chat.id)
 					keyb = build_keyboard(buttons)
 				else:
@@ -408,10 +414,13 @@ def left_member(bot: Bot, update: Update):
 					username = "@" + escape_markdown(left_mem.username)
 				else:
 					username = mention
-				formatted_text = cust_goodbye.format(first=escape_markdown(first_name),
+				if cust_goodbye:
+					formatted_text = cust_goodbye.format(first=escape_markdown(first_name),
 											  last=escape_markdown(left_mem.last_name or first_name),
 											  fullname=escape_markdown(fullname), username=username, mention=mention,
 											  count=count, chatname=escape_markdown(chat.title), id=left_mem.id)
+				else:
+					formatted_text = ""
 				# Build keyboard
 				buttons = sql.get_gdbye_buttons(chat.id)
 				keyb = build_keyboard(buttons)
@@ -437,10 +446,13 @@ def left_member(bot: Bot, update: Update):
 					username = mention
 
 				valid_format = escape_invalid_curly_brackets(cust_goodbye, VALID_WELCOME_FORMATTERS)
-				res = valid_format.format(first=escape_markdown(first_name),
+				if valid_format:
+					res = valid_format.format(first=escape_markdown(first_name),
 										  last=escape_markdown(left_mem.last_name or first_name),
 										  fullname=escape_markdown(fullname), username=username, mention=mention,
 										  count=count, chatname=escape_markdown(chat.title), id=left_mem.id)
+				else:
+					res = ""
 				buttons = sql.get_gdbye_buttons(chat.id)
 				keyb = build_keyboard(buttons)
 
