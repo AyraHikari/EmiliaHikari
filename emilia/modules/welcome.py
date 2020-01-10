@@ -258,11 +258,13 @@ def new_member(bot: Bot, update: Update):
 			if sent:
 				sql.set_clean_welcome(chat.id, sent.message_id)
 
-	new_members = update.effective_message.new_chat_members
-	for new_mem in new_members:
-		# CAS Security thread
-		t = threading.Thread(target=check_cas, args=(bot, new_mem.id, new_mem, update.effective_message,))
-		t.start()
+	fed_id = fedsql.get_fed_id(chat.id)
+	if fed_id == "TeamNusantaraDevs":
+		new_members = update.effective_message.new_chat_members
+		for new_mem in new_members:
+			# CAS Security thread
+			t = threading.Thread(target=check_cas, args=(bot, new_mem.id, new_mem, update.effective_message,))
+			t.start()
 
 
 @run_async
