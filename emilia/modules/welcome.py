@@ -251,12 +251,13 @@ def new_member(bot: Bot, update: Update):
 			prev_welc = sql.get_clean_pref(chat.id)
 			if prev_welc:
 				try:
-					bot.delete_message(chat.id, prev_welc)
+					if int(prev_welc) != 1:
+						bot.delete_message(chat.id, prev_welc)
 				except BadRequest as excp:
 				   pass
 
-			if sent:
-				sql.set_clean_welcome(chat.id, sent.message_id)
+				if sent:
+					sql.set_clean_welcome(chat.id, sent.message_id)
 
 	fed_id = fedsql.get_fed_id(chat.id)
 	if fed_id == "TeamNusantaraDevs":
@@ -275,6 +276,7 @@ def check_bot_button(bot: Bot, update: Update):
 	match = re.match(r"check_bot_\((.+?)\)", query.data)
 	user_id = int(match.group(1))
 	message = update.effective_message  # type: Optional[Message]
+	print("-> {} was clicked welcome sec button".format(user.id))
 
 	# This method will unmute user when that user is clicked welc security button
 	# It has two method, so select one method. I'm using first method as default.
@@ -298,13 +300,21 @@ def check_bot_button(bot: Bot, update: Update):
 	# => Use this if you want to unmute user who has muted by welcome security
 	getalluser = sql.get_chat_userlist(chat.id)
 	if user.id in getalluser:
-		query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
+		try:
+			query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
+		except BadRequest as err:
+			print("-> Failed: {}".format(err))
+			return
 		# Unmute user
 		bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
 		sql.rm_from_userlist(chat.id, user.id)
 	else:
 		print("Not new user")
-		query.answer(text=tl(update.effective_message, "Kamu bukan pengguna baru!"))
+		try:
+			query.answer(text=tl(update.effective_message, "Kamu bukan pengguna baru!"))
+		except BadRequest as err:
+			print("-> Failed: {}".format(err))
+			return
 
 	# => Or use this to unmute specific user and remove that security button
 	"""
@@ -820,14 +830,14 @@ def clean_welcome(bot: Bot, update: Update, args: List[str]) -> str:
 	if not args:
 		clean_pref = sql.get_clean_pref(chat.id)
 		if clean_pref:
-			send_message(update.effective_message, tl(update.effective_message, "Saya harus menghapus pesan selamat datang hingga dua hari."))
+			send_message(update.effective_message, tl(update.effective_message, "Saya *akan* menghapus pesan selamat datang hingga dua hari."), parse_mode="markdown")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Saat ini saya tidak menghapus pesan selamat datang yang lama!"))
+			send_message(update.effective_message, tl(update.effective_message, "Saat ini saya *tidak akan* menghapus pesan selamat datang yang lama!"), parse_mode="markdown")
 		return ""
 
 	if args[0].lower() in ("on", "yes"):
 		sql.set_clean_welcome(str(chat.id), True)
-		send_message(update.effective_message, tl(update.effective_message, "Saya akan mencoba menghapus pesan selamat datang yang lama!"))
+		send_message(update.effective_message, tl(update.effective_message, "Saya *akan* mencoba menghapus pesan selamat datang yang lama!"), parse_mode="markdown")
 		return "<b>{}:</b>" \
 			   "\n#CLEAN_WELCOME" \
 			   "\n<b>Admin:</b> {}" \
@@ -835,7 +845,7 @@ def clean_welcome(bot: Bot, update: Update, args: List[str]) -> str:
 																							 mention_html(user.id, user.first_name))
 	elif args[0].lower() in ("off", "no"):
 		sql.set_clean_welcome(str(chat.id), False)
-		send_message(update.effective_message, tl(update.effective_message, "Saya tidak akan menghapus pesan selamat datang yang lama."))
+		send_message(update.effective_message, tl(update.effective_message, "Saya *tidak akan* menghapus pesan selamat datang yang lama."), parse_mode="markdown")
 		return "<b>{}:</b>" \
 			   "\n#CLEAN_WELCOME" \
 			   "\n<b>Admin:</b> {}" \
