@@ -629,27 +629,32 @@ def welcome(bot: Bot, update: Update, args: List[str]):
 		send_message(update.effective_message, text,
 			parse_mode=ParseMode.MARKDOWN)
 
+		buttons = sql.get_welc_buttons(chat.id)
 		if welcome_type == sql.Types.BUTTON_TEXT or welcome_type == sql.Types.TEXT:
-			buttons = sql.get_welc_buttons(chat.id)
 			if noformat:
 				welcome_m += revert_buttons(buttons)
 				send_message(update.effective_message, welcome_m)
 
 			else:
-				keyb = build_keyboard(buttons)
-				keyboard = InlineKeyboardMarkup(keyb)
+				if buttons:
+					keyb = build_keyboard(buttons)
+					keyboard = InlineKeyboardMarkup(keyb)
+				else:
+					keyboard = None
 
 				send(update, welcome_m, keyboard, sql.DEFAULT_WELCOME)
 
 		else:
-			buttons = sql.get_welc_buttons(chat.id)
 			if noformat:
 				welcome_m += revert_buttons(buttons)
 				ENUM_FUNC_MAP[welcome_type](chat.id, cust_content, caption=welcome_m)
 
 			else:
-				keyb = build_keyboard(buttons)
-				keyboard = InlineKeyboardMarkup(keyb)
+				if buttons:
+					keyb = build_keyboard(buttons)
+					keyboard = InlineKeyboardMarkup(keyb)
+				else:
+					keyboard = None
 				ENUM_FUNC_MAP[welcome_type](chat.id, cust_content, caption=welcome_m, reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 	elif len(args) >= 1:
@@ -679,27 +684,32 @@ def goodbye(bot: Bot, update: Update, args: List[str]):
 			"(tidak mengisi {{}}) adalah:*").format(pref),
 			parse_mode=ParseMode.MARKDOWN)
 
+		buttons = sql.get_gdbye_buttons(chat.id)
 		if goodbye_type == sql.Types.BUTTON_TEXT:
-			buttons = sql.get_gdbye_buttons(chat.id)
 			if noformat:
 				goodbye_m += revert_buttons(buttons)
 				send_message(update.effective_message, goodbye_m)
 
 			else:
-				keyb = build_keyboard(buttons)
-				keyboard = InlineKeyboardMarkup(keyb)
+				if buttons:
+					keyb = build_keyboard(buttons)
+					keyboard = InlineKeyboardMarkup(keyb)
+				else:
+					keyboard = None
 
 				send(update, goodbye_m, keyboard, sql.DEFAULT_GOODBYE)
 
 		else:
-			buttons = sql.get_gdbye_buttons(chat.id)
 			if noformat:
 				goodbye_m += revert_buttons(buttons)
 				ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=goodbye_m)
 				
 			else:
-				keyb = build_keyboard(buttons)
-				keyboard = InlineKeyboardMarkup(keyb)
+				if buttons:
+					keyb = build_keyboard(buttons)
+					keyboard = InlineKeyboardMarkup(keyb)
+				else:
+					keyboard = None
 				ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=goodbye_m, reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 	elif len(args) >= 1:

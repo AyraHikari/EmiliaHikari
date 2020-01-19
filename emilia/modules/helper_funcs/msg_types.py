@@ -102,23 +102,6 @@ def get_welcome_type(msg: Message):
     except AttributeError:
         args = False
 
-    buttons = []
-    # determine what the contents of the filter are - text, image, sticker, etc
-    if args:
-        if msg.reply_to_message:
-            if msg.reply_to_message.caption:
-                argumen = msg.reply_to_message.caption
-            elif msg.reply_to_message.text:
-                argumen = msg.reply_to_message.text
-        else:
-            argumen = args[1]
-        offset = len(argumen) - len(msg.text)  # set correct offset relative to command + notename
-        text, buttons = button_markdown_parser(argumen, entities=msg.parse_entities(), offset=offset)
-        if buttons:
-            data_type = Types.BUTTON_TEXT
-        else:
-            data_type = Types.TEXT
-
     if msg.reply_to_message and msg.reply_to_message.sticker:
         content = msg.reply_to_message.sticker.file_id
         text = None
@@ -153,6 +136,19 @@ def get_welcome_type(msg: Message):
         content = msg.reply_to_message.video_note.file_id
         text = None
         data_type = Types.VIDEO_NOTE
+
+    buttons = []
+    # determine what the contents of the filter are - text, image, sticker, etc
+    if args:
+        if msg.reply_to_message:
+            argumen = msg.reply_to_message.caption if msg.reply_to_message.caption else ""
+            offset = 0 # offset is no need since target was in reply
+            entities = msg.reply_to_message.parse_entities()
+        else:
+            argumen = args[1]
+            offset = len(argumen) - len(msg.text)  # set correct offset relative to command + notename
+            entities = msg.parse_entities()
+        text, buttons = button_markdown_parser(argumen, entities=entities, offset=offset)
 
     return text, data_type, content, buttons
 
