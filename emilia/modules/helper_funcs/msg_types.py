@@ -150,6 +150,12 @@ def get_welcome_type(msg: Message):
             entities = msg.parse_entities()
         text, buttons = button_markdown_parser(argumen, entities=entities, offset=offset)
 
+    if not data_type:
+        if text and buttons:
+            data_type = Types.BUTTON_TEXT
+        elif text:
+            data_type = Types.TEXT
+
     return text, data_type, content, buttons
 
 def get_message_type(msg: Message):
