@@ -192,7 +192,7 @@ def gbanlist(bot: Bot, update: Update):
     banned_users = sql.get_gban_list()
 
     if not banned_users:
-        update.effective_send_message(update.effective_message, tl(update.effective_message, "Tidak ada pengguna yang dilarang global! Anda lebih baik dari yang saya harapkan..."))
+        bot.send_message(update.effective_message, tl(update.effective_message, "Tidak ada pengguna yang dilarang global! Anda lebih baik dari yang saya harapkan..."))
         return
 
     banfile = tl(update.effective_message, 'Persetan orang-orang ini.\n')
@@ -211,7 +211,7 @@ def check_and_ban(update, user_id, should_message=True):
     if sql.is_user_gbanned(user_id):
         update.effective_chat.kick_member(user_id)
         if should_message:
-            update.effective_send_message(update.effective_message, tl(update.effective_message, "Ini orang jahat, mereka seharusnya tidak ada di sini!"))
+            bot.send_message(update.effective_message, tl(update.effective_message, "Ini orang jahat, mereka seharusnya tidak ada di sini!"))
 
 
 @run_async
@@ -245,14 +245,14 @@ def gbanstat(bot: Bot, update: Update, args: List[str]):
     if len(args) > 0:
         if args[0].lower() in ["on", "yes"]:
             sql.enable_gbans(update.effective_chat.id)
-            update.effective_send_message(update.effective_message, tl(update.effective_message, "Saya telah mengaktifkan larangan global dalam grup ini. Ini akan membantu melindungi Anda "
+            bot.send_message(update.effective_message, tl(update.effective_message, "Saya telah mengaktifkan larangan global dalam grup ini. Ini akan membantu melindungi Anda "
                                                 "dari spammer, karakter tidak menyenangkan, dan troll terbesar."))
         elif args[0].lower() in ["off", "no"]:
             sql.disable_gbans(update.effective_chat.id)
-            update.effective_send_message(update.effective_message, tl(update.effective_message, "Saya telah menonaktifkan larangan global dalam grup ini. Larangan global tidak akan memengaruhi pengguna Anda "
+            bot.send_message(update.effective_message, tl(update.effective_message, "Saya telah menonaktifkan larangan global dalam grup ini. Larangan global tidak akan memengaruhi pengguna Anda "
                                                 "lagi. Anda akan kurang terlindungi dari troll dan spammer sekalipun"))
     else:
-        update.effective_send_message(update.effective_message, tl(update.effective_message, "Berikan saya beberapa argumen untuk memilih pengaturan! on/off, yes/no!\n\n"
+        bot.send_message(update.effective_message, tl(update.effective_message, "Berikan saya beberapa argumen untuk memilih pengaturan! on/off, yes/no!\n\n"
                                             "Pengaturan Anda saat ini: {}\n"
                                             "Ketika Benar, setiap larangan global yang terjadi juga akan terjadi di grup Anda. "
                                             "Ketika Salah, mereka tidak akan meninggalkan Anda pada belas kasihan yang mungkin dari "

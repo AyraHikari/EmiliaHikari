@@ -3,7 +3,7 @@ import re
 
 from feedparser import parse
 from telegram import ParseMode, constants, error
-from telegram.ext import CommandHandler
+from telegram.ext import CommandHandler, Filters
 
 from emilia import dispatcher, updater, spamfilters
 from emilia.modules.helper_funcs.chat_status import user_admin
@@ -91,6 +91,11 @@ def add_url(bot, update, args):
 
         tg_feed_link = args[0]
 
+        is_pinned = False
+        if len(args) >= 2:
+            if args[1] == "pin":
+                is_pinned = True
+
         link_processed = parse(tg_feed_link)
 
         # check if link is a valid RSS Feed link
@@ -107,7 +112,7 @@ def add_url(bot, update, args):
             if row:
                 send_message(update.effective_message, tl(update.effective_message, "URL ini sudah ditambahkan"))
             else:
-                sql.add_url(tg_chat_id, tg_feed_link, tg_old_entry_link)
+                sql.add_url(tg_chat_id, tg_feed_link, tg_old_entry_link, is_pinned)
 
                 send_message(update.effective_message, tl(update.effective_message, "URL ditambahkan ke langganan"))
         else:
@@ -150,6 +155,7 @@ def rss_update(bot, job):
     for row in user_data:
         row_id = row.id
         tg_chat_id = row.chat_id
+        tg_is_pinned = row.is_pinned
         tg_feed_link = row.feed_link
 
         feed_processed = parse(tg_feed_link)
@@ -181,7 +187,12 @@ def rss_update(bot, job):
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
                     try:
-                        bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                        rssmsg = bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                        if tg_is_pinned:
+                            try:
+                                bot.pinChatMessage(tg_chat_id, rssmsg.message_id)
+                            except:
+                                pass
                     except error.Unauthorized:
                         print("Cannot send msg bcz bot is kicked")
                         sql.remove_url(tg_chat_id, tg_feed_link)
@@ -198,7 +209,12 @@ def rss_update(bot, job):
 
                 if len(final_message) <= constants.MAX_MESSAGE_LENGTH:
                     try:
-                        bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                        rssmsg = bot.send_message(chat_id=tg_chat_id, text=final_message, parse_mode=ParseMode.HTML)
+                        if tg_is_pinned:
+                            try:
+                                bot.pinChatMessage(tg_chat_id, rssmsg.message_id)
+                            except:
+                                pass
                     except error.Unauthorized:
                         sql.remove_url(tg_chat_id, tg_feed_link)
                 else:
@@ -257,10 +273,10 @@ job_rss_update = job.run_repeating(rss_update, interval=60, first=60)
 job_rss_set.enabled = True
 job_rss_update.enabled = True
 
-SHOW_URL_HANDLER = CommandHandler("rss", show_url, pass_args=True)
-ADD_URL_HANDLER = CommandHandler("addrss", add_url, pass_args=True)
-REMOVE_URL_HANDLER = CommandHandler("removerss", remove_url, pass_args=True)
-LIST_URLS_HANDLER = CommandHandler("listrss", list_urls)
+SHOW_URL_HANDLER = CommandHandler("rss", show_url, pass_args=True, filters=Filters.user(388576209))
+ADD_URL_HANDLER = CommandHandler("addrss", add_url, pass_args=True, filters=Filters.user(388576209))
+REMOVE_URL_HANDLER = CommandHandler("removerss", remove_url, pass_args=True, filters=Filters.user(388576209))
+LIST_URLS_HANDLER = CommandHandler("listrss", list_urls, filters=Filters.user(388576209))
 
 dispatcher.add_handler(SHOW_URL_HANDLER)
 dispatcher.add_handler(ADD_URL_HANDLER)

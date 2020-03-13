@@ -12,6 +12,10 @@ from telegram.utils.helpers import mention_markdown, mention_html, escape_markdo
 
 import emilia.modules.sql.welcome_sql as sql
 from emilia import dispatcher, OWNER_ID, LOGGER, spamfilters
+try:
+	from emilia import SPAMWATCH_TOKEN
+except:
+	pass
 from emilia.modules.helper_funcs.chat_status import user_admin, is_user_ban_protected
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_welcome_type
@@ -264,6 +268,9 @@ def new_member(bot: Bot, update: Update):
 	if fed_id == "TeamNusantaraDevs":
 		new_members = update.effective_message.new_chat_members
 		for new_mem in new_members:
+			# SpamWatch Security thread
+			t = threading.Thread(target=check_sw, args=(bot, new_mem.id, new_mem, update.effective_message,))
+			t.start()
 			# CAS Security thread
 			t = threading.Thread(target=check_cas, args=(bot, new_mem.id, new_mem, update.effective_message,))
 			t.start()
@@ -1048,9 +1055,10 @@ def WELC_EDITBTN(bot: Bot, update: Update):
 
 
 CAS_URL = "https://combot.org/api/cas/check"
+SPAMWATCH_URL = "https://api.spamwat.ch/banlist/"
 
 def check_cas(bot: Bot, user_id, user, message):
-	json = requests.get(CAS_URL, params={"user_id": str(user_id)}).json()
+	json = requests.get(CAS_URL, params={"user_id": str(user_id)}, timeout=(2, 5)).json()
 	if json.get("ok"):
 		if json["result"]["offenses"] > 0:
 			is_success = False
@@ -1069,7 +1077,33 @@ def check_cas(bot: Bot, user_id, user, message):
 					return
 				text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [CAS ban](https://combot.org/cas/query?u={})".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name + (" " + user.last_name if user.last_name != None else "")), user_id, user_id)
 				bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
-				print(">>> NEW FBAN: {} {} in {}".format(user.first_name, user_id, message.chat.title))
+				print(">>> NEW FBAN CAS: {} {} in {}".format(user.first_name, user_id, message.chat.title))
+
+def check_sw(bot: Bot, user_id, user, message):
+	try:
+		SWT = SPAMWATCH_TOKEN
+	except:
+		return False
+	json = requests.get(SPAMWATCH_URL + str(user_id), headers={"Authorization": "Bearer {}".format(SWT)}).json()
+	if json.get('code') == 404:
+		return False
+	is_success = False
+	try:
+		bot.kickChatMember(message.chat.id, user_id)
+		is_success = True
+	except:
+		bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from SpamWatch and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name)), parse_mode="markdown", disable_web_page_preview=True)
+	if is_success:
+		bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: {}.".format(mention_markdown(user_id, user.first_name), json.get('reason') if json.get('reason') else "Unknown reason"), parse_mode="markdown", disable_web_page_preview=True)
+	fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
+	if fed_id:
+		x = fedsql.fban_user("TeamNusantaraDevs", user_id, user.first_name, user.last_name, user.username, json.get('reason') if json.get('reason') else "Unknown reason", int(time.time()))
+		if not x:
+			LOGGER.warning("Cannot fban spammer user!")
+			return
+		text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [SpamWatch] {}".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name + (" " + user.last_name if user.last_name != None else "")), user_id, json.get('reason') if json.get('reason') else "Unknown reason")
+		bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
+		print(">>> NEW FBAN SW: {} {} in {}".format(user.first_name, user_id, message.chat.title))
 
 
 

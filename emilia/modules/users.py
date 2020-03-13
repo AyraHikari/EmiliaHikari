@@ -73,6 +73,7 @@ def broadcast(bot: Bot, update: Update):
 def log_user(bot: Bot, update: Update):
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
+    # print(msg.text) if msg.text else ""
     fed_id = fedsql.get_fed_id(chat.id)
     if fed_id:
         user = update.effective_user

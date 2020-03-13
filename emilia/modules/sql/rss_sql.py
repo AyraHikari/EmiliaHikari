@@ -1,6 +1,6 @@
 import threading
 
-from sqlalchemy import Column, UnicodeText, Integer
+from sqlalchemy import Column, UnicodeText, Integer, Boolean
 
 from emilia.modules.sql import BASE, SESSION
 
@@ -11,11 +11,13 @@ class RSS(BASE):
     chat_id = Column(UnicodeText, nullable=False)
     feed_link = Column(UnicodeText)
     old_entry_link = Column(UnicodeText)
+    is_pinned = Column(Boolean)
 
-    def __init__(self, chat_id, feed_link, old_entry_link):
+    def __init__(self, chat_id, feed_link, old_entry_link, is_pinned):
         self.chat_id = chat_id
         self.feed_link = feed_link
         self.old_entry_link = old_entry_link
+        self.is_pinned = is_pinned
 
     def __repr__(self):
         return "<RSS for chatID {} at feed_link {} with old_entry_link {}>".format(self.chat_id,
@@ -35,9 +37,9 @@ def check_url_availability(tg_chat_id, tg_feed_link):
         SESSION.close()
 
 
-def add_url(tg_chat_id, tg_feed_link, tg_old_entry_link):
+def add_url(tg_chat_id, tg_feed_link, tg_old_entry_link, is_pinned):
     with INSERTION_LOCK:
-        action = RSS(tg_chat_id, tg_feed_link, tg_old_entry_link)
+        action = RSS(tg_chat_id, tg_feed_link, tg_old_entry_link, is_pinned)
 
         SESSION.add(action)
         SESSION.commit()
