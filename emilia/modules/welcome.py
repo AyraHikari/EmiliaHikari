@@ -200,6 +200,8 @@ def new_member(bot: Bot, update: Update):
 						if canrest:
 							if new_mem.id not in list(is_clicked):
 								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+							elif new_mem.id in list(is_clicked) and is_clicked[new_mem.id] == False:
+								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
 					keyboard = InlineKeyboardMarkup(keyb)
 					# Send message
 					try:
@@ -271,6 +273,8 @@ def new_member(bot: Bot, update: Update):
 							sql.add_to_userlist(chat.id, new_mem.id, False)
 						if canrest:
 							if new_mem.id not in list(is_clicked):
+								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+							elif new_mem.id in list(is_clicked) and is_clicked[new_mem.id] == False:
 								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
 					keyboard = InlineKeyboardMarkup(keyb)
 
