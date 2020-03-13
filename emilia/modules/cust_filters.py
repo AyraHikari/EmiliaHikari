@@ -238,11 +238,14 @@ def reply_filter(bot: Bot, update: Update):
 				keyboard = InlineKeyboardMarkup(keyb)
 
 				VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention']
-				valid_format = escape_invalid_curly_brackets(filt.reply_text, VALID_WELCOME_FORMATTERS)
-				if valid_format:
-					filtext = valid_format.format(first=escape_markdown(message.from_user.first_name),
-												  last=escape_markdown(message.from_user.last_name or message.from_user.first_name),
-												  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else message.from_user.first_name)), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title), id=message.from_user.id)
+				if filt.reply_text:
+					valid_format = escape_invalid_curly_brackets(filt.reply_text, VALID_WELCOME_FORMATTERS)
+					if valid_format:
+						filtext = valid_format.format(first=escape_markdown(message.from_user.first_name),
+													  last=escape_markdown(message.from_user.last_name or message.from_user.first_name),
+													  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else message.from_user.first_name)), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title), id=message.from_user.id)
+					else:
+						filtext = ""
 				else:
 					filtext = ""
 
