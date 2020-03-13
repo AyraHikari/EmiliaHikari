@@ -169,24 +169,35 @@ def new_member(bot: Bot, update: Update):
 						pass
 					elif getsec:
 						# If mute time is turned on
+						is_clicked = sql.get_chat_userlist(chat.id)
 						if mutetime:
 							if mutetime[:1] == "0":
-								try:
-									bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
-									canrest = True
-								except BadRequest:
+								if new_mem.id not in list(is_clicked):
+									try:
+										bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+										canrest = True
+									except BadRequest:
+										canrest = False
+								else:
 									canrest = False
 							else:
-								mutetime = extract_time(update.effective_message, mutetime)
-								try:
-									bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
-									canrest = True
-								except BadRequest:
+								if new_mem.id not in list(is_clicked):
+									mutetime = extract_time(update.effective_message, mutetime)
+									try:
+										bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+										canrest = True
+									except BadRequest:
+										canrest = False
+								else:
 									canrest = False
 						# If security welcome is turned on
+						if is_clicked.get(new_mem.id) and is_clicked[new_mem.id] == True:
+							sql.add_to_userlist(chat.id, new_mem.id, True)
+						else:
+							sql.add_to_userlist(chat.id, new_mem.id, False)
 						if canrest:
-							sql.add_to_userlist(chat.id, new_mem.id)
-							keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+							if new_mem.id not in list(is_clicked):
+								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
 					keyboard = InlineKeyboardMarkup(keyb)
 					# Send message
 					try:
@@ -230,23 +241,34 @@ def new_member(bot: Bot, update: Update):
 					if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
 						pass
 					elif getsec:
+						is_clicked = sql.get_chat_userlist(chat.id)
 						if mutetime:
 							if mutetime[:1] == "0":
-								try:
-									bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
-									canrest = True
-								except BadRequest:
+								if new_mem.id not in list(is_clicked):
+									try:
+										bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+										canrest = True
+									except BadRequest:
+										canrest = False
+								else:
 									canrest = False
 							else:
-								mutetime = extract_time(update.effective_message, mutetime)
-								try:
-									bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
-									canrest = True
-								except BadRequest:
+								if new_mem.id not in list(is_clicked):
+									mutetime = extract_time(update.effective_message, mutetime)
+									try:
+										bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+										canrest = True
+									except BadRequest:
+										canrest = False
+								else:
 									canrest = False
+						if is_clicked.get(new_mem.id) and is_clicked[new_mem.id] == True:
+							sql.add_to_userlist(chat.id, new_mem.id, True)
+						else:
+							sql.add_to_userlist(chat.id, new_mem.id, False)
 						if canrest:
-							sql.add_to_userlist(chat.id, new_mem.id)
-							keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+							if new_mem.id not in list(is_clicked):
+								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
 					keyboard = InlineKeyboardMarkup(keyb)
 
 					sent = send(update, res, keyboard,
@@ -301,13 +323,21 @@ def check_bot_button(bot: Bot, update: Update):
 	# who has muted by security button.
 	# Also you can remove add_to_userlist and rm_from_userlist script
 	# if you want to use second method since it unused.
+	# 
+	# 
+	# Edit 14/03/2020
+	# Now welcome security is more secure!
+	# When user was clicked welcome, no need to restirect him/her again,
+	# And when they're got muted by admins, and want to rejoin group to
+	# bypass mute, he/she will not muted again or send 'unmute me' to them.
+	# 
 
 	# PLEASE SELECT ONE
 	# use """ to set it as comment and disable that script
 
 	# => Use this if you want to unmute user who has muted by welcome security
 	getalluser = sql.get_chat_userlist(chat.id)
-	if user.id in getalluser:
+	if getalluser and user.id in list(getalluser) and getalluser[user.id] == False:
 		try:
 			query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
 		except BadRequest as err:
@@ -315,14 +345,22 @@ def check_bot_button(bot: Bot, update: Update):
 			return
 		# Unmute user
 		bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-		sql.rm_from_userlist(chat.id, user.id)
+		# sql.rm_from_userlist(chat.id, user.id)
+		sql.add_to_userlist(chat.id, user.id, True)
 	else:
 		print("Not new user")
-		try:
-			query.answer(text=tl(update.effective_message, "Kamu bukan pengguna baru!"))
-		except BadRequest as err:
-			print("-> Failed: {}".format(err))
-			return
+		if getalluser.get(user.id) and getalluser.get(user.id) == True:
+			try:
+				query.answer(text=tl(update.effective_message, "Kamu sudah pernah mengklik ini sebelumnya!"))
+			except BadRequest as err:
+				print("-> Failed: {}".format(err))
+				return
+		else:
+			try:
+				query.answer(text=tl(update.effective_message, "Kamu bukan pengguna baru!"))
+			except BadRequest as err:
+				print("-> Failed: {}".format(err))
+				return
 
 	# => Or use this to unmute specific user and remove that security button
 	"""
@@ -330,8 +368,11 @@ def check_bot_button(bot: Bot, update: Update):
 		print("Not that user")
 		query.answer(text=tl(update.effective_message, "Kamu bukan pengguna yang di tuju!"))
 		return
+	if getalluser.get(user.id) and getalluser.get(user.id) == True:
+		query.answer(text=tl(update.effective_message, "Kamu sudah pernah mengklik ini sebelumnya!"))
+		return
 	bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
-	sql.rm_from_userlist(chat.id, user.id)
+	sql.add_to_userlist(chat.id, user.id, True)
 	should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
 	# If welcome message is media, send with appropriate function
 	if welc_type != sql.Types.TEXT and welc_type != sql.Types.BUTTON_TEXT:

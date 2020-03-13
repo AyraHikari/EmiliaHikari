@@ -94,10 +94,12 @@ class UserRestrict(BASE):
     __tablename__ = "welcome_restrictlist"
     chat_id = Column(String(14), primary_key=True)
     user_id = Column(Integer, primary_key=True, nullable=False)
+    is_clicked = Column(Boolean)
 
-    def __init__(self, chat_id, user_id):
+    def __init__(self, chat_id, user_id, is_clicked):
         self.chat_id = str(chat_id)  # ensure string
         self.user_id = user_id
+        self.is_clicked = is_clicked
 
     def __repr__(self):
         return "<User restrict '%s' in %s>" % (self.user_id, self.chat_id)
@@ -125,25 +127,25 @@ UR_LOCK = threading.RLock()
 CHAT_USERRESTRICT = {}
 
 
-def add_to_userlist(chat_id, user_id):
+def add_to_userlist(chat_id, user_id, is_clicked):
     with UR_LOCK:
-        user_filt = UserRestrict(str(chat_id), user_id)
+        user_filt = UserRestrict(str(chat_id), user_id, is_clicked)
 
         SESSION.merge(user_filt)  # merge to avoid duplicate key issues
         SESSION.commit()
         global CHAT_USERRESTRICT
-        if CHAT_USERRESTRICT.get(str(chat_id), set()) == set():
-            CHAT_USERRESTRICT[str(chat_id)] = {user_id}
+        if CHAT_USERRESTRICT.get(str(chat_id)):
+            CHAT_USERRESTRICT[str(chat_id)] = {user_id: is_clicked}
         else:
-            CHAT_USERRESTRICT.get(str(chat_id), set()).add(user_id)
+            CHAT_USERRESTRICT.get(str(chat_id))[user_id] = is_clicked
 
 
 def rm_from_userlist(chat_id, user_id):
     with UR_LOCK:
         user_filt = SESSION.query(UserRestrict).get((str(chat_id), user_id))
         if user_filt:
-            if user_id in CHAT_USERRESTRICT.get(str(chat_id), set()):  # sanity check
-                CHAT_USERRESTRICT.get(str(chat_id), set()).remove(user_id)
+            if user_id in CHAT_USERRESTRICT.get(str(chat_id)):  # sanity check
+                CHAT_USERRESTRICT.get(str(chat_id)).pop(user_id)
 
             SESSION.delete(user_filt)
             SESSION.commit()
@@ -153,7 +155,10 @@ def rm_from_userlist(chat_id, user_id):
         return False
 
 def get_chat_userlist(chat_id):
-    return CHAT_USERRESTRICT.get(str(chat_id), set())
+    global CHAT_USERRESTRICT
+    if not CHAT_USERRESTRICT.get(str(chat_id)):
+        CHAT_USERRESTRICT[str(chat_id)] = {}
+    return CHAT_USERRESTRICT.get(str(chat_id))
 
 
 def welcome_security(chat_id):
@@ -395,9 +400,11 @@ def __load_chat_userrestrict():
 
         all_filters = SESSION.query(UserRestrict).all()
         for x in all_filters:
-            CHAT_USERRESTRICT[x.chat_id] += [x.user_id]
+            if not CHAT_USERRESTRICT.get(x.chat_id):
+                CHAT_USERRESTRICT[x.chat_id] = {}
+            CHAT_USERRESTRICT[x.chat_id][x.user_id] = x.is_clicked
 
-        CHAT_USERRESTRICT = {x: set(y) for x, y in CHAT_USERRESTRICT.items()}
+        # CHAT_USERRESTRICT = {x: set(y) for x, y in CHAT_USERRESTRICT.items()}
 
     finally:
         SESSION.close()

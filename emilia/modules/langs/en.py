@@ -1225,6 +1225,7 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui.": "Note: An error occurred while sending custom messages. Please update.",
 	"Kamu telah disuarakan!": "You've been unmuted!",
 	"Kamu bukan pengguna baru!": "You are not a new member!",
+	"Kamu sudah pernah mengklik ini sebelumnya!": "You've clicked this before!",
 
 # cleaner
 	"Penghapus pesan biru telah di *non-aktifkan* di *{}*.": "Blue text cleaner was *disabled* in *{}*.",
