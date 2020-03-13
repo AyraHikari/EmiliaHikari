@@ -228,7 +228,7 @@ def get_id(bot: Bot, update: Update, args: List[str]):
     elif user_id == "error":
         try:
             user = bot.get_chat(args[0])
-        except telegram.error.BadRequest:
+        except BadRequest:
             send_message(update.effective_message, "Error: Unknown User/Chat!")
             return
         send_message(update.effective_message, tl(update.effective_message, "Id grup tersebut adalah `{}`.").format(user.id), parse_mode=ParseMode.MARKDOWN)
