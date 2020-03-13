@@ -65,6 +65,9 @@ def promote(bot: Bot, update: Update, args: List[str]) -> str:
     if not user_id:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
         return ""
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, "Error: Unknown user!"))
+        return ""
 
     user_member = chat.get_member(user_id)
     if user_member.status == 'administrator' or user_member.status == 'creator':
@@ -133,6 +136,9 @@ def demote(bot: Bot, update: Update, args: List[str]) -> str:
     user_id = extract_user(message, args)
     if not user_id:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
+        return ""
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, "Error: Unknown user!"))
         return ""
 
     user_member = chat.get_member(user_id)

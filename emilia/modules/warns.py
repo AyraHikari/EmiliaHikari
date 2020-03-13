@@ -170,6 +170,9 @@ def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
     user = update.effective_user
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     conn = connected(bot, update, chat, user.id, need_admin=True)
     if conn:
@@ -244,7 +247,7 @@ def reset_warns(bot: Bot, update: Update, args: List[str]) -> str:
         send_message(update.effective_message, text, parse_mode="markdown")
         return ""
     
-    if user_id:
+    if user_id and user_id != "error":
         sql.reset_warns(user_id, chat.id)
         if conn:
             send_message(update.effective_message, tl(update.effective_message, "Peringatan telah disetel ulang pada *{}*!").format(chat_name), parse_mode="markdown")

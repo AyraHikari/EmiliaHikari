@@ -49,9 +49,7 @@ def extract_user_and_text(message: Message, args: List[str]) -> (Optional[int], 
         user = args[0]
         user_id = get_user_id(user)
         if not user_id:
-            message.reply_text("Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika "
-                               "Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu.")
-            return None, None
+            return "error", "Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu."
 
         else:
             user_id = user_id
@@ -75,9 +73,7 @@ def extract_user_and_text(message: Message, args: List[str]) -> (Optional[int], 
         message.bot.get_chat(user_id)
     except BadRequest as excp:
         if excp.message in ("User_id_invalid", "Chat not found"):
-            message.reply_text("Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari "
-                               "mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa"
-                               "untuk menjalankan perintah tertentu...)")
+            return "error", "Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa untuk menjalankan perintah tertentu...)"
         else:
             LOGGER.exception("Exception %s on user %s", excp.message, user_id)
 

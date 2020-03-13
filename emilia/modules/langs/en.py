@@ -860,6 +860,7 @@ Setting the log channel is done by:
 	"Id {} adalah `{}`.": "{}'s id is `{}`.",
 	"Id Anda adalah `{}`.": "Your id is `{}`.",
 	"Id grup ini adalah `{}`.": "This group's id is `{}`.",
+	"Id grup tersebut adalah `{}`.": "That group's id is `{}`.",
 	"Saya tidak dapat mengekstrak pengguna dari ini.": "I can't extract a user from this.",
 	"<b>Info Pengguna</b>:": "<b>User info</b>:",
 	"\nNama depan: {}": "\nFirst Name: {}",

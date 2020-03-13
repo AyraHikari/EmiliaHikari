@@ -32,7 +32,7 @@ def mute(bot: Bot, update: Update, args: List[str]) -> str:
     message = update.effective_message  # type: Optional[Message]
 
     user_id = extract_user(message, args)
-    if not user_id:
+    if not user_id or user_id == "error":
         send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi saya nama pengguna untuk membungkam, atau membalas seseorang untuk dibisukan."))
         return ""
 
@@ -97,7 +97,7 @@ def unmute(bot: Bot, update: Update, args: List[str]) -> str:
     message = update.effective_message  # type: Optional[Message]
 
     user_id = extract_user(message, args)
-    if not user_id:
+    if not user_id or user_id == "error":
         send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi saya nama pengguna untuk menyuarakan, atau membalas seseorang untuk disuarakan."))
         return ""
 
@@ -169,6 +169,9 @@ def temp_mute(bot: Bot, update: Update, args: List[str]) -> str:
     message = update.effective_message  # type: Optional[Message]
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     if not user_id:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))

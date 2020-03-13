@@ -172,7 +172,7 @@ def slap(bot: Bot, update: Update, args: List[str]):
     curr_user = "{}".format(mention_markdown(msg.from_user.id, msg.from_user.first_name))
 
     user_id = extract_user(update.effective_message, args)
-    if user_id:
+    if user_id and user_id != "error":
         slapped_user = bot.get_chat(user_id)
         user1 = curr_user
         #if slapped_user.username:
@@ -210,7 +210,7 @@ def get_id(bot: Bot, update: Update, args: List[str]):
     if spam == True:
         return
     user_id = extract_user(update.effective_message, args)
-    if user_id:
+    if user_id and user_id != "error":
         if update.effective_message.reply_to_message and update.effective_message.reply_to_message.forward_from:
             user1 = update.effective_message.reply_to_message.from_user
             user2 = update.effective_message.reply_to_message.forward_from
@@ -225,6 +225,13 @@ def get_id(bot: Bot, update: Update, args: List[str]):
             user = bot.get_chat(user_id)
             send_message(update.effective_message, tl(update.effective_message, "Id {} adalah `{}`.").format(escape_markdown(user.first_name), user.id),
                                                 parse_mode=ParseMode.MARKDOWN)
+    elif user_id == "error":
+        try:
+            user = bot.get_chat(args[0])
+        except telegram.error.BadRequest:
+            send_message(update.effective_message, "Error: Unknown User/Chat!")
+            return
+        send_message(update.effective_message, tl(update.effective_message, "Id grup tersebut adalah `{}`.").format(user.id), parse_mode=ParseMode.MARKDOWN)
     else:
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == "private":
@@ -245,7 +252,7 @@ def info(bot: Bot, update: Update, args: List[str]):
     chat = update.effective_chat  # type: Optional[Chat]
     user_id = extract_user(update.effective_message, args)
 
-    if user_id:
+    if user_id and user_id != "error":
         user = bot.get_chat(user_id)
 
     elif not msg.reply_to_message and not args:

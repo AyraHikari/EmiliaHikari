@@ -51,6 +51,9 @@ def gban(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     if not user_id:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
@@ -138,6 +141,9 @@ def ungban(bot: Bot, update: Update, args: List[str]):
     if not user_id:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
         return
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, "Error: Unknown user!"))
+        return ""
 
     user_chat = bot.get_chat(user_id)
     if user_chat.type != 'private':

@@ -24,7 +24,7 @@ def about_me(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
     user_id = extract_user(message, args)
 
-    if user_id:
+    if user_id and user_id != "error":
         user = bot.get_chat(user_id)
     else:
         user = message.from_user
@@ -69,7 +69,7 @@ def about_bio(bot: Bot, update: Update, args: List[str]):
     message = update.effective_message  # type: Optional[Message]
 
     user_id = extract_user(message, args)
-    if user_id:
+    if user_id and user_id != "error":
         user = bot.get_chat(user_id)
     else:
         user = message.from_user

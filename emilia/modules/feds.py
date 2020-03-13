@@ -276,7 +276,7 @@ def user_join_fed(bot: Bot, update: Update, args: List[str]):
 
 	if is_user_fed_owner(fed_id, user.id):
 		user_id = extract_user(msg, args)
-		if user_id:
+		if user_id and user_id != "error":
 			user = bot.get_chat(user_id)
 		elif not msg.reply_to_message and not args:
 			user = msg.from_user
@@ -328,7 +328,7 @@ def user_demote_fed(bot: Bot, update: Update, args: List[str]):
 	if is_user_fed_owner(fed_id, user.id):
 		msg = update.effective_message  # type: Optional[Message]
 		user_id = extract_user(msg, args)
-		if user_id:
+		if user_id and user_id != "error":
 			user = bot.get_chat(user_id)
 
 		elif not msg.reply_to_message and not args:
@@ -1448,7 +1448,7 @@ def fed_stat_user(bot, update, args):
 	else:
 		user_id = extract_user(msg, args)
 
-	if user_id:
+	if user_id and user_id != "error":
 		if len(args) == 2 and args[0].isdigit():
 			fed_id = args[1]
 			user_name, reason, fbantime = sql.get_user_fban(fed_id, str(user_id))

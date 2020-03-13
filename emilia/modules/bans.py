@@ -33,6 +33,9 @@ def ban(bot: Bot, update: Update, args: List[str]) -> str:
         return
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     conn = connected(bot, update, chat, user.id, need_admin=True)
     if conn:
@@ -146,6 +149,9 @@ def temp_ban(bot: Bot, update: Update, args: List[str]) -> str:
         return
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     conn = connected(bot, update, chat, user.id, need_admin=True)
     if conn:
@@ -273,6 +279,9 @@ def kick(bot: Bot, update: Update, args: List[str]) -> str:
         return
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     if not user_id:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
@@ -406,6 +415,9 @@ def unban(bot: Bot, update: Update, args: List[str]) -> str:
         return
 
     user_id, reason = extract_user_and_text(message, args)
+    if user_id == "error":
+        send_message(update.effective_message, tl(update.effective_message, reason))
+        return ""
 
     conn = connected(bot, update, chat, user.id, need_admin=True)
     if conn:
