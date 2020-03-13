@@ -7,7 +7,7 @@ from telegram import Message, Update, Bot
 from telegram.error import BadRequest, Unauthorized
 from telegram.ext import CommandHandler, RegexHandler
 from telegram.ext.dispatcher import run_async
-from telegram.utils.helpers import escape_markdown
+from telegram.utils.helpers import escape_markdown, mention_markdown
 
 import emilia.modules.sql.notes_sql as sql
 from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamfilters, OWNER_ID
@@ -15,6 +15,7 @@ from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_note_type
+from emilia.modules.helper_funcs.string_handling import escape_invalid_curly_brackets
 
 from emilia.modules.connection import connected
 from emilia.modules.languages import tl
@@ -89,7 +90,16 @@ def get(bot, update, notename, show_none=True, no_format=False):
 					else:
 						raise
 		else:
-			text = note.value
+
+			VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention']
+			valid_format = escape_invalid_curly_brackets(note.value, VALID_WELCOME_FORMATTERS)
+			if valid_format:
+				text = valid_format.format(first=escape_markdown(message.from_user.first_name),
+											  last=escape_markdown(message.from_user.last_name or message.from_user.first_name),
+											  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else message.from_user.first_name)), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title), id=message.from_user.id)
+			else:
+				text = ""
+
 			keyb = []
 			parseMode = ParseMode.MARKDOWN
 			buttons = sql.get_buttons(chat_id, notename)

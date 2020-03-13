@@ -6,7 +6,7 @@ from telegram import ParseMode, InlineKeyboardMarkup, Message, Chat
 from telegram import Update, Bot
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, MessageHandler, DispatcherHandlerStop, run_async
-from telegram.utils.helpers import escape_markdown
+from telegram.utils.helpers import escape_markdown, mention_markdown
 
 from emilia import dispatcher, LOGGER, spamfilters, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
@@ -15,7 +15,7 @@ from emilia.modules.helper_funcs.extraction import extract_text
 from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.helper_funcs.misc import build_keyboard
 from emilia.modules.helper_funcs.msg_types import get_filter_type
-from emilia.modules.helper_funcs.string_handling import split_quotes, button_markdown_parser
+from emilia.modules.helper_funcs.string_handling import split_quotes, button_markdown_parser, escape_invalid_curly_brackets
 from emilia.modules.sql import cust_filters_sql as sql
 
 from emilia.modules.connection import connected
@@ -236,16 +236,26 @@ def reply_filter(bot: Bot, update: Update):
 				buttons = sql.get_buttons(chat.id, filt.keyword)
 				keyb = build_keyboard(buttons)
 				keyboard = InlineKeyboardMarkup(keyb)
+
+				VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention']
+				valid_format = escape_invalid_curly_brackets(filt.reply_text, VALID_WELCOME_FORMATTERS)
+				if valid_format:
+					filtext = valid_format.format(first=escape_markdown(message.from_user.first_name),
+												  last=escape_markdown(message.from_user.last_name or message.from_user.first_name),
+												  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else message.from_user.first_name)), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title), id=message.from_user.id)
+				else:
+					filtext = ""
+
 				if filt.file_type in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
 					try:
-						bot.send_message(chat.id, filt.reply_text, reply_to_message_id=message.message_id,
+						bot.send_message(chat.id, filtext, reply_to_message_id=message.message_id,
 										 parse_mode="markdown", disable_web_page_preview=True,
 										 reply_markup=keyboard)
 					except BadRequest as excp:
 						error_catch = get_exception(excp, filt, chat)
 						if error_catch == "noreply":
 							try:
-								bot.send_message(chat.id, filt.reply_text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
+								bot.send_message(chat.id, filtext, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
 							except BadRequest as excp:
 								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
 								send_message(update.effective_message, tl(update.effective_message, get_exception(excp, filt, chat)))
@@ -257,7 +267,7 @@ def reply_filter(bot: Bot, update: Update):
 								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
 								pass
 				else:
-					ENUM_FUNC_MAP[filt.file_type](chat.id, filt.file_id, caption=filt.reply_text, reply_to_message_id=message.message_id, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
+					ENUM_FUNC_MAP[filt.file_type](chat.id, filt.file_id, caption=filtext, reply_to_message_id=message.message_id, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
 				break
 			else:
 				if filt.is_sticker:
