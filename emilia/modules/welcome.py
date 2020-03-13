@@ -336,6 +336,7 @@ def check_bot_button(bot: Bot, update: Update):
 	# use """ to set it as comment and disable that script
 
 	# => Use this if you want to unmute user who has muted by welcome security
+	"""
 	getalluser = sql.get_chat_userlist(chat.id)
 	if getalluser and user.id in list(getalluser) and getalluser[user.id] == False:
 		try:
@@ -361,9 +362,10 @@ def check_bot_button(bot: Bot, update: Update):
 			except BadRequest as err:
 				print("-> Failed: {}".format(err))
 				return
+	"""
 
 	# => Or use this to unmute specific user and remove that security button
-	"""
+	getalluser = sql.get_chat_userlist(chat.id)
 	if int(user.id) != int(user_id):
 		print("Not that user")
 		query.answer(text=tl(update.effective_message, "Kamu bukan pengguna yang di tuju!"))
@@ -430,9 +432,8 @@ def check_bot_button(bot: Bot, update: Update):
 		res = sql.DEFAULT_WELCOME.format(first=first_name)
 		keyb = []
 	keyboard = InlineKeyboardMarkup(keyb)
-	bot.editMessageText(chat.id, message_id=query.message.message_id, text=res, reply_markup=keyboard, parse_mode="markdown")
+	bot.editMessageText(chat_id=chat.id, message_id=query.message.message_id, text=res, reply_markup=keyboard, parse_mode="markdown")
 	query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
-	"""
 	#TODO need kick users after 2 hours and remove message 
 
 
