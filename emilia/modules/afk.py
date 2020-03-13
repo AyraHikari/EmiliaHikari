@@ -18,7 +18,7 @@ AFK_REPLY_GROUP = 8
 
 
 @run_async
-def afk(bot: Bot, update: Update):
+def afk(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -34,7 +34,7 @@ def afk(bot: Bot, update: Update):
 
 
 @run_async
-def no_longer_afk(bot: Bot, update: Update):
+def no_longer_afk(update, context):
     user = update.effective_user  # type: Optional[User]
 
     if not user:  # ignore channels
@@ -46,7 +46,7 @@ def no_longer_afk(bot: Bot, update: Update):
 
 
 @run_async
-def reply_afk(bot: Bot, update: Update):
+def reply_afk(update, context):
     message = update.effective_message  # type: Optional[Message]
 
     entities = message.parse_entities([MessageEntity.TEXT_MENTION, MessageEntity.MENTION])

@@ -39,7 +39,7 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
 @user_admin
-def import_data(bot: Bot, update):
+def import_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -718,7 +718,7 @@ def import_data(bot: Bot, update):
 
 @run_async
 @user_admin
-def export_data(bot: Bot, update: Update, chat_data):
+def export_data(update, context, chat_data):
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)

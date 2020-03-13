@@ -214,16 +214,22 @@ def get_id(bot: Bot, update: Update, args: List[str]):
         if update.effective_message.reply_to_message and update.effective_message.reply_to_message.forward_from:
             user1 = update.effective_message.reply_to_message.from_user
             user2 = update.effective_message.reply_to_message.forward_from
-            send_message(update.effective_message, 
-                tl(update.effective_message, "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.").format(
+            text = tl(update.effective_message, "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.").format(
                     escape_markdown(user2.first_name),
                     user2.id,
                     escape_markdown(user1.first_name),
-                    user1.id),
+                    user1.id)
+            if update.effective_message.chat.type != "private":
+                text += "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(update.effective_message.chat.id)
+            send_message(update.effective_message, 
+                text,
                 parse_mode=ParseMode.MARKDOWN)
         else:
             user = bot.get_chat(user_id)
-            send_message(update.effective_message, tl(update.effective_message, "Id {} adalah `{}`.").format(escape_markdown(user.first_name), user.id),
+            text = tl(update.effective_message, "Id {} adalah `{}`.").format(escape_markdown(user.first_name), user.id)
+            if update.effective_message.chat.type != "private":
+                text += "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(update.effective_message.chat.id)
+            send_message(update.effective_message, text,
                                                 parse_mode=ParseMode.MARKDOWN)
     elif user_id == "error":
         try:
@@ -231,15 +237,19 @@ def get_id(bot: Bot, update: Update, args: List[str]):
         except BadRequest:
             send_message(update.effective_message, "Error: Unknown User/Chat!")
             return
-        send_message(update.effective_message, tl(update.effective_message, "Id grup tersebut adalah `{}`.").format(user.id), parse_mode=ParseMode.MARKDOWN)
+        text = tl(update.effective_message, "Id Anda adalah `{}`.").format(update.effective_message.from_user.id)
+        text += "\n" + tl(update.effective_message, "Id grup tersebut adalah `{}`.").format(user.id)
+        if update.effective_message.chat.type != "private":
+            text += "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(update.effective_message.chat.id)
+        send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
     else:
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == "private":
-            send_message(update.effective_message, tl(update.effective_message, "Id Anda adalah `{}`.").format(chat.id),
+            send_message(update.effective_message, tl(update.effective_message, "Id Anda adalah `{}`.").format(update.effective_message.from_user.id),
                                                 parse_mode=ParseMode.MARKDOWN)
 
         else:
-            send_message(update.effective_message, tl(update.effective_message, "Id grup ini adalah `{}`.").format(chat.id),
+            send_message(update.effective_message, tl(update.effective_message, "Id Anda adalah `{}`.").format(update.effective_message.from_user.id) + "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(chat.id),
                                                 parse_mode=ParseMode.MARKDOWN)
 
 

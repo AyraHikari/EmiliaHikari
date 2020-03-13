@@ -52,14 +52,14 @@ def get_user_id(username):
 
 
 @run_async
-def broadcast(bot: Bot, update: Update):
+def broadcast(update, context):
     to_send = update.effective_message.text.split(None, 1)
     if len(to_send) >= 2:
         chats = sql.get_all_chats() or []
         failed = 0
         for chat in chats:
             try:
-                bot.sendMessage(int(chat.chat_id), to_send[1])
+                context.bot.sendMessage(int(chat.chat_id), to_send[1])
                 sleep(0.1)
             except TelegramError:
                 failed += 1
@@ -70,7 +70,7 @@ def broadcast(bot: Bot, update: Update):
 
 
 @run_async
-def log_user(bot: Bot, update: Update):
+def log_user(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
     # print(msg.text) if msg.text else ""
@@ -82,9 +82,9 @@ def log_user(bot: Bot, update: Update):
             if fban:
                 send_message(update.effective_message, languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
                 try:
-                     bot.kick_chat_member(chat.id, user.id)
+                    context.bot.kick_chat_member(chat.id, user.id)
                 except:
-                	 print("Fban: cannot banned this user")
+                	print("Fban: cannot banned this user")
 
     sql.update_user(msg.from_user.id,
                     msg.from_user.username,
@@ -103,7 +103,7 @@ def log_user(bot: Bot, update: Update):
 
 
 @run_async
-def chats(bot: Bot, update: Update):
+def chats(update, context):
     all_chats = sql.get_all_chats() or []
     chatfile = 'Daftar obrolan.\n'
     for chat in all_chats:

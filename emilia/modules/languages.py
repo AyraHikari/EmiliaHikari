@@ -80,7 +80,7 @@ def tl(message, text):
 
 @run_async
 @user_admin
-def set_language(bot, update):
+def set_language(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -127,7 +127,7 @@ def set_language(bot, update):
 
 @run_async
 @user_admin_no_reply
-def button(bot, update):
+def button(update, context):
 	query = update.callback_query  # type: Optional[CallbackQuery]
 	user = update.effective_user  # type: Optional[User]
 	match = re.match(r"set_lang\((.+?)\)", query.data)

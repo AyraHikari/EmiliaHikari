@@ -40,7 +40,7 @@ ENUM_FUNC_MAP = {
 
 
 @run_async
-def list_handlers(bot: Bot, update: Update):
+def list_handlers(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 
@@ -48,7 +48,7 @@ def list_handlers(bot: Bot, update: Update):
 	if spam == True:
 		return
 	
-	conn = connected(bot, update, chat, user.id, need_admin=False)
+	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if not conn == False:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -82,7 +82,7 @@ def list_handlers(bot: Bot, update: Update):
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
 @user_admin
-def filters(bot: Bot, update: Update):
+def filters(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -92,7 +92,7 @@ def filters(bot: Bot, update: Update):
 	if spam == True:
 		return
 
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if not conn == False:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -179,7 +179,7 @@ def filters(bot: Bot, update: Update):
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
 @user_admin
-def stop_filter(bot: Bot, update: Update):
+def stop_filter(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = update.effective_message.text.split(None, 1)
@@ -188,7 +188,7 @@ def stop_filter(bot: Bot, update: Update):
 	if spam == True:
 		return
 
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if not conn == False:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -219,7 +219,7 @@ def stop_filter(bot: Bot, update: Update):
 
 
 @run_async
-def reply_filter(bot: Bot, update: Update):
+def reply_filter(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 
@@ -251,14 +251,14 @@ def reply_filter(bot: Bot, update: Update):
 
 				if filt.file_type in (sql.Types.BUTTON_TEXT, sql.Types.TEXT):
 					try:
-						bot.send_message(chat.id, filtext, reply_to_message_id=message.message_id,
+						context.bot.send_message(chat.id, filtext, reply_to_message_id=message.message_id,
 										 parse_mode="markdown", disable_web_page_preview=True,
 										 reply_markup=keyboard)
 					except BadRequest as excp:
 						error_catch = get_exception(excp, filt, chat)
 						if error_catch == "noreply":
 							try:
-								bot.send_message(chat.id, filtext, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
+								context.bot.send_message(chat.id, filtext, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
 							except BadRequest as excp:
 								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
 								send_message(update.effective_message, tl(update.effective_message, get_exception(excp, filt, chat)))
@@ -305,7 +305,7 @@ def reply_filter(bot: Bot, update: Update):
 								pass
 						elif excp.message == "Reply message not found":
 							try:
-								bot.send_message(chat.id, filt.reply, parse_mode=ParseMode.MARKDOWN,
+								context.bot.send_message(chat.id, filt.reply, parse_mode=ParseMode.MARKDOWN,
 												 disable_web_page_preview=True,
 												 reply_markup=keyboard)
 							except BadRequest as excp:

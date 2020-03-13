@@ -62,9 +62,9 @@ def is_user_in_chat(chat: Chat, user_id: int) -> bool:
 
 def bot_can_delete(func):
     @wraps(func)
-    def delete_rights(bot: Bot, update: Update, *args, **kwargs):
-        if can_delete(update.effective_chat, bot.id):
-            return func(bot, update, *args, **kwargs)
+    def delete_rights(update, context, *args, **kwargs):
+        if can_delete(update.effective_chat, context.bot.id):
+            return func(update, context, *args, **kwargs)
         else:
             update.effective_message.reply_text(languages.tl(update.effective_message, "Saya tidak dapat menghapus pesan di sini! "
                                                 "Pastikan saya admin dan dapat menghapus pesan pengguna lain."))
@@ -74,9 +74,9 @@ def bot_can_delete(func):
 
 def can_pin(func):
     @wraps(func)
-    def pin_rights(bot: Bot, update: Update, *args, **kwargs):
-        if update.effective_chat.get_member(bot.id).can_pin_messages:
-            return func(bot, update, *args, **kwargs)
+    def pin_rights(update, context, *args, **kwargs):
+        if update.effective_chat.get_member(context.bot.id).can_pin_messages:
+            return func(update, context, *args, **kwargs)
         else:
             update.effective_message.reply_text(languages.tl(update.effective_message, "Saya tidak bisa menyematkan pesan di sini! "
                                                 "Pastikan saya admin dan dapat pin pesan."))
@@ -86,9 +86,9 @@ def can_pin(func):
 
 def can_promote(func):
     @wraps(func)
-    def promote_rights(bot: Bot, update: Update, *args, **kwargs):
-        if update.effective_chat.get_member(bot.id).can_promote_members:
-            return func(bot, update, *args, **kwargs)
+    def promote_rights(update, context, *args, **kwargs):
+        if update.effective_chat.get_member(context.bot.id).can_promote_members:
+            return func(update, context, *args, **kwargs)
         else:
             update.effective_message.reply_text(languages.tl(update.effective_message, "Saya tidak dapat mempromosikan/mendemosikan orang di sini! "
                                                 "Pastikan saya admin dan dapat menunjuk admin baru."))
@@ -98,9 +98,9 @@ def can_promote(func):
 
 def can_restrict(func):
     @wraps(func)
-    def promote_rights(bot: Bot, update: Update, *args, **kwargs):
-        if update.effective_chat.get_member(bot.id).can_restrict_members:
-            return func(bot, update, *args, **kwargs)
+    def promote_rights(update, context, *args, **kwargs):
+        if update.effective_chat.get_member(context.bot.id).can_restrict_members:
+            return func(update, context, *args, **kwargs)
         else:
             update.effective_message.reply_text(languages.tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! "
                                                 "Pastikan saya admin dan dapat menunjuk admin baru."))
@@ -110,9 +110,9 @@ def can_restrict(func):
 
 def bot_admin(func):
     @wraps(func)
-    def is_admin(bot: Bot, update: Update, *args, **kwargs):
-        if is_bot_admin(update.effective_chat, bot.id):
-            return func(bot, update, *args, **kwargs)
+    def is_admin(update, context, *args, **kwargs):
+        if is_bot_admin(update.effective_chat, context.bot.id):
+            return func(update, context, *args, **kwargs)
         else:
             update.effective_message.reply_text(languages.tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! "
                                                 "Pastikan saya admin dan dapat menunjuk admin baru."))
@@ -122,10 +122,10 @@ def bot_admin(func):
 
 def user_admin(func):
     @wraps(func)
-    def is_admin(bot: Bot, update: Update, *args, **kwargs):
+    def is_admin(update, context, *args, **kwargs):
         user = update.effective_user  # type: Optional[User]
         if user and is_user_admin(update.effective_chat, user.id):
-            return func(bot, update, *args, **kwargs)
+            return func(update, context, *args, **kwargs)
 
         elif not user:
             pass
@@ -141,10 +141,10 @@ def user_admin(func):
 
 def user_admin_no_reply(func):
     @wraps(func)
-    def is_admin(bot: Bot, update: Update, *args, **kwargs):
+    def is_admin(update, context, *args, **kwargs):
         user = update.effective_user  # type: Optional[User]
         if user and is_user_admin(update.effective_chat, user.id):
-            return func(bot, update, *args, **kwargs)
+            return func(update, context, *args, **kwargs)
 
         elif not user:
             pass
@@ -153,26 +153,26 @@ def user_admin_no_reply(func):
             update.effective_message.delete()
 
         else:
-            bot.answer_callback_query(update.callback_query.id, languages.tl(update.effective_message, "Anda bukan admin di grup ini!"))
+            context.bot.answer_callback_query(update.callback_query.id, languages.tl(update.effective_message, "Anda bukan admin di grup ini!"))
 
     return is_admin
 
 
 def user_not_admin(func):
     @wraps(func)
-    def is_not_admin(bot: Bot, update: Update, *args, **kwargs):
+    def is_not_admin(update, context, *args, **kwargs):
         user = update.effective_user  # type: Optional[User]
         if user and not is_user_admin(update.effective_chat, user.id):
-            return func(bot, update, *args, **kwargs)
+            return func(update, context, *args, **kwargs)
 
     return is_not_admin
 
 # This is unused code
 def no_reply_handler(func):
     @wraps(func)
-    def error_catcher(bot: Bot, update: Update, *args, **kwargs):
+    def error_catcher(update, context, *args, **kwargs):
         try:
-            func(bot, update, *args,**kwargs)
+            func(update, context, *args,**kwargs)
         except error.BadRequest as err:
             if str(err) == "Reply message not found":
                 print('Error')

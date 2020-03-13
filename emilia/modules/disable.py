@@ -1,7 +1,7 @@
 from typing import Union, List, Optional
 
 from future.utils import string_types
-from telegram import ParseMode, Update, Bot, Chat, User
+from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity
 from telegram.ext import CommandHandler, RegexHandler, Filters
 from telegram.utils.helpers import escape_markdown
 
@@ -41,24 +41,26 @@ if is_module_loaded(FILENAME):
             sql.disableable_cache(command)
 
         def check_update(self, update):
-            chat = update.effective_chat  # type: Optional[Chat]
-            user = update.effective_user  # type: Optional[User]
-            if super().check_update(update):
-                # Should be safe since check_update passed.
-                command = update.effective_message.text_html.split(None, 1)[0][1:].split('@')[0]
-                
-                # disabled, admincmd, user admin
-                if sql.is_command_disabled(chat.id, command.lower()):
-                    is_disabled = command in ADMIN_CMDS and is_user_admin(chat, user.id)
-                    if not is_disabled and sql.is_disable_del(chat.id):
-                        update.effective_message.delete()
-                    return is_disabled
+            # TODO
+            if isinstance(update, Update) and update.effective_message:
+                message = update.effective_message
 
-                # not disabled
-                else:
-                    return True
+                if (message.entities and message.entities[0].type == MessageEntity.BOT_COMMAND
+                        and message.entities[0].offset == 0):
+                    command = message.text[1:message.entities[0].length]
+                    args = message.text.split()[1:]
+                    command = command.split('@')
+                    command.append(message.bot.username)
 
-            return False
+                    if not (command[0].lower() in self.command
+                            and command[1].lower() == message.bot.username.lower()):
+                        return None
+
+                    filter_result = self.filters(update)
+                    if filter_result:
+                        return args, filter_result
+                    else:
+                        return False
 
 
     class DisableAbleRegexHandler(RegexHandler):
@@ -75,14 +77,15 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def disable(bot: Bot, update: Update, args: List[str]):
+    def disable(update, context):
         chat = update.effective_chat  # type: Optional[Chat]
         user = update.effective_user
+        args = context.args
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
 
-        conn = connected(bot, update, chat, user.id, need_admin=True)
+        conn = connected(context.bot, update, chat, user.id, need_admin=True)
         if conn:
             chat = dispatcher.bot.getChat(conn)
             chat_id = conn
@@ -117,14 +120,15 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def enable(bot: Bot, update: Update, args: List[str]):
+    def enable(update, context):
         chat = update.effective_chat  # type: Optional[Chat]
         user = update.effective_user
+        args = context.args
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
 
-        conn = connected(bot, update, chat, user.id, need_admin=True)
+        conn = connected(context.bot, update, chat, user.id, need_admin=True)
         if conn:
             chat = dispatcher.bot.getChat(conn)
             chat_id = conn
@@ -158,7 +162,7 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def list_cmds(bot: Bot, update: Update):
+    def list_cmds(update, context):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
@@ -174,7 +178,7 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def disable_del(bot: Bot, update: Update):
+    def disable_del(update, context):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
@@ -211,14 +215,14 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
-    def commands(bot: Bot, update: Update):
+    def commands(update, context):
         chat = update.effective_chat
         user = update.effective_user
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
 
-        conn = connected(bot, update, chat, user.id, need_admin=True)
+        conn = connected(context.bot, update, chat, user.id, need_admin=True)
         if conn:
             chat = dispatcher.bot.getChat(conn)
             chat_id = conn

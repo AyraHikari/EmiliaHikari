@@ -92,6 +92,7 @@ If you really are interested in donating, please visit ayrahikari.github.io/dona
 	"Bagaimana saya ingin menaikan jabatan seseorang yang sudah menjadi admin?": "How am I meant to promote someone that's already an admin?",
 	"Saya tidak bisa menaikan jabatan diri saya sendiri! Hanya admin yang dapat melakukanya untuk saya.": "I can't promote myself! Get an admin to do it for me.",
 	"Tidak dapat mempromosikan pengguna, mungkin saya bukan admin atau tidak punya izin untuk mempromosikan pengguna.": "Cannot promote users, maybe I am not admin or do not have permission to promote users.",
+	"Gagal menaikan jabatan: Bot terkunci": "Failed to promote: Bot was locked",
 	"💖 Berhasil dinaikan jabatannya!": "💖 Successfully promoted!",
 	"Orang ini MENCIPTAKAN obrolan ini, bagaimana saya menurunkannya?": "This person CREATED the chat, how would I demote them?",
 	"Tidak dapat menurunkan jabatan apa yang tidak dipromosikan!": "Can't demote what wasn't promoted!",

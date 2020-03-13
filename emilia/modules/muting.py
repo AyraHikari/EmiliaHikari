@@ -2,6 +2,7 @@ import html
 from typing import Optional, List
 
 from telegram import Message, Chat, Update, Bot, User
+from telegram import ChatPermissions
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, Filters
 from telegram.ext.dispatcher import run_async
@@ -23,20 +24,21 @@ from emilia.modules.helper_funcs.alternate import send_message
 #@can_restrict
 @user_admin
 @loggable
-def mute(bot: Bot, update: Update, args: List[str]) -> str:
+def mute(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
+    args = context.args
 
     user_id = extract_user(message, args)
     if not user_id or user_id == "error":
         send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi saya nama pengguna untuk membungkam, atau membalas seseorang untuk dibisukan."))
         return ""
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -51,11 +53,11 @@ def mute(bot: Bot, update: Update, args: List[str]) -> str:
         chat_name = update.effective_message.chat.title
         text = tl(update.effective_message, "Terbisukan! 😆")
 
-    if user_id == bot.id:
+    if user_id == context.bot.id:
         send_message(update.effective_message, tl(update.effective_message, "Saya tidak akan membungkam diri saya sendiri!"))
         return ""
 
-    check = bot.getChatMember(chat.id, user.id)
+    check = context.bot.getChatMember(chat.id, user.id)
     if check['can_restrict_members'] == False:
         send_message(update.effective_message, tl(update.effective_message, "Anda tidak punya hak untuk membatasi seseorang."))
         return ""
@@ -67,7 +69,7 @@ def mute(bot: Bot, update: Update, args: List[str]) -> str:
             send_message(update.effective_message, tl(update.effective_message, "Saya tidak bisa menghentikan seorang admin berbicara!"))
 
         elif member.can_send_messages is None or member.can_send_messages:
-            bot.restrict_chat_member(chat.id, user_id, can_send_messages=False)
+            context.bot.restrict_chat_member(chat.id, user_id, permissions=ChatPermissions(can_send_messages=False))
             send_message(update.effective_message, text, parse_mode="markdown")
             return "<b>{}:</b>" \
                    "\n#MUTE" \
@@ -88,20 +90,21 @@ def mute(bot: Bot, update: Update, args: List[str]) -> str:
 @bot_admin
 @user_admin
 @loggable
-def unmute(bot: Bot, update: Update, args: List[str]) -> str:
+def unmute(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
+    args = context.args
 
     user_id = extract_user(message, args)
     if not user_id or user_id == "error":
         send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi saya nama pengguna untuk menyuarakan, atau membalas seseorang untuk disuarakan."))
         return ""
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -118,7 +121,7 @@ def unmute(bot: Bot, update: Update, args: List[str]) -> str:
         text = tl(update.effective_message, "Pengguna ini sudah bisa untuk berbicara.")
         text2 = "Dia telah disuarakan."
 
-    check = bot.getChatMember(chat.id, user.id)
+    check = context.bot.getChatMember(chat.id, user.id)
     if check['can_restrict_members'] == False:
         send_message(update.effective_message, tl(update.effective_message, "Anda tidak punya hak untuk membatasi seseorang."))
         return ""
@@ -136,11 +139,13 @@ def unmute(bot: Bot, update: Update, args: List[str]) -> str:
                 send_message(update.effective_message, text, parse_mode="markdown")
                 return ""
             else:
-                bot.restrict_chat_member(chat.id, int(user_id),
+                context.bot.restrict_chat_member(chat.id, int(user_id),
+                                        permissions=ChatPermissions(
                                          can_send_messages=True,
                                          can_send_media_messages=True,
                                          can_send_other_messages=True,
                                          can_add_web_page_previews=True)
+                                        )
                 send_message(update.effective_message, text2, parse_mode="markdown")
                 return "<b>{}:</b>" \
                        "\n#UNMUTE" \
@@ -160,13 +165,14 @@ def unmute(bot: Bot, update: Update, args: List[str]) -> str:
 #@can_restrict
 @user_admin
 @loggable
-def temp_mute(bot: Bot, update: Update, args: List[str]) -> str:
+def temp_mute(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
+    args = context.args
 
     user_id, reason = extract_user_and_text(message, args)
     if user_id == "error":
@@ -177,7 +183,7 @@ def temp_mute(bot: Bot, update: Update, args: List[str]) -> str:
         send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
         return ""
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -203,11 +209,11 @@ def temp_mute(bot: Bot, update: Update, args: List[str]) -> str:
         send_message(update.effective_message, tl(update.effective_message, "Saya benar-benar berharap dapat membisukan admin..."))
         return ""
 
-    if user_id == bot.id:
+    if user_id == context.bot.id:
         send_message(update.effective_message, tl(update.effective_message, "Saya tidak akan membisukan diri saya sendiri, apakah kamu gila?"))
         return ""
 
-    check = bot.getChatMember(chat.id, user.id)
+    check = context.bot.getChatMember(chat.id, user.id)
     if check['can_restrict_members'] == False:
         send_message(update.effective_message, tl(update.effective_message, "Anda tidak punya hak untuk membatasi seseorang."))
         return ""
@@ -240,7 +246,7 @@ def temp_mute(bot: Bot, update: Update, args: List[str]) -> str:
 
     try:
         if member.can_send_messages is None or member.can_send_messages:
-            bot.restrict_chat_member(chat.id, user_id, until_date=mutetime, can_send_messages=False)
+            context.bot.restrict_chat_member(chat.id, user_id, until_date=mutetime, permissions=ChatPermissions(can_send_messages=False))
             if conn:
                 text = tl(update.effective_message, "Dibisukan untuk *{}* pada *{}*!").format(time_val, chat_name)
             else:
@@ -268,9 +274,9 @@ __help__ = "mute_help"
 
 __mod_name__ = "Muting"
 
-MUTE_HANDLER = CommandHandler("mute", mute, pass_args=True)#, filters=Filters.group)
-UNMUTE_HANDLER = CommandHandler("unmute", unmute, pass_args=True)#, filters=Filters.group)
-TEMPMUTE_HANDLER = CommandHandler(["tmute", "tempmute"], temp_mute, pass_args=True)#, filters=Filters.group)
+MUTE_HANDLER = CommandHandler("mute", mute, pass_args=True)
+UNMUTE_HANDLER = CommandHandler("unmute", unmute, pass_args=True)
+TEMPMUTE_HANDLER = CommandHandler(["tmute", "tempmute"], temp_mute, pass_args=True)
 
 dispatcher.add_handler(MUTE_HANDLER)
 dispatcher.add_handler(UNMUTE_HANDLER)

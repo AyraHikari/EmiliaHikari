@@ -90,19 +90,21 @@ def send_help(chat_id, text, keyboard=None):
 
 
 @run_async
-def test(bot: Bot, update: Update):
+def test(update, context):
     # pprint(eval(str(update)))
     # update.effective_message.reply_text("Hola tester! _I_ *have* `markdown`", parse_mode=ParseMode.MARKDOWN)
     update.effective_message.reply_text("This person edited a message")
-    print(update.effective_message)
+    print(context.match)
+    print(update.effective_message.text)
 
 
 @run_async
-def start(bot: Bot, update: Update, args: List[str]):
+def start(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     if update.effective_chat.type == "private":
+        args = context.args
         if len(args) >= 1:
             if args[0].lower() == "help":
                 send_help(update.effective_chat.id, tl(update.effective_message, HELP_STRINGS))
@@ -145,7 +147,7 @@ def start(bot: Bot, update: Update, args: List[str]):
                 [InlineKeyboardButton(text="👥 Support Group", url="https://t.me/EmiliaOfficial"), InlineKeyboardButton(text="🔔 Update Channel", url="https://t.me/AyraBotNews")],
                 [InlineKeyboardButton(text="❓ Help", url="https://t.me/EmiliaHikariBot?start=help"), InlineKeyboardButton(text="💖 Donate", url="http://ayrahikari.github.io/donations.html")]])
             update.effective_message.reply_text(
-                tl(update.effective_message, PM_START_TEXT).format(escape_markdown(first_name), escape_markdown(bot.first_name), OWNER_ID),
+                tl(update.effective_message, PM_START_TEXT).format(escape_markdown(first_name), escape_markdown(context.bot.first_name), OWNER_ID),
                 disable_web_page_preview=True,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=buttons)
@@ -153,26 +155,26 @@ def start(bot: Bot, update: Update, args: List[str]):
         update.effective_message.reply_text(tl(update.effective_message, "Ada yang bisa saya bantu? 😊"))
 
 
-def m_connect_button(bot, update):
-    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
-    connect_button(bot, update)
+def m_connect_button(update, context):
+    context.bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
+    connect_button(context.bot, update)
 
-def m_change_langs(bot, update):
-    bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
-    set_language(bot, update)
+def m_change_langs(update, context):
+    context.bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
+    set_language(context.bot, update)
 
 # for test purposes
-def error_callback(bot, update, error):
+def error_callback(update, context):
     try:
         raise error
     except Unauthorized:
         print("no nono1")
-        print(error)
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
         # remove update.message.chat_id from conversation list
     except BadRequest:
         print("no nono2")
         print("BadRequest caught")
-        print(error)
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
 
         # handle malformed requests - read more below!
     except TimedOut:
@@ -183,15 +185,15 @@ def error_callback(bot, update, error):
         # handle other connection problems
     except ChatMigrated as err:
         print("no nono5")
-        print(err)
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
         # the chat_id of a group has changed, use e.new_chat_id instead
     except TelegramError:
-        print(error)
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
         # handle all other telegram related errors
 
 
 @run_async
-def help_button(bot: Bot, update: Update):
+def help_button(update, context):
     query = update.callback_query
     mod_match = re.match(r"help_module\((.+?)\)", query.data)
     prev_match = re.match(r"help_prev\((.+?)\)", query.data)
@@ -229,7 +231,7 @@ def help_button(bot: Bot, update: Update):
 
         # ensure no spinny white circle
         query.message.delete()
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
     except Exception as excp:
         if excp.message == "Message is not modified":
             pass
@@ -243,7 +245,7 @@ def help_button(bot: Bot, update: Update):
 
 
 @run_async
-def get_help(bot: Bot, update: Update):
+def get_help(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     args = update.effective_message.text.split(None, 1)
 
@@ -259,7 +261,7 @@ def get_help(bot: Bot, update: Update):
                                             reply_markup=InlineKeyboardMarkup(
                                                 [[InlineKeyboardButton(text=tl(update.effective_message, "Tolong"),
                                                                        url="t.me/{}?start=help".format(
-                                                                           bot.username))]]))
+                                                                           context.bot.username))]]))
         return
 
     elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
@@ -299,7 +301,7 @@ def send_settings(chat_id, user_id, user=False):
 
 
 @run_async
-def settings_button(bot: Bot, update: Update):
+def settings_button(update, context):
     query = update.callback_query
     user = update.effective_user
     mod_match = re.match(r"stngs_module\((.+?),(.+?)\)", query.data)
@@ -375,7 +377,7 @@ def settings_button(bot: Bot, update: Update):
 
 
 @run_async
-def get_settings(bot: Bot, update: Update):
+def get_settings(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
@@ -402,7 +404,7 @@ def get_settings(bot: Bot, update: Update):
 
 
 @run_async
-def donate(bot: Bot, update: Update):
+def donate(update, context):
     user = update.effective_message.from_user
     chat = update.effective_chat  # type: Optional[Chat]
 
@@ -426,24 +428,6 @@ def donate(bot: Bot, update: Update):
         except Unauthorized:
             update.effective_message.reply_text(tl(update.effective_message, "Hubungi saya di PM dulu untuk mendapatkan informasi donasi."))
 
-
-def migrate_chats(bot: Bot, update: Update):
-    msg = update.effective_message  # type: Optional[Message]
-    if msg.migrate_to_chat_id:
-        old_chat = update.effective_chat.id
-        new_chat = msg.migrate_to_chat_id
-    elif msg.migrate_from_chat_id:
-        old_chat = msg.migrate_from_chat_id
-        new_chat = update.effective_chat.id
-    else:
-        return
-
-    LOGGER.info("Migrating from %s, to %s", str(old_chat), str(new_chat))
-    for mod in MIGRATEABLE:
-        mod.__migrate__(old_chat, new_chat)
-
-    LOGGER.info("Successfully migrated!")
-    raise DispatcherHandlerStop
 
 
 
@@ -494,23 +478,17 @@ def main():
     M_CONNECT_BTN_HANDLER = CallbackQueryHandler(m_connect_button, pattern=r"main_connect")
     M_SETLANG_BTN_HANDLER = CallbackQueryHandler(m_change_langs, pattern=r"main_setlang")
 
-    migrate_handler = MessageHandler(Filters.status_update.migrate, migrate_chats)
-
-    # dispatcher.add_handler(test_handler)
+    dispatcher.add_handler(test_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(settings_handler)
     dispatcher.add_handler(help_callback_handler)
     dispatcher.add_handler(settings_callback_handler)
-    dispatcher.add_handler(migrate_handler)
     dispatcher.add_handler(donate_handler)
     dispatcher.add_handler(M_CONNECT_BTN_HANDLER)
     dispatcher.add_handler(M_SETLANG_BTN_HANDLER)
 
     # dispatcher.add_error_handler(error_callback)
-
-    # add antiflood processor
-    Dispatcher.process_update = process_update
 
     if WEBHOOK:
         LOGGER.info("Using webhooks.")
@@ -529,65 +507,6 @@ def main():
         updater.start_polling(timeout=15, read_latency=4)
 
     updater.idle()
-
-
-CHATS_CNT = {}
-CHATS_TIME = {}
-
-
-def process_update(self, update):
-    # An error happened while polling
-    if isinstance(update, TelegramError):
-        try:
-            self.dispatch_error(None, update)
-        except Exception:
-            self.logger.exception('An uncaught error was raised while handling the error')
-        return
-
-    now = datetime.datetime.utcnow()
-    try:
-        cnt = CHATS_CNT.get(update.effective_chat.id, 0)
-    except AttributeError:
-        self.logger.exception('An uncaught error was raised while updating process')
-        return
-
-    t = CHATS_TIME.get(update.effective_chat.id, datetime.datetime(1970, 1, 1))
-    if t and now > t + datetime.timedelta(0, 1):
-        CHATS_TIME[update.effective_chat.id] = now
-        cnt = 0
-    else:
-        cnt += 1
-
-    if cnt > 10:
-        return
-
-    CHATS_CNT[update.effective_chat.id] = cnt
-    for group in self.groups:
-        try:
-            for handler in (x for x in self.handlers[group] if x.check_update(update)):
-                handler.handle_update(update, self)
-                break
-
-        # Stop processing with any other handler.
-        except DispatcherHandlerStop:
-            self.logger.debug('Stopping further handlers due to DispatcherHandlerStop')
-            break
-
-        # Dispatch any error.
-        except TelegramError as te:
-            self.logger.warning('A TelegramError was raised while processing the Update')
-
-            try:
-                self.dispatch_error(update, te)
-            except DispatcherHandlerStop:
-                self.logger.debug('Error handler stopped further handlers')
-                break
-            except Exception:
-                self.logger.exception('An uncaught error was raised while handling the error')
-
-        # Errors should not stop the thread.
-        except Exception:
-            self.logger.exception('An uncaught error was raised while processing the update')
 
 if __name__ == '__main__':
     LOGGER.info("Successfully loaded modules: " + str(ALL_MODULES))

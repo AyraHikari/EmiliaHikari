@@ -19,21 +19,22 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
-def clean_blue_text_must_click(bot: Bot, update: Update):
+def clean_blue_text_must_click(update, context):
 	if sql.is_enable(update.effective_chat.id):
 		update.effective_message.delete()
 
 @run_async
 @user_admin
-def set_blue_text_must_click(bot: Bot, update: Update, args):
+def set_blue_text_must_click(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message  # type: Optional[Message]
+	args = context.args
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
