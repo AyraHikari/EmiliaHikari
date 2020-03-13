@@ -16,7 +16,7 @@ try:
 	from emilia import SPAMWATCH_TOKEN
 except:
 	pass
-from emilia.modules.helper_funcs.chat_status import user_admin, is_user_ban_protected
+from emilia.modules.helper_funcs.chat_status import user_admin, is_user_ban_protected, bot_can_restrict
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_welcome_type
 from emilia.modules.helper_funcs.string_handling import markdown_parser, \
@@ -29,7 +29,7 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 OWNER_SPECIAL = False
-VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'count', 'chatname', 'mention']
+VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'count', 'chatname', 'mention', 'rules']
 
 ENUM_FUNC_MAP = {
 	sql.Types.TEXT.value: dispatcher.bot.send_message,
@@ -152,11 +152,13 @@ def new_member(bot: Bot, update: Update):
 						username = "@" + escape_markdown(new_mem.username)
 					else:
 						username = mention
+					rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+
 					if cust_welcome:
 						formatted_text = cust_welcome.format(first=escape_markdown(first_name),
 											  last=escape_markdown(new_mem.last_name or first_name),
 											  fullname=escape_markdown(fullname), username=username, mention=mention,
-											  count=count, chatname=escape_markdown(chat.title), id=new_mem.id)
+											  count=count, chatname=escape_markdown(chat.title), id=new_mem.id, rules=rules)
 					else:
 						formatted_text = ""
 					# Build keyboard
@@ -179,7 +181,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = False
+									canrest = bot_can_restrict(chat, bot.id)
 							else:
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
@@ -189,7 +191,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = False
+									canrest = bot_can_restrict(chat, bot.id)
 						# If security welcome is turned on
 						if is_clicked.get(new_mem.id) and is_clicked[new_mem.id] == True:
 							sql.add_to_userlist(chat.id, new_mem.id, True)
@@ -220,13 +222,14 @@ def new_member(bot: Bot, update: Update):
 							username = "@" + escape_markdown(new_mem.username)
 						else:
 							username = mention
+						rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
 
 						valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
 						if valid_format:
 							res = valid_format.format(first=escape_markdown(first_name),
 												  last=escape_markdown(new_mem.last_name or first_name),
 												  fullname=escape_markdown(fullname), username=username, mention=mention,
-												  count=count, chatname=escape_markdown(chat.title), id=new_mem.id)
+												  count=count, chatname=escape_markdown(chat.title), id=new_mem.id, rules=rules)
 						else:
 							res = ""
 						buttons = sql.get_welc_buttons(chat.id)
@@ -251,7 +254,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = False
+									canrest = bot_can_restrict(chat, bot.id)
 							else:
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
@@ -261,7 +264,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = False
+									canrest = bot_can_restrict(chat, bot.id)
 						if is_clicked.get(new_mem.id) and is_clicked[new_mem.id] == True:
 							sql.add_to_userlist(chat.id, new_mem.id, True)
 						else:
@@ -390,10 +393,12 @@ def check_bot_button(bot: Bot, update: Update):
 			username = "@" + escape_markdown(query.from_user.username)
 		else:
 			username = mention
+		rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+
 		formatted_text = cust_welcome.format(first=escape_markdown(first_name),
 											 last=escape_markdown(query.from_user.last_name or first_name),
 											 fullname=escape_markdown(fullname), username=username, mention=mention,
-											 count=count, chatname=escape_markdown(chat.title), id=query.from_user.id)
+											 count=count, chatname=escape_markdown(chat.title), id=query.from_user.id, rules=rules)
 		# Build keyboard
 		buttons = sql.get_welc_buttons(chat.id)
 		keyb = build_keyboard(buttons)
@@ -420,12 +425,13 @@ def check_bot_button(bot: Bot, update: Update):
 			username = "@" + escape_markdown(query.from_user.username)
 		else:
 			username = mention
+		rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
 
 		valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
 		res = valid_format.format(first=escape_markdown(first_name),
 								  last=escape_markdown(query.from_user.last_name or first_name),
 								  fullname=escape_markdown(fullname), username=username, mention=mention,
-								  count=count, chatname=escape_markdown(chat.title), id=query.from_user.id)
+								  count=count, chatname=escape_markdown(chat.title), id=query.from_user.id, rules=rules)
 		buttons = sql.get_welc_buttons(chat.id)
 		keyb = build_keyboard(buttons)
 	else:
@@ -476,11 +482,13 @@ def left_member(bot: Bot, update: Update):
 					username = "@" + escape_markdown(left_mem.username)
 				else:
 					username = mention
+				rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+
 				if cust_goodbye:
 					formatted_text = cust_goodbye.format(first=escape_markdown(first_name),
 											  last=escape_markdown(left_mem.last_name or first_name),
 											  fullname=escape_markdown(fullname), username=username, mention=mention,
-											  count=count, chatname=escape_markdown(chat.title), id=left_mem.id)
+											  count=count, chatname=escape_markdown(chat.title), id=left_mem.id, rules=rules)
 				else:
 					formatted_text = ""
 				# Build keyboard

@@ -15,6 +15,9 @@ from emilia.modules import languages
 def can_delete(chat: Chat, bot_id: int) -> bool:
     return chat.get_member(bot_id).can_delete_messages
 
+def bot_can_restrict(chat: Chat, bot_id: int) -> bool:
+    return chat.get_member(bot_id).can_restrict_members
+
 
 def is_user_ban_protected(chat: Chat, user_id: int, member: ChatMember = None) -> bool:
     if chat.type == 'private' \
