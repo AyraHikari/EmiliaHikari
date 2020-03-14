@@ -155,10 +155,7 @@ SPAMMERS = list(SPAMMERS)
 GROUP_BLACKLIST = list(GROUP_BLACKLIST)
 
 # Load at end to ensure all prev variables have been set
-from emilia.modules.helper_funcs.handlers import CustomCommandHandler, CustomRegexHandler
-
-# make sure the regex handler can take extra kwargs
-tg.RegexHandler = CustomRegexHandler
+from emilia.modules.helper_funcs.handlers import CustomCommandHandler
 
 if ALLOW_EXCL:
 	tg.CommandHandler = CustomCommandHandler

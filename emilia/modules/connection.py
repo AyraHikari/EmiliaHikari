@@ -270,11 +270,11 @@ __help__ = "connection_help"
 
 __mod_name__ = "Connection"
 
-CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, allow_edited=True, pass_args=True)
+CONNECT_CHAT_HANDLER = CommandHandler("connect", connect_chat, pass_args=True)
 CONNECTION_CHAT_HANDLER = CommandHandler("connection", connection_chat)
-DISCONNECT_CHAT_HANDLER = CommandHandler("disconnect", disconnect_chat, allow_edited=True)
-ALLOW_CONNECTIONS_HANDLER = CommandHandler("allowconnect", allow_connections, allow_edited=True, pass_args=True)
-HELP_CONNECT_CHAT_HANDLER = CommandHandler("helpconnect", help_connect_chat, allow_edited=True, pass_args=True)
+DISCONNECT_CHAT_HANDLER = CommandHandler("disconnect", disconnect_chat)
+ALLOW_CONNECTIONS_HANDLER = CommandHandler("allowconnect", allow_connections, pass_args=True)
+HELP_CONNECT_CHAT_HANDLER = CommandHandler("helpconnect", help_connect_chat, pass_args=True)
 CONNECT_BTN_HANDLER = CallbackQueryHandler(connect_button, pattern=r"connect")
 
 dispatcher.add_handler(CONNECT_CHAT_HANDLER)

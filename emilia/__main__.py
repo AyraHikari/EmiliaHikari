@@ -166,29 +166,31 @@ def m_change_langs(update, context):
 # for test purposes
 def error_callback(update, context):
     try:
-        raise error
+        raise context.error
     except Unauthorized:
         print("no nono1")
-        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
+        LOGGER.exception(context.error)
         # remove update.message.chat_id from conversation list
     except BadRequest:
         print("no nono2")
         print("BadRequest caught")
-        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
+        LOGGER.exception(context.error)
 
         # handle malformed requests - read more below!
     except TimedOut:
         print("no nono3")
+        LOGGER.exception(context.error)
         # handle slow connection problems
     except NetworkError:
         print("no nono4")
+        LOGGER.exception(context.error)
         # handle other connection problems
     except ChatMigrated as err:
         print("no nono5")
-        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
+        LOGGER.exception(context.error)
         # the chat_id of a group has changed, use e.new_chat_id instead
     except TelegramError:
-        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
+        LOGGER.exception(context.error)
         # handle all other telegram related errors
 
 
