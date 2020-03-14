@@ -747,7 +747,7 @@ def goodbye(bot: Bot, update: Update, args: List[str]):
 			parse_mode=ParseMode.MARKDOWN)
 
 		buttons = sql.get_gdbye_buttons(chat.id)
-		if goodbye_type == sql.Types.BUTTON_TEXT:
+		if goodbye_type == sql.Types.TEXT or goodbye_type == sql.Types.BUTTON_TEXT:
 			if noformat:
 				goodbye_m += revert_buttons(buttons)
 				send_message(update.effective_message, goodbye_m)
