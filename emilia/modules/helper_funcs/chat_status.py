@@ -153,6 +153,7 @@ def user_admin_no_reply(func):
             update.effective_message.delete()
 
         else:
+            print(update.message.from_user.id)
             bot.answer_callback_query(update.callback_query.id, languages.tl(update.effective_message, "Anda bukan admin di grup ini!"))
 
     return is_admin
