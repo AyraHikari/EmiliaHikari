@@ -105,7 +105,7 @@ def send(update, message, keyboard, backup_message):
 
 
 @run_async
-def new_member(bot: Bot, update: Update):
+def new_member(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 
 	should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
@@ -130,7 +130,7 @@ def new_member(bot: Bot, update: Update):
 				continue
 
 			# Don't welcome yourself
-			elif new_mem.id == bot.id:
+			elif new_mem.id == context.bot.id:
 				continue
 
 			else:
@@ -152,7 +152,7 @@ def new_member(bot: Bot, update: Update):
 						username = "@" + escape_markdown(new_mem.username)
 					else:
 						username = mention
-					rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+					rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 					if cust_welcome:
 						formatted_text = cust_welcome.format(first=escape_markdown(first_name),
@@ -181,7 +181,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = bot_can_restrict(chat, bot.id)
+									canrest = bot_can_restrict(chat, context.bot.id)
 							else:
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
@@ -191,7 +191,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = bot_can_restrict(chat, bot.id)
+									canrest = bot_can_restrict(chat, context.bot.id)
 						# If security welcome is turned on
 						if is_clicked.get(new_mem.id) and is_clicked[new_mem.id] == True:
 							sql.add_to_userlist(chat.id, new_mem.id, True)
@@ -224,7 +224,7 @@ def new_member(bot: Bot, update: Update):
 							username = "@" + escape_markdown(new_mem.username)
 						else:
 							username = mention
-						rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+						rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 						valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
 						if valid_format:
@@ -256,7 +256,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = bot_can_restrict(chat, bot.id)
+									canrest = bot_can_restrict(chat, context.bot.id)
 							else:
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
@@ -266,7 +266,7 @@ def new_member(bot: Bot, update: Update):
 									except BadRequest:
 										canrest = False
 								else:
-									canrest = bot_can_restrict(chat, bot.id)
+									canrest = bot_can_restrict(chat, context.bot.id)
 						if is_clicked.get(new_mem.id) and is_clicked[new_mem.id] == True:
 							sql.add_to_userlist(chat.id, new_mem.id, True)
 						else:
@@ -306,7 +306,7 @@ def new_member(bot: Bot, update: Update):
 
 
 @run_async
-def check_bot_button(bot: Bot, update: Update):
+def check_bot_button(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	query = update.callback_query  # type: Optional[CallbackQuery]
@@ -397,7 +397,7 @@ def check_bot_button(bot: Bot, update: Update):
 			username = "@" + escape_markdown(query.from_user.username)
 		else:
 			username = mention
-		rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+		rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 		formatted_text = cust_welcome.format(first=escape_markdown(first_name),
 											 last=escape_markdown(query.from_user.last_name or first_name),
@@ -429,7 +429,7 @@ def check_bot_button(bot: Bot, update: Update):
 			username = "@" + escape_markdown(query.from_user.username)
 		else:
 			username = mention
-		rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+		rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 		valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
 		res = valid_format.format(first=escape_markdown(first_name),
@@ -448,14 +448,14 @@ def check_bot_button(bot: Bot, update: Update):
 
 
 @run_async
-def left_member(bot: Bot, update: Update):
+def left_member(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	should_goodbye, cust_goodbye, cust_content, goodbye_type = sql.get_gdbye_pref(chat.id)
 	if should_goodbye:
 		left_mem = update.effective_message.left_chat_member
 		if left_mem:
 			# Ignore bot being kicked
-			if left_mem.id == bot.id:
+			if left_mem.id == context.bot.id:
 				return
 
 			# Give the owner a special goodbye
@@ -486,7 +486,7 @@ def left_member(bot: Bot, update: Update):
 					username = "@" + escape_markdown(left_mem.username)
 				else:
 					username = mention
-				rules = "https://t.me/" + bot.username + "?start=" + str(chat.id)
+				rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 				if cust_goodbye:
 					formatted_text = cust_goodbye.format(first=escape_markdown(first_name),
@@ -541,16 +541,17 @@ def left_member(bot: Bot, update: Update):
 
 @run_async
 @user_admin
-def security(bot: Bot, update: Update, args: List[str]) -> str:
+def security(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
+	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		var = args[0].lower()
 		if (var == "yes" or var == "ya" or var == "on"):
-			check = bot.getChatMember(chat.id, bot.id)
+			check = context.bot.getChatMember(chat.id, context.bot.id)
 			if check.status == 'member' or check['can_restrict_members'] == False:
 				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
 				send_message(update.effective_message, text, parse_mode="markdown")
@@ -572,10 +573,11 @@ def security(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 @user_admin
-def security_mute(bot: Bot, update: Update, args: List[str]) -> str:
+def security_mute(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
+	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
@@ -601,10 +603,11 @@ def security_mute(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 @user_admin
-def security_text(bot: Bot, update: Update, args: List[str]) -> str:
+def security_text(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
+	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
@@ -619,7 +622,7 @@ def security_text(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 @user_admin
-def security_text_reset(bot: Bot, update: Update):
+def security_text_reset(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -632,10 +635,11 @@ def security_text_reset(bot: Bot, update: Update):
 
 @run_async
 @user_admin
-def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
+def cleanservice(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
+	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	if chat.type != chat.PRIVATE:
 		if len(args) >= 1:
@@ -661,8 +665,9 @@ def cleanservice(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 @user_admin
-def welcome(bot: Bot, update: Update, args: List[str]):
+def welcome(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
+	args = context.args
 	# if no args, show current replies.
 	if len(args) == 0 or args[0].lower() == "noformat":
 		noformat = args and args[0].lower() == "noformat"
@@ -735,8 +740,9 @@ def welcome(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 @user_admin
-def goodbye(bot: Bot, update: Update, args: List[str]):
+def goodbye(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
+	args = context.args
 
 	if len(args) == 0 or args[0] == "noformat":
 		noformat = args and args[0] == "noformat"
@@ -791,7 +797,7 @@ def goodbye(bot: Bot, update: Update, args: List[str]):
 @run_async
 @user_admin
 @loggable
-def set_welcome(bot: Bot, update: Update) -> str:
+def set_welcome(update, context) -> str:
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -824,7 +830,7 @@ def set_welcome(bot: Bot, update: Update) -> str:
 @run_async
 @user_admin
 @loggable
-def reset_welcome(bot: Bot, update: Update) -> str:
+def reset_welcome(update, context) -> str:
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -842,7 +848,7 @@ def reset_welcome(bot: Bot, update: Update) -> str:
 @run_async
 @user_admin
 @loggable
-def set_goodbye(bot: Bot, update: Update) -> str:
+def set_goodbye(update, context) -> str:
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -874,7 +880,7 @@ def set_goodbye(bot: Bot, update: Update) -> str:
 @run_async
 @user_admin
 @loggable
-def reset_goodbye(bot: Bot, update: Update) -> str:
+def reset_goodbye(update, context) -> str:
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -892,12 +898,13 @@ def reset_goodbye(bot: Bot, update: Update) -> str:
 @run_async
 @user_admin
 @loggable
-def clean_welcome(bot: Bot, update: Update, args: List[str]) -> str:
+def clean_welcome(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+	args = context.args
 
 	if not args:
 		clean_pref = sql.get_clean_pref(chat.id)
@@ -931,7 +938,7 @@ def clean_welcome(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 @user_admin
-def welcome_help(bot: Bot, update: Update):
+def welcome_help(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -988,7 +995,7 @@ def __chat_settings_btn__(chat_id, user_id):
 		InlineKeyboardButton(text=clserv, callback_data="set_welc=s|{}".format(chat_id))])
 	return button
 
-def WELC_EDITBTN(bot: Bot, update: Update):
+def WELC_EDITBTN(update, context):
 	query = update.callback_query
 	user = update.effective_user
 	print("User {} clicked button WELC EDIT".format(user.id))
@@ -1018,7 +1025,7 @@ def WELC_EDITBTN(bot: Bot, update: Update):
 			clserv = "✅ Aktif"
 		else:
 			clserv = "❎ Tidak Aktif"
-		chat = bot.get_chat(chat_id)
+		chat = context.bot.get_chat(chat_id)
 		text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
 		text += "Obrolan ini preferensi pesan sambutannya telah diganti menjadi `{}`.\n".format(welc)
 		text += "Untuk preferensi pesan selamat tinggal `{}`.\n".format(gdby)
@@ -1053,7 +1060,7 @@ def WELC_EDITBTN(bot: Bot, update: Update):
 			clserv = "✅ Aktif"
 		else:
 			clserv = "❎ Tidak Aktif"
-		chat = bot.get_chat(chat_id)
+		chat = context.bot.get_chat(chat_id)
 		text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
 		text += "Obrolan ini preferensi pesan selamat tinggal telah diganti menjadi `{}`.\n".format(gdby)
 		text += "Untuk preferensi pesan sambutan `{}`.\n".format(welc)
@@ -1088,7 +1095,7 @@ def WELC_EDITBTN(bot: Bot, update: Update):
 		else:
 			clserv = "✅ Aktif"
 			sql.set_clean_service(chat_id, True)
-		chat = bot.get_chat(chat_id)
+		chat = context.bot.get_chat(chat_id)
 		text = "*{}* memiliki pengaturan berikut untuk modul *Welcomes/Goodbyes*:\n\n".format(escape_markdown(chat.title))
 		text += "Pengaturan clean service telah di ubah. Bot `{}` menghapus notifikasi member masuk/keluar.\n".format(clserv)
 		text += "Untuk preferensi pesan sambutan `{}`.\n".format(welc)

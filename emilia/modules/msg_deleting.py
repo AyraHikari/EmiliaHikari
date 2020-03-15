@@ -18,15 +18,16 @@ from emilia.modules.helper_funcs.alternate import send_message
 @run_async
 @user_admin
 @loggable
-def purge(bot: Bot, update: Update, args: List[str]) -> str:
+def purge(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = context.args
     msg = update.effective_message  # type: Optional[Message]
     if msg.reply_to_message:
         user = update.effective_user  # type: Optional[User]
         chat = update.effective_chat  # type: Optional[Chat]
-        if can_delete(chat, bot.id):
+        if can_delete(chat, context.bot.id):
             message_id = msg.reply_to_message.message_id
             if args and args[0].isdigit():
                 delete_to = message_id + int(args[0])
@@ -34,7 +35,7 @@ def purge(bot: Bot, update: Update, args: List[str]) -> str:
                 delete_to = msg.message_id - 1
             for m_id in range(delete_to, message_id - 1, -1):  # Reverse iteration over message ids
                 try:
-                    bot.deleteMessage(chat.id, m_id)
+                    context.bot.deleteMessage(chat.id, m_id)
                 except BadRequest as err:
                     if err.message == "Message can't be deleted":
                         send_message(update.effective_message, tl(update.effective_message, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
@@ -70,14 +71,14 @@ def purge(bot: Bot, update: Update, args: List[str]) -> str:
 @run_async
 @user_admin
 @loggable
-def del_message(bot: Bot, update: Update) -> str:
+def del_message(update, context) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     if update.effective_message.reply_to_message:
         user = update.effective_user  # type: Optional[User]
         chat = update.effective_chat  # type: Optional[Chat]
-        if can_delete(chat, bot.id):
+        if can_delete(chat, context.bot.id):
             update.effective_message.reply_to_message.delete()
             update.effective_message.delete()
             return "<b>{}:</b>" \

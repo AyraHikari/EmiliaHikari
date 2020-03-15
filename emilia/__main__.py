@@ -4,6 +4,7 @@ import re
 import resource
 import platform
 import sys
+import traceback
 import wikipedia
 from typing import Optional, List
 
@@ -12,7 +13,7 @@ from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import Unauthorized, BadRequest, TimedOut, NetworkError, ChatMigrated, TelegramError
 from telegram.ext import CommandHandler, Filters, MessageHandler, CallbackQueryHandler
 from telegram.ext.dispatcher import run_async, DispatcherHandlerStop, Dispatcher
-from telegram.utils.helpers import escape_markdown
+from telegram.utils.helpers import escape_markdown, mention_html
 
 from emilia import dispatcher, updater, TOKEN, WEBHOOK, OWNER_ID, DONATION_LINK, CERT_PATH, PORT, URL, LOGGER, \
     ALLOW_EXCL, spamfilters
@@ -165,33 +166,60 @@ def m_change_langs(update, context):
 
 # for test purposes
 def error_callback(update, context):
+    # add all the dev user_ids in this list. You can also add ids of channels or groups.
+    devs = [OWNER_ID]
+    # we want to notify the user of this problem. This will always work, but not notify users if the update is an 
+    # callback or inline query, or a poll update. In case you want this, keep in mind that sending the message 
+    # could fail
+    if update.effective_message:
+        text = "Hey. I'm sorry to inform you that an error happened while I tried to handle your update. " \
+               "My developer(s) will be notified."
+        update.effective_message.reply_text(text)
+    # This traceback is created with accessing the traceback object from the sys.exc_info, which is returned as the
+    # third value of the returned tuple. Then we use the traceback.format_tb to get the traceback as a string, which
+    # for a weird reason separates the line breaks in a list, but keeps the linebreaks itself. So just joining an
+    # empty string works fine.
+    trace = "".join(traceback.format_tb(sys.exc_info()[2]))
+    # lets try to get as much information from the telegram update as possible
+    payload = ""
+    # normally, we always have an user. If not, its either a channel or a poll update.
+    if update.effective_user:
+        payload += f' with the user {mention_html(update.effective_user.id, update.effective_user.first_name)}'
+    # there are more situations when you don't get a chat
+    if update.effective_chat:
+        payload += f' within the chat <i>{update.effective_chat.title}</i>'
+        if update.effective_chat.username:
+            payload += f' (@{update.effective_chat.username})'
+    # but only one where you have an empty payload by now: A poll (buuuh)
+    if update.poll:
+        payload += f' with the poll id {update.poll.id}.'
+    # lets put this in a "well" formatted text
+    text = f"Hey.\n The error <code>{context.error}</code> happened{payload}. The full traceback:\n\n<code>{trace}" \
+           f"</code>"
+    # and send it to the dev(s)
+    for dev_id in devs:
+        context.bot.send_message(dev_id, text, parse_mode=ParseMode.HTML)
+    # we raise the error again, so the logger module catches it. If you don't use the logger module, use it.
     try:
         raise context.error
     except Unauthorized:
-        print("no nono1")
-        LOGGER.exception(context.error)
         # remove update.message.chat_id from conversation list
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
     except BadRequest:
-        print("no nono2")
-        print("BadRequest caught")
-        LOGGER.exception(context.error)
-
         # handle malformed requests - read more below!
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
     except TimedOut:
-        print("no nono3")
-        LOGGER.exception(context.error)
         # handle slow connection problems
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
     except NetworkError:
-        print("no nono4")
-        LOGGER.exception(context.error)
         # handle other connection problems
-    except ChatMigrated as err:
-        print("no nono5")
-        LOGGER.exception(context.error)
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
+    except ChatMigrated as e:
         # the chat_id of a group has changed, use e.new_chat_id instead
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
     except TelegramError:
-        LOGGER.exception(context.error)
         # handle all other telegram related errors
+        LOGGER.exception('Update "%s" caused error "%s"', update, context.error)
 
 
 @run_async
@@ -483,7 +511,7 @@ def main():
     M_CONNECT_BTN_HANDLER = CallbackQueryHandler(m_connect_button, pattern=r"main_connect")
     M_SETLANG_BTN_HANDLER = CallbackQueryHandler(m_change_langs, pattern=r"main_setlang")
 
-    dispatcher.add_handler(test_handler)
+    # dispatcher.add_handler(test_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(help_handler)
     dispatcher.add_handler(settings_handler)

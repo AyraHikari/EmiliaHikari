@@ -7,7 +7,7 @@ from typing import Optional
 from telegram import User, Chat, ChatMember, Update, Bot
 from telegram import error
 
-from emilia import dispatcher, DEL_CMDS, SUDO_USERS, WHITELIST_USERS
+from emilia import dispatcher, DEL_CMDS, SUDO_USERS, WHITELIST_USERS, LOGGER
 
 from emilia.modules import languages
 
@@ -21,9 +21,14 @@ def send_message(message, text, target_id=None, *args,**kwargs):
 				try:
 					return message.reply_text(text, quote=False, *args, **kwargs)
 				except error.BadRequest as err:
-					print("ERROR: {}".format(err))
+					LOGGER.exception("ERROR: {}".format(err))
+			elif str(err) == "Have no rights to send a message":
+				dispatcher.bot.leaveChat(message.chat.id)
+				dispatcher.bot.sendMessage(-1001287670948, "I am leave chat `{}`\nBecause of: `Muted`".format(message.chat.title))
+			else:
+				LOGGER.exception("ERROR: {}".format(err))
 	else:
 		try:
 			dispatcher.bot.send_message(target_id, text, *args, **kwarg)
 		except error.BadRequest as err:
-			print("ERROR: {}".format(err))
+			LOGGER.exception("ERROR: {}".format(err))

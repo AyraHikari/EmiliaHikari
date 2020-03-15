@@ -26,16 +26,17 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
-def blackliststicker(bot: Bot, update: Update, args: List[str]):
+def blackliststicker(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
+	args = context.args
 
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 		
-	conn = connected(bot, update, chat, user.id, need_admin=False)
+	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -67,7 +68,7 @@ def blackliststicker(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 @user_admin
-def add_blackliststicker(bot: Bot, update: Update):
+def add_blackliststicker(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -77,7 +78,7 @@ def add_blackliststicker(bot: Bot, update: Update):
 	if spam == True:
 		return
 
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -94,7 +95,7 @@ def add_blackliststicker(bot: Bot, update: Update):
 		added = 0
 		for trigger in to_blacklist:
 			try:
-				get = bot.getStickerSet(trigger)
+				get = context.bot.getStickerSet(trigger)
 				sql.add_to_stickers(chat_id, trigger.lower())
 				added += 1
 			except BadRequest:
@@ -115,7 +116,7 @@ def add_blackliststicker(bot: Bot, update: Update):
 			send_message(update.effective_message, tl(update.effective_message, "Stiker tidak valid!"))
 			return
 		try:
-			get = bot.getStickerSet(trigger)
+			get = context.bot.getStickerSet(trigger)
 			sql.add_to_stickers(chat_id, trigger.lower())
 			added += 1
 		except BadRequest:
@@ -130,7 +131,7 @@ def add_blackliststicker(bot: Bot, update: Update):
 
 @run_async
 @user_admin
-def unblackliststicker(bot: Bot, update: Update):
+def unblackliststicker(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -140,7 +141,7 @@ def unblackliststicker(bot: Bot, update: Update):
 	if spam == True:
 		return
 
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -199,15 +200,16 @@ def unblackliststicker(bot: Bot, update: Update):
 @run_async
 @loggable
 @user_admin
-def blacklist_mode(bot: Bot, update: Update, args: List[str]):
+def blacklist_mode(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
+	args = context.args
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat = dispatcher.bot.getChat(conn)
 		chat_id = conn
@@ -296,7 +298,7 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
 
 @run_async
 @user_not_admin
-def del_blackliststicker(bot: Bot, update: Update):
+def del_blackliststicker(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	user = update.effective_user

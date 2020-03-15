@@ -229,6 +229,7 @@ Examples of time values: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 week.
 	"- Pesan salam\n": "- Greetings message\n",
 	"- Pesan selamat tinggal\n": "- Goodbye message\n",
 	"- {} catatan\n": "- {} notes\n",
+	"- Penguncian\n": "- Locked\n",
 	"- Pengaturan pelaporan\n": "- Reporting setting\n",
 	"- Pesan peraturan grup\n": "- Rules group\n",
 	"- Pengaturan bahasa\n": "- Language settings\n",
@@ -789,9 +790,14 @@ you and your groups by removing spam flooders as quickly as possible. They can b
 """,
 	
 # locks
-	"Jenis kunci yang tersedia adalah: ": "Locks: ",
-	"Terkunci *{}* pesan untuk semua non-admin pada *{}*!": "Locked *{}* messages for all non-admins at *{}*!",
-	"Terkunci *{}* pesan untuk semua non-admin!": "Locked *{}* messages for all non-admins!",
+	"*Jenis kunci yang tersedia adalah:* ": "Locks: ",
+	"*Jenis izin kunci yang tersedia adalah:* ": "Permissions: ",
+	"Terkunci pesan *{}* untuk semua non-admin pada *{}*!": "Locked *{}* messages for all non-admins at *{}*!",
+	"Terkunci pesan *{}* untuk semua non-admin!": "Locked *{}* messages for all non-admins!",
+	"Izin terkunci pesan *{}* untuk semua non-admin pada *{}*!": "Permission *{}* was locked for all non-admins at *{}*!",
+	"Izin terkunci pesan *{}* untuk semua non-admin!": "Permission *{}* was locked for all non-admins!",
+	"Izin tidak terkunci *{}* untuk semua orang pada *{}*!": "Permission *{}* was unlocked for all non-admins at *{}*!",
+	"Izin tidak terkunci *{}* untuk semua orang!": "Permission *{}* was unlocked for all non-admins!",
 	"Apa yang Anda coba untuk kunci...? Coba /locktypes untuk daftar kunci yang dapat dikunci": "What are you trying to lock...? Try /locktypes for the list of lockables",
 	"Apa yang Anda ingin kunci...?": "What do you want to lock...?",
 	"Saya bukan admin, atau tidak punya hak menghapus.": "I'm not an administrator, or haven't got delete rights.",
@@ -802,12 +808,14 @@ you and your groups by removing spam flooders as quickly as possible. They can b
 	"Hanya admin yang diizinkan menambahkan bot ke obrolan ini! Keluar dari sini!": "Only admins are allowed to add bots to this chat! Get outta here.",
 	"Tidak ada kunci saat ini dalam obrolan ini.": "There are no current locks in this chat.",
 	"Ini adalah kunci dalam obrolan ini:": "These are the locks in this chat:",
+	"Ini adalah izin dalam obrolan ini:": "These are permissions in this chat:",
 	"obrolan ini": "this chat",
 	"Saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will warn* user if send any message/media which currently locked",
 	"Saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will not warn* user if send any message/media which currently locked",
 	"Saat ini saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will warn* user if send any message/media which currently locked",
 	"Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will not warn* user if send any message/media which currently locked",
 	"Mengirim 'Teks RTL' yang sedang di kunci saat ini": "Send 'RTL Text' which currently locked",
+	"Mengirim 'Pesan Tombol' yang sedang di kunci saat ini": "Send 'Button Message' which currently locked",
 	"Memasukan 'Bot' yang sedang di kunci saat ini": "Invite 'Bot' which currently locked",
 	"Mengirim '{}' yang sedang di kunci saat ini": "Send '{}' which currently locked",
 	"locks_help": """
@@ -1347,7 +1355,11 @@ This also works with /goodbye.
  - /tr <to> <text>: translate text written or reply for any language to the intended language
  - /wiki <text>: search for text written from the wikipedia source
  - /ud <text>: search from urban dictionary
-"""
+""",
+
+# Misc
+	"Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu.": "I don't have that user in my db. You'll be able to interact with them if you reply to that person's message instead, or forward one of that user's messages.",
+	"Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa untuk menjalankan perintah tertentu...)": "I don't seem to have interacted with this user before - please forward a message from them to give me control! (like a voodoo doll, I need a piece of them to be able to execute certain commands...)"
 }
 
 

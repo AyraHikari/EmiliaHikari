@@ -24,7 +24,7 @@ from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.sql import cust_filters_sql as filtersql
 from emilia.modules.sql import languages_sql as langsql
 import emilia.modules.sql.locks_sql as locksql
-from emilia.modules.locks import LOCK_TYPES, RESTRICTION_TYPES
+from emilia.modules.locks import LOCK_TYPES
 from emilia.modules.sql import notes_sql as notesql
 from emilia.modules.sql import reporting_sql as reportsql
 import emilia.modules.sql.rules_sql as rulessql
@@ -49,7 +49,7 @@ def import_data(update, context):
 	if spam == True:
 		return
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat = dispatcher.bot.getChat(conn)
 		chat_id = conn
@@ -68,7 +68,7 @@ def import_data(update, context):
 			send_message(update.effective_message, tl(update.effective_message, "File cadangan tidak valid!"))
 			return
 		try:
-			file_info = bot.get_file(msg.reply_to_message.document.file_id)
+			file_info = context.bot.get_file(msg.reply_to_message.document.file_id)
 		except BadRequest:
 			send_message(update.effective_message, tl(update.effective_message, "Coba unduh dan unggah ulang file seperti Anda sendiri sebelum mengimpor - yang ini sepertinya rusak!"))
 			return
@@ -99,13 +99,17 @@ def import_data(update, context):
 				imp_warn = False
 				imp_warn_chat = 0
 				imp_warn_filter = 0
-				NOT_IMPORTED = "This cannot be imported because from other bot."
+				NOT_IMPORTED = "This cannot be imported because from other context.bot."
 				NOT_IMPORTED_INT = 0
 				# If backup is from this bot, import all files
-				if data.get('bot_id') == bot.id:
+				if data.get('bot_id') == context.bot.id:
 					is_self = True
 				else:
 					is_self = False
+				if data.get('bot_base') == "Emilia":
+					is_emilia = True
+				else:
+					is_emilia = False
 				# Import antiflood
 				if data.get('antiflood'):
 					imp_antiflood = True
@@ -184,7 +188,25 @@ def import_data(update, context):
 								has_markdown = True
 							note_data, buttons = button_markdown_parser(x['reply'], entities=0)
 							filtersql.add_filter(chat_id, x['name'], note_data, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
-							imp_filters_count += 1	
+							imp_filters_count += 1
+						elif is_emilia:
+							is_sticker = False
+							is_document = False
+							is_image = False
+							is_audio = False
+							is_voice = False
+							is_video = False
+							has_markdown = False
+							universal = False
+							if x['type'] == 0:
+								has_markdown = True
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['name'])
+								NOT_IMPORTED_INT += 1
+								continue
+							note_data, buttons = button_markdown_parser(x['reply'], entities=0)
+							filtersql.add_filter(chat_id, x['name'], note_data, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
+							imp_filters_count += 1
 						else:
 							if x['has_markdown']:
 								note_data, buttons = button_markdown_parser(x['reply'], entities=0)
@@ -291,10 +313,6 @@ def import_data(update, context):
 								is_locked = data['locks']['locks'].get('x')
 								locksql.update_lock(chat_id, x, locked=is_locked)
 								imp_locks = True
-							if x in RESTRICTION_TYPES:
-								is_locked = data['locks']['locks'].get('x')
-								locksql.update_restriction(chat_id, x, locked=is_locked)
-								imp_locks = True
 
 				# Import notes
 				if data.get('notes'):
@@ -329,6 +347,24 @@ def import_data(update, context):
 								note_type = Types.VIDEO_NOTE
 							else:
 								note_type = None
+							if note_type <= 8:
+								notesql.add_note_to_db(chat_id, note_name, note_data, note_type, buttons, note_file)
+								imp_notes += 1
+						elif is_emilia:
+							note_data, buttons = button_markdown_parser(x['note_data'], entities=0)
+							note_name = x['note_tag']
+							note_file = None
+							note_type = x['note_type']
+							if x['note_file']:
+								note_file = x['note_file']
+							if note_type == 0:
+								note_type = Types.TEXT
+							elif note_type == 1:
+								note_type = Types.BUTTON_TEXT
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['note_tag'])
+								NOT_IMPORTED_INT += 1
+								continue
 							if note_type <= 8:
 								notesql.add_note_to_db(chat_id, note_name, note_data, note_type, buttons, note_file)
 								imp_notes += 1
@@ -431,11 +467,11 @@ def import_data(update, context):
 					f = open("{}-notimported.txt".format(chat_id), "w")
 					f.write(str(NOT_IMPORTED))
 					f.close()
-					bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+					context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
 					os.remove("{}-notimported.txt".format(chat_id))
 				return
 		except Exception as err:
-			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
+			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/EmiliaOfficial) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
 			LOGGER.exception("An error when importing from Emilia base!")
 			return
 
@@ -656,7 +692,7 @@ def import_data(update, context):
 						f = open("{}-notimported.txt".format(chat_id), "w")
 						f.write(str(NOT_IMPORTED))
 						f.close()
-						bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+						context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
 						os.remove("{}-notimported.txt".format(chat_id))
 					return
 		except Exception as err:
@@ -718,7 +754,7 @@ def import_data(update, context):
 
 @run_async
 @user_admin
-def export_data(update, context, chat_data):
+def export_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
@@ -728,8 +764,9 @@ def export_data(update, context, chat_data):
 	chat_id = update.effective_chat.id
 	chat = update.effective_chat
 	current_chat_id = update.effective_chat.id
+	chat_data = context.chat_data
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat = dispatcher.bot.getChat(conn)
 		chat_id = conn
@@ -764,7 +801,7 @@ def export_data(update, context, chat_data):
 	bot_base = "Emilia"
 
 	# Make sure this backup is for this bot
-	bot_id = bot.id
+	bot_id = context.bot.id
 
 	# Backuping antiflood
 	flood_mode, flood_duration = antifloodsql.get_flood_setting(chat_id)
@@ -933,16 +970,16 @@ def export_data(update, context, chat_data):
 	f = open("{}-Emilia.backup".format(chat_id), "w")
 	f.write(str(all_backups))
 	f.close()
-	bot.sendChatAction(current_chat_id, "upload_document")
+	context.bot.sendChatAction(current_chat_id, "upload_document")
 	tgl = time.strftime("%H:%M:%S - %d/%m/%Y", time.localtime(time.time()))
 	try:
-		bot.sendMessage(TEMPORARY_DATA, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
+		context.bot.sendMessage(TEMPORARY_DATA, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
 	except BadRequest:
 		pass
-	send = bot.sendDocument(current_chat_id, document=open('{}-Emilia.backup'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
+	send = context.bot.sendDocument(current_chat_id, document=open('{}-Emilia.backup'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
 	try:
 		# Send to temp data for prevent unexpected issue
-		bot.sendDocument(TEMPORARY_DATA, document=send.document.file_id, caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, parse_mode=ParseMode.MARKDOWN)
+		context.bot.sendDocument(TEMPORARY_DATA, document=send.document.file_id, caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, parse_mode=ParseMode.MARKDOWN)
 	except BadRequest:
 		pass
 	os.remove("{}-Emilia.backup".format(chat_id)) # Cleaning file

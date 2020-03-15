@@ -18,7 +18,7 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
-def get_rules(bot: Bot, update: Update):
+def get_rules(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -87,7 +87,7 @@ def send_rules(update, chat_id, from_pm=False):
 
 @run_async
 @user_admin
-def set_rules(bot: Bot, update: Update):
+def set_rules(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -136,7 +136,7 @@ def set_rules(bot: Bot, update: Update):
 
 @run_async
 @user_admin
-def clear_rules(bot: Bot, update: Update):
+def clear_rules(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -164,10 +164,11 @@ def clear_rules(bot: Bot, update: Update):
 
 @run_async
 @user_admin
-def private_rules(bot: Bot, update: Update, args: List[str]):
+def private_rules(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
+    args = context.args
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     conn = connected(bot, update, chat, user.id)

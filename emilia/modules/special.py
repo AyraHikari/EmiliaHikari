@@ -27,7 +27,7 @@ from telegram.utils.helpers import escape_markdown, mention_html, mention_markdo
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamfilters
 from emilia.__main__ import STATS, USER_INFO
-from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleRegexHandler
+from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.sql import languages_sql as langsql
@@ -36,7 +36,7 @@ from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
-def stickerid(bot: Bot, update: Update):
+def stickerid(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -49,7 +49,7 @@ def stickerid(bot: Bot, update: Update):
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-def getsticker(bot: Bot, update: Update):
+def getsticker(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -60,13 +60,13 @@ def getsticker(bot: Bot, update: Update):
 											msg.from_user.id) + ", Silahkan cek file yang anda minta dibawah ini."
 											"\nTolong gunakan fitur ini dengan bijak!",
 											parse_mode=ParseMode.MARKDOWN)
-		bot.sendChatAction(chat_id, "upload_document")
+		context.bot.sendChatAction(chat_id, "upload_document")
 		file_id = msg.reply_to_message.sticker.file_id
-		newFile = bot.get_file(file_id)
+		newFile = context.bot.get_file(file_id)
 		newFile.download('sticker.png')
-		bot.sendDocument(chat_id, document=open('sticker.png', 'rb'))
-		bot.sendChatAction(chat_id, "upload_photo")
-		bot.send_photo(chat_id, photo=open('sticker.png', 'rb'))
+		context.bot.sendDocument(chat_id, document=open('sticker.png', 'rb'))
+		context.bot.sendChatAction(chat_id, "upload_photo")
+		context.bot.send_photo(chat_id, photo=open('sticker.png', 'rb'))
 		
 	else:
 		send_message(update.effective_message, "Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
@@ -74,7 +74,7 @@ def getsticker(bot: Bot, update: Update):
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-def stiker(bot: Bot, update: Update):
+def stiker(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -83,12 +83,12 @@ def stiker(bot: Bot, update: Update):
 	message = update.effective_message
 	message.delete()
 	if message.reply_to_message:
-		bot.sendSticker(chat_id, args[1], reply_to_message_id=message.reply_to_message.message_id)
+		context.bot.sendSticker(chat_id, args[1], reply_to_message_id=message.reply_to_message.message_id)
 	else:
-		bot.sendSticker(chat_id, args[1])
+		context.bot.sendSticker(chat_id, args[1])
 
 @run_async
-def file(bot: Bot, update: Update):
+def file(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -97,36 +97,38 @@ def file(bot: Bot, update: Update):
 	message = update.effective_message
 	message.delete()
 	if message.reply_to_message:
-		bot.sendDocument(chat_id, args[1], reply_to_message_id=message.reply_to_message.message_id)
+		context.bot.sendDocument(chat_id, args[1], reply_to_message_id=message.reply_to_message.message_id)
 	else:
-		bot.sendDocument(chat_id, args[1])
+		context.bot.sendDocument(chat_id, args[1])
 
 @run_async
-def getlink(bot: Bot, update: Update, args: List[int]):
+def getlink(update, context):
+	args = context.args
 	if args:
 		chat_id = int(args[0])
 	else:
 		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada obrolan"))
-	chat = bot.getChat(chat_id)
-	bot_member = chat.get_member(bot.id)
+	chat = context.bot.getChat(chat_id)
+	bot_member = chat.get_member(context.bot.id)
 	if bot_member.can_invite_users:
-		titlechat = bot.get_chat(chat_id).title
-		invitelink = bot.get_chat(chat_id).invite_link
+		titlechat = context.bot.get_chat(chat_id).title
+		invitelink = context.bot.get_chat(chat_id).invite_link
 		send_message(update.effective_message, tl(update.effective_message, "Sukses mengambil link invite di grup {}. \nInvite link : {}").format(titlechat, invitelink))
 	else:
 		send_message(update.effective_message, tl(update.effective_message, "Saya tidak memiliki akses ke tautan undangan!"))
 	
 @run_async
-def leavechat(bot: Bot, update: Update, args: List[int]):
+def leavechat(update, context):
+	args = context.args
 	if args:
 		chat_id = int(args[0])
 	else:
 		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada obrolan"))
 	try:
-		chat = bot.getChat(chat_id)
-		titlechat = bot.get_chat(chat_id).title
-		bot.sendMessage(chat_id, tl(update.effective_message, "Selamat tinggal semua 😁"))
-		bot.leaveChat(chat_id)
+		chat = context.bot.getChat(chat_id)
+		titlechat = context.bot.get_chat(chat_id).title
+		context.bot.sendMessage(chat_id, tl(update.effective_message, "Selamat tinggal semua 😁"))
+		context.bot.leaveChat(chat_id)
 		send_message(update.effective_message, tl(update.effective_message, "Saya telah keluar dari grup {}").format(titlechat))
 
 	except BadRequest as excp:
@@ -136,7 +138,7 @@ def leavechat(bot: Bot, update: Update, args: List[int]):
 			return
 
 @run_async
-def ping(bot: Bot, update: Update):
+def ping(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -144,11 +146,11 @@ def ping(bot: Bot, update: Update):
 	test = send_message(update.effective_message, "Pong!")
 	end_time = time.time()
 	ping_time = float(end_time - start_time)
-	bot.editMessageText(chat_id=update.effective_chat.id, message_id=test.message_id,
+	context.bot.editMessageText(chat_id=update.effective_chat.id, message_id=test.message_id,
 						text=tl(update.effective_message, "Pong!\nKecepatannya: {0:.2f} detik").format(round(ping_time, 2) % 60))
 
 @run_async
-def ramalan(bot: Bot, update: Update):
+def ramalan(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -159,7 +161,7 @@ def ramalan(bot: Bot, update: Update):
 	send_message(update.effective_message, text)    
 
 @run_async
-def terjemah(bot: Bot, update: Update):
+def terjemah(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -236,7 +238,7 @@ def terjemah(bot: Bot, update: Update):
 
 
 @run_async
-def wiki(bot: Bot, update: Update):
+def wiki(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -283,14 +285,14 @@ def wiki(bot: Bot, update: Update):
 		if len(summary) >= 200:
 			judul = pagewiki.title
 			summary = summary[:200]+"..."
-			button = InlineKeyboardMarkup([[InlineKeyboardButton(text=tl(update.effective_message, "Baca Lebih Lengkap"), url="t.me/{}?start=wiki-{}".format(bot.username, teks.replace(' ', '_')))]])
+			button = InlineKeyboardMarkup([[InlineKeyboardButton(text=tl(update.effective_message, "Baca Lebih Lengkap"), url="t.me/{}?start=wiki-{}".format(context.bot.username, teks.replace(' ', '_')))]])
 		else:
 			button = None
 		send_message(update.effective_message, tl(update.effective_message, "Hasil dari {} adalah:\n\n<b>{}</b>\n{}").format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
 
 
 @run_async
-def kamusbesarbahasaindonesia(bot: Bot, update: Update):
+def kamusbesarbahasaindonesia(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -327,7 +329,7 @@ def kamusbesarbahasaindonesia(bot: Bot, update: Update):
 		return
 
 @run_async
-def kitabgaul(bot: Bot, update: Update):
+def kitabgaul(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
@@ -365,10 +367,11 @@ def kitabgaul(bot: Bot, update: Update):
 	send_message(update.effective_message, balas, parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-def urbandictionary(bot: Bot, update: Update, args):
+def urbandictionary(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
+	args = context.args
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	message = update.effective_message
@@ -394,7 +397,7 @@ def urbandictionary(bot: Bot, update: Update, args):
 		send_message(update.effective_message, "Use `/ud <text` for search meaning from urban dictionary.", parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-def log(bot: Bot, update: Update):
+def log(update, context):
 	message = update.effective_message
 	eventdict = message.to_dict()
 	jsondump = json.dumps(eventdict, indent=4)
