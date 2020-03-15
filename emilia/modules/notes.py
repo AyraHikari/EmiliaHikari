@@ -178,39 +178,40 @@ def get(bot, update, notename, show_none=True, no_format=False):
 
 
 @run_async
-def cmd_get(bot: Bot, update: Update, args: List[str]):
+def cmd_get(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
+	args = context.args
 	if len(args) >= 2 and args[1].lower() == "noformat":
-		get(bot, update, args[0], show_none=True, no_format=True)
+		get(context.bot, update, args[0], show_none=True, no_format=True)
 	elif len(args) >= 1:
-		get(bot, update, args[0], show_none=True)
+		get(context.bot, update, args[0], show_none=True)
 	else:
 		send_message(update.effective_message, tl(update.effective_message, "Get apa?"))
 
 
 @run_async
-def hash_get(bot: Bot, update: Update):
+def hash_get(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	message = update.effective_message.text
 	fst_word = message.split()[0]
 	no_hash = fst_word[1:]
-	get(bot, update, no_hash, show_none=False)
+	get(context.bot, update, no_hash, show_none=False)
 
 
 # TODO: FIX THIS
 @run_async
 @user_admin
-def save(bot: Bot, update: Update):
+def save(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -272,13 +273,14 @@ def save(bot: Bot, update: Update):
 
 @run_async
 @user_admin
-def clear(bot: Bot, update: Update, args: List[str]):
+def clear(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id)
+	args = context.args
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -343,13 +345,14 @@ def clear(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 @user_admin
-def private_note(bot: Bot, update: Update, args: List[str]):
+def private_note(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id)
+	args = context.args
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -384,13 +387,13 @@ def private_note(bot: Bot, update: Update, args: List[str]):
 
 
 @run_async
-def list_notes(bot: Bot, update: Update):
+def list_notes(update, context):
 	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
 	if spam == True:
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id, need_admin=False)
+	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title

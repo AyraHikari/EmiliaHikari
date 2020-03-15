@@ -62,7 +62,7 @@ def reply_afk(update, context):
                     # Should never happen, since for a user to become AFK they must have spoken. Maybe changed username?
                     return
                 try:
-                    chat = bot.get_chat(user_id)
+                    chat = context.bot.get_chat(user_id)
                 except BadRequest:
                     print("Error: Could not fetch userid {} for AFK module".format(user_id))
                     return

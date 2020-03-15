@@ -128,7 +128,7 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 @user_admin_no_reply
 @bot_admin
 @loggable
-def button(bot: Bot, update: Update) -> str:
+def button(update, context):
     query = update.callback_query  # type: Optional[CallbackQuery]
     user = update.effective_user  # type: Optional[User]
     match = re.match(r"rm_warn\((.+?)\)", query.data)
@@ -160,7 +160,7 @@ def button(bot: Bot, update: Update) -> str:
 @user_admin
 #@can_restrict
 @loggable
-def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
+def warn_user(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -168,13 +168,14 @@ def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     warner = update.effective_user  # type: Optional[User]
     user = update.effective_user
+    args = context.args
 
     user_id, reason = extract_user_and_text(message, args)
     if user_id == "error":
         send_message(update.effective_message, tl(update.effective_message, reason))
         return ""
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -187,7 +188,7 @@ def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
 
-    check = bot.getChatMember(chat_id, bot.id)
+    check = context.bot.getChatMember(chat_id, context.bot.id)
     if check.status == 'member' or check['can_restrict_members'] == False:
         if conn:
             text = tl(update.effective_message, "Saya tidak bisa membatasi orang di {}! Pastikan saya sudah menjadi admin.").format(chat_name)
@@ -215,17 +216,18 @@ def warn_user(bot: Bot, update: Update, args: List[str]) -> str:
 @user_admin
 #@bot_admin
 @loggable
-def reset_warns(bot: Bot, update: Update, args: List[str]) -> str:
+def reset_warns(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+    args = context.args
 
     user_id = extract_user(message, args)
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -238,7 +240,7 @@ def reset_warns(bot: Bot, update: Update, args: List[str]) -> str:
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
 
-    check = bot.getChatMember(chat_id, bot.id)
+    check = context.bot.getChatMember(chat_id, context.bot.id)
     if check.status == 'member' or check['can_restrict_members'] == False:
         if conn:
             text = tl(update.effective_message, "Saya tidak bisa membatasi orang di {}! Pastikan saya sudah menjadi admin.").format(chat_name)
@@ -267,15 +269,16 @@ def reset_warns(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-def warns(bot: Bot, update: Update, args: List[str]):
+def warns(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+    args = context.args
 
-    conn = connected(bot, update, chat, user.id, need_admin=False)
+    conn = connected(context.bot, update, chat, user.id, need_admin=False)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -322,7 +325,7 @@ def warns(bot: Bot, update: Update, args: List[str]):
 
 # Dispatcher handler stop - do not async
 @user_admin
-def add_warn_filter(bot: Bot, update: Update):
+def add_warn_filter(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -330,7 +333,7 @@ def add_warn_filter(bot: Bot, update: Update):
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -374,7 +377,7 @@ def add_warn_filter(bot: Bot, update: Update):
 
 
 @user_admin
-def remove_warn_filter(bot: Bot, update: Update):
+def remove_warn_filter(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
@@ -382,7 +385,7 @@ def remove_warn_filter(bot: Bot, update: Update):
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -471,14 +474,14 @@ def remove_warn_filter(bot: Bot, update: Update):
 
 
 @run_async
-def list_warn_filters(bot: Bot, update: Update):
+def list_warn_filters(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
 
-    conn = connected(bot, update, chat, user.id, need_admin=False)
+    conn = connected(context.bot, update, chat, user.id, need_admin=False)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -518,7 +521,7 @@ def list_warn_filters(bot: Bot, update: Update):
 
 @run_async
 @loggable
-def reply_filter(bot: Bot, update: Update) -> str:
+def reply_filter(update, context) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     message = update.effective_message  # type: Optional[Message]
 
@@ -539,15 +542,16 @@ def reply_filter(bot: Bot, update: Update) -> str:
 @run_async
 @user_admin
 @loggable
-def set_warn_limit(bot: Bot, update: Update, args: List[str]) -> str:
+def set_warn_limit(update, context) -> str:
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
+    args = context.args
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -590,15 +594,16 @@ def set_warn_limit(bot: Bot, update: Update, args: List[str]) -> str:
 
 @run_async
 @user_admin
-def set_warn_strength(bot: Bot, update: Update, args: List[str]):
+def set_warn_strength(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
+    args = context.args
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -660,15 +665,16 @@ def set_warn_strength(bot: Bot, update: Update, args: List[str]):
 
 @run_async
 @user_admin
-def set_warn_mode(bot: Bot, update: Update, args: List[str]):
+def set_warn_mode(update, context):
     spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
     if spam == True:
         return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
+    args = context.args
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -789,23 +795,23 @@ def __chat_settings_btn__(chat_id, user_id):
     button.append([InlineKeyboardButton(text="{}".format("❎ Tendang" if soft_warn else "⛔️ Blokir"), callback_data="set_wlim=exec|{}".format(chat_id))])
     return button
 
-def WARN_EDITBTN(bot: Bot, update: Update):
+def WARN_EDITBTN(update, context):
     query = update.callback_query
     user = update.effective_user
     print("User {} clicked button WARN EDIT".format(user.id))
     qdata = query.data.split("=")[1].split("|")[0]
     chat_id = query.data.split("|")[1]
     if qdata == "?":
-        bot.answerCallbackQuery(query.id, "Batas dari peringatan. Jika peringatan melewati batas maka akan di eksekusi.", show_alert=True)
+        context.bot.answerCallbackQuery(query.id, "Batas dari peringatan. Jika peringatan melewati batas maka akan di eksekusi.", show_alert=True)
     if qdata == "-":
         button = []
         limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
         limit = int(limit)-1
         if limit <= 2:
-            bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 3", show_alert=True)
+            context.bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 3", show_alert=True)
             return
         sql.set_warn_limit(chat_id, int(limit))
-        chat = bot.get_chat(chat_id)
+        chat = context.bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Peringatan*:\n\n".format(escape_markdown(chat.title))
         text += "Batas maksimal peringatan telah di setel menjadi `{}`. Dibutuhkan `{}` peringatan " \
            "sebelum pengguna akan mendapatkan *{}*.".format(limit, limit, "tendangan" if soft_warn else "pemblokiran")
@@ -817,16 +823,16 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
     if qdata == "+":
         button = []
         limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
         limit = int(limit)+1
         if limit <= 0:
-            bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 0", show_alert=True)
+            context.bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 0", show_alert=True)
             return
         sql.set_warn_limit(chat_id, int(limit))
-        chat = bot.get_chat(chat_id)
+        chat = context.bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Peringatan*:\n\n".format(escape_markdown(chat.title))
         text += "Batas maksimal peringatan telah di setel menjadi `{}`. Dibutuhkan `{}` peringatan " \
            "sebelum pengguna akan mendapatkan *{}*.".format(limit, limit, "tendangan" if soft_warn else "pemblokiran")
@@ -838,7 +844,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
     if qdata == "exec":
         button = []
         limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
@@ -850,7 +856,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
             exc = "Tendang"
             sql.set_warn_strength(chat_id, True)
             soft_warn = True
-        chat = bot.get_chat(chat_id)
+        chat = context.bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Peringatan*:\n\n".format(escape_markdown(chat.title))
         text += "Pengguna akan di `{}` jika sudah diluar batas peringatan. Dibutuhkan `{}` peringatan " \
            "sebelum pengguna akan mendapatkan *{}*.".format(exc, limit, "tendangan" if soft_warn else "pemblokiran")
@@ -862,7 +868,7 @@ def WARN_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
 """
 
 
