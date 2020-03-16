@@ -124,7 +124,7 @@ def new_member(update, context):
 			# Give the owner a special welcome
 			if OWNER_SPECIAL and new_mem.id == OWNER_ID:
 				if cleanserv:
-					bot.send_message(chat.id, tl(update.effective_message, "Master telah pulang! Mari kita mulai pesta ini! 😆"))
+					context.bot.send_message(chat.id, tl(update.effective_message, "Master telah pulang! Mari kita mulai pesta ini! 😆"))
 				else:
 					send_message(update.effective_message, tl(update.effective_message, "Master telah pulang! Mari kita mulai pesta ini! 😆"))
 				continue
@@ -176,7 +176,7 @@ def new_member(update, context):
 							if mutetime[:1] == "0":
 								if new_mem.id not in list(is_clicked):
 									try:
-										bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -186,7 +186,7 @@ def new_member(update, context):
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
 									try:
-										bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -251,7 +251,7 @@ def new_member(update, context):
 							if mutetime[:1] == "0":
 								if new_mem.id not in list(is_clicked):
 									try:
-										bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -261,7 +261,7 @@ def new_member(update, context):
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
 									try:
-										bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -286,7 +286,7 @@ def new_member(update, context):
 			if prev_welc:
 				try:
 					if int(prev_welc) != 1:
-						bot.delete_message(chat.id, prev_welc)
+						context.bot.delete_message(chat.id, prev_welc)
 				except BadRequest as excp:
 				   pass
 
@@ -352,7 +352,7 @@ def check_bot_button(update, context):
 			print("-> Failed: {}".format(err))
 			return
 		# Unmute user
-		bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
+		context.bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
 		# sql.rm_from_userlist(chat.id, user.id)
 		sql.add_to_userlist(chat.id, user.id, True)
 	else:
@@ -380,7 +380,7 @@ def check_bot_button(update, context):
 	if getalluser.get(user.id) and getalluser.get(user.id) == True:
 		query.answer(text=tl(update.effective_message, "Kamu sudah pernah mengklik ini sebelumnya!"))
 		return
-	bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
+	context.bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
 	sql.add_to_userlist(chat.id, user.id, True)
 	should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
 	# If welcome message is media, send with appropriate function
@@ -411,7 +411,7 @@ def check_bot_button(update, context):
 		# Send message
 		try:
 			if welc_type != sql.Types.STICKER or welc_type != sql.Types.VOICE:
-				bot.editMessageCaption(chat.id, message_id=query.message.message_id, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown")
+				context.bot.editMessageCaption(chat.id, message_id=query.message.message_id, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown")
 		except BadRequest:
 			pass
 		query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
@@ -442,7 +442,7 @@ def check_bot_button(update, context):
 		res = sql.DEFAULT_WELCOME.format(first=first_name)
 		keyb = []
 	keyboard = InlineKeyboardMarkup(keyb)
-	bot.editMessageText(chat_id=chat.id, message_id=query.message.message_id, text=res, reply_markup=keyboard, parse_mode="markdown")
+	context.bot.editMessageText(chat_id=chat.id, message_id=query.message.message_id, text=res, reply_markup=keyboard, parse_mode="markdown")
 	query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
 	#TODO need kick users after 2 hours and remove message 
 
@@ -1002,11 +1002,11 @@ def WELC_EDITBTN(update, context):
 	chat_id = query.data.split("|")[1]
 	data = query.data.split("=")[1].split("|")[0]
 	if data == "w?":
-		bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member baru masuk jika di aktifkan.", show_alert=True)
+		context.bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member baru masuk jika di aktifkan.", show_alert=True)
 	if data == "g?":
-		bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member yang keluar jika di aktifkan. Akan aktif hanya untuk grup dibawah 100 member.", show_alert=True)
+		context.bot.answerCallbackQuery(query.id, "Bot akan mengirim pesan setiap ada member yang keluar jika di aktifkan. Akan aktif hanya untuk grup dibawah 100 member.", show_alert=True)
 	if data == "s?":
-		bot.answerCallbackQuery(query.id, "Bot akan menghapus notifikasi member masuk atau member keluar secara otomatis jika di aktifkan.", show_alert=True)
+		context.bot.answerCallbackQuery(query.id, "Bot akan menghapus notifikasi member masuk atau member keluar secara otomatis jika di aktifkan.", show_alert=True)
 	if data == "w":
 		welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
 		goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
@@ -1041,7 +1041,7 @@ def WELC_EDITBTN(update, context):
 		query.message.edit_text(text=text,
 								  parse_mode=ParseMode.MARKDOWN,
 								  reply_markup=InlineKeyboardMarkup(button))
-		bot.answer_callback_query(query.id)
+		context.bot.answer_callback_query(query.id)
 	if data == "g":
 		welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
 		goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
@@ -1076,7 +1076,7 @@ def WELC_EDITBTN(update, context):
 		query.message.edit_text(text=text,
 								  parse_mode=ParseMode.MARKDOWN,
 								  reply_markup=InlineKeyboardMarkup(button))
-		bot.answer_callback_query(query.id)
+		context.bot.answer_callback_query(query.id)
 	if data == "s":
 		welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
 		goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
@@ -1111,7 +1111,7 @@ def WELC_EDITBTN(update, context):
 		query.message.edit_text(text=text,
 								  parse_mode=ParseMode.MARKDOWN,
 								  reply_markup=InlineKeyboardMarkup(button))
-		bot.answer_callback_query(query.id)
+		context.bot.answer_callback_query(query.id)
 """
 
 
@@ -1124,12 +1124,12 @@ def check_cas(bot: Bot, user_id, user, message):
 		if json["result"]["offenses"] > 0:
 			is_success = False
 			try:
-				bot.kickChatMember(message.chat.id, user_id)
+				context.bot.kickChatMember(message.chat.id, user_id)
 				is_success = True
 			except:
-				bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from [CAS ban](https://combot.org/cas/query?u={}) and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
+				context.bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from [CAS ban](https://combot.org/cas/query?u={}) and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
 			if is_success:
-				bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: [CAS ban](https://combot.org/cas/query?u={}).".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
+				context.bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: [CAS ban](https://combot.org/cas/query?u={}).".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
 			fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
 			if fed_id:
 				x = fedsql.fban_user("TeamNusantaraDevs", user_id, user.first_name, user.last_name, user.username, "CAS-Banned", int(time.time()))
@@ -1137,7 +1137,7 @@ def check_cas(bot: Bot, user_id, user, message):
 					LOGGER.warning("Cannot fban spammer user!")
 					return
 				text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [CAS ban](https://combot.org/cas/query?u={})".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name + (" " + user.last_name if user.last_name != None else "")), user_id, user_id)
-				bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
+				context.bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
 				print(">>> NEW FBAN CAS: {} {} in {}".format(user.first_name, user_id, message.chat.title))
 
 def check_sw(bot: Bot, user_id, user, message):
@@ -1150,12 +1150,12 @@ def check_sw(bot: Bot, user_id, user, message):
 		return False
 	is_success = False
 	try:
-		bot.kickChatMember(message.chat.id, user_id)
+		context.bot.kickChatMember(message.chat.id, user_id)
 		is_success = True
 	except:
-		bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from SpamWatch and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name)), parse_mode="markdown", disable_web_page_preview=True)
+		context.bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from SpamWatch and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name)), parse_mode="markdown", disable_web_page_preview=True)
 	if is_success:
-		bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: {}.".format(mention_markdown(user_id, user.first_name), json.get('reason') if json.get('reason') else "Unknown reason"), parse_mode="markdown", disable_web_page_preview=True)
+		context.bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: {}.".format(mention_markdown(user_id, user.first_name), json.get('reason') if json.get('reason') else "Unknown reason"), parse_mode="markdown", disable_web_page_preview=True)
 	fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
 	if fed_id:
 		x = fedsql.fban_user("TeamNusantaraDevs", user_id, user.first_name, user.last_name, user.username, json.get('reason') if json.get('reason') else "Unknown reason", int(time.time()))
@@ -1163,7 +1163,7 @@ def check_sw(bot: Bot, user_id, user, message):
 			LOGGER.warning("Cannot fban spammer user!")
 			return
 		text = "*New FedBan*\n*Fed:* `TeamNusantaraDevs`\n*FedAdmin*: {}\n*User:* {}\n*User ID:* `{}`\n*Reason:* [SpamWatch] {}".format(mention_markdown(692882995, "Emilia"), mention_markdown(user_id, user.first_name + (" " + user.last_name if user.last_name != None else "")), user_id, json.get('reason') if json.get('reason') else "Unknown reason")
-		bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
+		context.bot.sendMessage(-1001338861977, text, parse_mode="markdown", disable_web_page_preview=True)
 		print(">>> NEW FBAN SW: {} {} in {}".format(user.first_name, user_id, message.chat.title))
 
 
