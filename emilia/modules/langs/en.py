@@ -1264,7 +1264,7 @@ Note:
 	"Di nonaktifkan, saya tidak akan membisukan member masuk lagi": "Disabled, I will not mute new member again",
 	"Silakan tulis `on`/`ya`/`off`/`ga`!": "Please write `on`/`off`!",
 	"Selamanya": "Forever",
-	"Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`": "Current settings are:\nWelcome security: `{}`\nnVerify security: `{}`\nMembers will be muted for: `{}`\nUnmute custom button: `{}`",
+	"Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nWaktu verifikasi timeout: `{}`\nTombol unmute custom: `{}`": "Current settings are:\nWelcome security: `{}`\nVerify security: `{}`\nMembers will be muted for: `{}`\nVerification timeout: `{}`\nUnmute custom button: `{}`",
 	"Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!": "Every new member will be muted forever until they presses the welcome button!",
 	"Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!": "Every new member will be muted for {} until they presses the welcome button!",
 	"Pengaturan saat ini: member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!": "Current settings: new member will be muted forever until they presses the welcome button!",
@@ -1329,6 +1329,10 @@ Note:
  - /setmutetext <new text>: Customise the "Click here to unmute" button obtained from enabling welcomemutes.
  - /resetmutetext: Reset teks tombol unmute menjadi default.
 
+ - /welcomeverify <on/off>: Enable welcome verification with images and buttons, best for anti bots
+ - /wtimeout <Xw/d/h/m>: Set welcome timeout, when user wasn't verify for X, then that user will be kicked/banned
+ - /wtmode <kick/ban>: Set welcome timeout should be kicked or banned
+
 Read /welcomehelp and /markdownhelp to learn about formatting your text and mentioning new users when the join!
 
 If you want to save an image, gif, or sticker, or any other data, do the following:
@@ -1338,6 +1342,22 @@ Tip: use /welcome noformat to retrieve the unformatted welcome message.
 This will retrieve the welcome message and send it without formatting it; getting you the raw markdown, allowing you to make easy edits.
 This also works with /goodbye.
 """,
+
+# Welcome timeout
+	"Verifikasi gagal!\n{} telah di tendang!": "Verification failed!\n{} was kicked!",
+	"Verifikasi gagal!\nTetapi gagal menendang {}: {}": "Verification failed!\nBut was failed to kick {}: {}",
+	"Verifikasi gagal!\n{} telah di banned!": "Verification failed!\n{} was banned!",
+	"Verifikasi gagal!\nTetapi gagal membanned {}: {}": "Verification failed!\nut was failed to banned {}: {}",
+	"Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat": "Security for new members is activated! New users are required to complete verification to chat",
+	"Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat": "Disabled, users can click the button to chat immediately",
+	"Batas waktu verifikasi telah di nonaktifkan!": "Verification timeout has been deactivated!",
+	"Jika member baru tidak memverifikasi selama *{}* maka dia akan di *{}*": "If the new member doesn't verify for *{}* then he/she will *{}*",
+	"Pengaturan batas waktu ketika join: *{}*": "Timeout settings: *{}*",
+	"Saya hanya mengerti kick/banned!": "I only understand kick/banned!",
+	"Mode timeout diubah, Pengguna akan di `{}` pada *{}*!": "Timeout mode changed, User will be `{}` at *{}*!",
+	"Mode timeout diubah, Pengguna akan di `{}`!": "Timeout mode changed, User will be `{}`!",
+	"Mode timeout saat ini disetel ke *{}* pada *{}*.": "The current timeout mode is set to *{}* at *{}*.",
+	"Mode timeout saat ini disetel ke *{}*.": "The current timeout mode is set to *{}*.",
 
 # Only for Special module
 	"Hai {}, Id stiker yang anda balas adalah :\n```{}```": "Hi {}, sticker id that you reply is :\n```{}```",

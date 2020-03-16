@@ -463,6 +463,10 @@ menjadi kalimat, mencakup dengan tanda kutip, seperti: `/addwarn "sangat marah" 
  - /setmutetext <teks tombol>: Ubahsuaikan untuk tombol "Klik disini untuk mensuarakan" yang diperoleh dari mengaktifkan welcomemute.
  - /resetmutetext: Reset teks tombol unmute menjadi default.
 
+ - /welcomeverify <on/off>: Aktifkan verifikasi selamat datang dengan gambar dan tombol, gunakan untuk anti bot
+ - /wtimeout <Xw/d/h/m>: Tetapkan batas waktu sambutan, saat pengguna tidak memverifikasi pada waktu X, maka pengguna tersebut akan ditendang/diblokir
+ - /wtmode <kick/ban>: Setel batas waktu sambutan harus ditendang atau dicekal
+
 Baca /welcomehelp dan /markdownhelp untuk mempelajari tentang memformat teks Anda dan menyebutkan pengguna baru saat bergabung!
 
 Jika Anda ingin menyimpan gambar, gif, atau stiker, atau data lain, lakukan hal berikut:

@@ -21,6 +21,7 @@ from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_welcome_type
 from emilia.modules.helper_funcs.string_handling import markdown_parser, \
 	escape_invalid_curly_brackets, extract_time
+from emilia.modules.helper_funcs.welcome_timeout import welcome_timeout
 from emilia.modules.log_channel import loggable
 
 import emilia.modules.sql.feds_sql as fedsql
@@ -240,7 +241,7 @@ def new_member(update, context):
 						res = sql.DEFAULT_WELCOME.format(first=first_name)
 						keyb = []
 
-					getsec, extra_verify, mutetime, timeout, custom_text = sql.welcome_security(chat.id)
+					getsec, extra_verify, mutetime, timeout, timeout_mode, custom_text = sql.welcome_security(chat.id)
 					
 					# If user ban protected don't apply security on him
 					if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
@@ -277,11 +278,15 @@ def new_member(update, context):
 									keyb.append([InlineKeyboardButton(text=str(custom_text), url="t.me/{}?start=verify_{}".format(context.bot.username, chat.id))])
 								else:
 									keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+								if timeout != "0":
+									sql.add_to_timeout(chat.id, new_mem.id, int(timeout))
 							elif new_mem.id in list(is_clicked) and is_clicked[new_mem.id] == False:
 								if extra_verify:
 									keyb.append([InlineKeyboardButton(text=str(custom_text), url="t.me/{}?start=verify_{}".format(context.bot.username, chat.id))])
 								else:
 									keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+								if timeout != "0":
+									sql.add_to_timeout(chat.id, new_mem.id, int(timeout))
 					keyboard = InlineKeyboardMarkup(keyb)
 
 					sent = send(update, res, keyboard,
@@ -419,7 +424,7 @@ def check_bot_button(update, context):
 		# Build keyboard
 		buttons = sql.get_welc_buttons(chat.id)
 		keyb = build_keyboard(buttons)
-		getsec, extra_verify, mutetime, timeout, custom_text = sql.welcome_security(chat.id)
+		getsec, extra_verify, mutetime, timeout, timeout_mode, custom_text = sql.welcome_security(chat.id)
 		keyboard = InlineKeyboardMarkup(keyb)
 		# Send message
 		try:
@@ -560,7 +565,7 @@ def security(update, context):
 		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
-	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		var = args[0].lower()
 		if (var == "yes" or var == "ya" or var == "on"):
@@ -569,10 +574,10 @@ def security(update, context):
 				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
 				send_message(update.effective_message, text, parse_mode="markdown")
 				return ""
-			sql.set_welcome_security(chat.id, True, extra_verify, str(cur_value), str(timeout), cust_text)
+			sql.set_welcome_security(chat.id, True, extra_verify, str(cur_value), str(timeout), int(timeout_mode), cust_text)
 			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan!"))
 		elif (var == "no" or var == "ga" or var == "off"):
-			sql.set_welcome_security(chat.id, False, extra_verify, str(cur_value), str(timeout), cust_text)
+			sql.set_welcome_security(chat.id, False, extra_verify, str(cur_value), str(timeout), int(timeout_mode), cust_text)
 			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, saya tidak akan membisukan member masuk lagi"))
 		else:
 			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
@@ -593,18 +598,18 @@ def security_mute(update, context):
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
-	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		var = args[0]
 		if var[:1] == "0":
 			mutetime = "0"
-			sql.set_welcome_security(chat.id, getcur, extra_verify, "0", timeout, cust_text)
+			sql.set_welcome_security(chat.id, getcur, extra_verify, "0", timeout, timeout_mode, cust_text)
 			text = tl(update.effective_message, "Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!")
 		else:
 			mutetime = extract_time(message, var)
 			if mutetime == "":
 				return
-			sql.set_welcome_security(chat.id, getcur, extra_verify, str(var), timeout, cust_text)
+			sql.set_welcome_security(chat.id, getcur, extra_verify, str(var), timeout, timeout_mode, cust_text)
 			text = tl(update.effective_message, "Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!").format(var)
 		send_message(update.effective_message, text)
 	else:
@@ -623,10 +628,10 @@ def security_text(update, context):
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
-	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		text = " ".join(args)
-		sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, text)
+		sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, timeout_mode, text)
 		text = tl(update.effective_message, "Tombol custom teks telah di ubah menjadi: `{}`").format(text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 	else:
@@ -641,8 +646,8 @@ def security_text_reset(update, context):
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
-	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
-	sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, tl(update.effective_message, "Klik disini untuk mensuarakan"))
+	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
+	sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, timeout_mode, tl(update.effective_message, "Klik disini untuk mensuarakan"))
 	send_message(update.effective_message, tl(update.effective_message, "Tombol custom teks security telah di reset menjadi: `Klik disini untuk mensuarakan`"), parse_mode="markdown")
 
 
@@ -1129,38 +1134,6 @@ def WELC_EDITBTN(update, context):
 """
 
 
-@run_async
-@user_admin
-def set_verify_welcome(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-	args = context.args
-	chat = update.effective_chat  # type: Optional[Chat]
-	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
-	if len(args) >= 1:
-		var = args[0].lower()
-		if (var == "yes" or var == "ya" or var == "on"):
-			check = context.bot.getChatMember(chat.id, context.bot.id)
-			if check.status == 'member' or check['can_restrict_members'] == False:
-				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
-				send_message(update.effective_message, text, parse_mode="markdown")
-				return ""
-			sql.set_welcome_security(chat.id, getcur, True, str(cur_value), str(timeout), cust_text)
-			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat"))
-		elif (var == "no" or var == "ga" or var == "off"):
-			sql.set_welcome_security(chat.id, getcur, False, str(cur_value), str(timeout), cust_text)
-			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat"))
-		else:
-			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
-	else:
-		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
-		if cur_value[:1] == "0":
-			cur_value = tl(update.effective_message, "Selamanya")
-		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, extra_verify, cur_value, cust_text)
-		send_message(update.effective_message, text, parse_mode="markdown")
-
-
 CAS_URL = "https://combot.org/api/cas/check"
 SPAMWATCH_URL = "https://api.spamwat.ch/banlist/"
 
@@ -1233,7 +1206,6 @@ SECURITY_MUTE_HANDLER = CommandHandler("welcomemutetime", security_mute, pass_ar
 SECURITY_BUTTONTXT_HANDLER = CommandHandler("setmutetext", security_text, pass_args=True, filters=Filters.group)
 SECURITY_BUTTONRESET_HANDLER = CommandHandler("resetmutetext", security_text_reset, filters=Filters.group)
 CLEAN_SERVICE_HANDLER = CommandHandler("cleanservice", cleanservice, pass_args=True, filters=Filters.group)
-WELCVERIFY_HANDLER = CommandHandler("welcomeverify", set_verify_welcome, pass_args=True, filters=Filters.group)
 
 welcomesec_callback_handler = CallbackQueryHandler(check_bot_button, pattern=r"check_bot_")
 # WELC_BTNSET_HANDLER = CallbackQueryHandler(WELC_EDITBTN, pattern=r"set_welc")
@@ -1253,7 +1225,6 @@ dispatcher.add_handler(SECURITY_MUTE_HANDLER)
 dispatcher.add_handler(SECURITY_BUTTONTXT_HANDLER)
 dispatcher.add_handler(SECURITY_BUTTONRESET_HANDLER)
 dispatcher.add_handler(CLEAN_SERVICE_HANDLER)
-dispatcher.add_handler(WELCVERIFY_HANDLER)
 
 dispatcher.add_handler(welcomesec_callback_handler)
 #dispatcher.add_handler(WELC_BTNSET_HANDLER)

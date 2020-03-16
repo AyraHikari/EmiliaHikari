@@ -275,3 +275,25 @@ def make_time(time_val):
     elif int(time_val) >= 86400:
         bantime = str(int(time_val / 24 / 60 / 60)) + "d"
     return bantime
+
+def extract_time_int(message, time_val):
+    if any(time_val.endswith(unit) for unit in ('m', 'h', 'd')):
+        unit = time_val[-1]
+        time_num = time_val[:-1]  # type: str
+        if not time_num.isdigit():
+            message.reply_text("Jumlah waktu tidak ditentukan.")
+            return ""
+
+        if unit == 'm':
+            bantime = int(int(time_num) * 60)
+        elif unit == 'h':
+            bantime = int(int(time_num) * 60 * 60)
+        elif unit == 'd':
+            bantime = int(int(time_num) * 24 * 60 * 60)
+        else:
+            # how even...?
+            return ""
+        return bantime
+    else:
+        message.reply_text("Jenis waktu tidak valid ditentukan. Diharapkan m, h, atau d, didapatkan: {}".format(time_val[-1]))
+        return ""
