@@ -292,7 +292,7 @@ def new_member(update, context):
 
 				if sent:
 					sql.set_clean_welcome(chat.id, sent.message_id)
-
+	"""
 	fed_id = fedsql.get_fed_id(chat.id)
 	if fed_id == "TeamNusantaraDevs":
 		new_members = update.effective_message.new_chat_members
@@ -303,7 +303,7 @@ def new_member(update, context):
 			# CAS Security thread
 			t = threading.Thread(target=check_cas, args=(bot, new_mem.id, new_mem, update.effective_message,))
 			t.start()
-
+	"""
 
 @run_async
 def check_bot_button(update, context):
