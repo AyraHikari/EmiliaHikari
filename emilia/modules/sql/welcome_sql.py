@@ -137,7 +137,6 @@ WelcomeButtons.__table__.create(checkfirst=True)
 GoodbyeButtons.__table__.create(checkfirst=True)
 CleanServiceSetting.__table__.create(checkfirst=True)
 WelcomeSecurity.__table__.create(checkfirst=True)
-UserRestrict.__table__.drop()
 UserRestrict.__table__.create(checkfirst=True)
 WelcomeTimeout.__table__.create(checkfirst=True)
 
