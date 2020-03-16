@@ -23,6 +23,7 @@ from emilia.modules import ALL_MODULES
 from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.chat_status import is_user_admin
 from emilia.modules.helper_funcs.misc import paginate_modules
+from emilia.modules.helper_funcs.verifier import verify_welcome
 from emilia.modules.sql import languages_sql as langsql
 
 from emilia.modules.connection import connect_button
@@ -139,6 +140,10 @@ def start(update, context):
                 message.reply_text("<b>{}</b>\n{}".format(judul, summary), parse_mode=ParseMode.HTML,
                     reply_markup=InlineKeyboardMarkup(
                             [[InlineKeyboardButton(text=tl(update.effective_message, "Baca di Wikipedia"), url=pagewiki.url)]]))
+
+            elif args[0][:6].lower() == "verify":
+                chat_id = args[0].split("_")[1]
+                verify_welcome(update, context, chat_id)
 
         else:
             first_name = update.effective_user.first_name
