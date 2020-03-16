@@ -1,11 +1,15 @@
 import random
 import re
 
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, ChatPermissions
 from telegram.ext import CallbackQueryHandler
+from telegram.error import BadRequest
 
 from emilia import dispatcher
+import emilia.modules.sql.welcome_sql as sql
 from emilia.modules.languages import tl
+
+from emilia.modules.helper_funcs.alternate import send_message
 
 
 verify_code = ["🙏", "👈", "👉", "👇", "👆", "❤️", "🅰️", "🅱️", "0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
@@ -33,6 +37,13 @@ verify_code_images = {
 
 def verify_welcome(update, context, chat_id):
 	user_id = update.effective_user.id
+	is_clicked = sql.get_chat_userlist(chat_id)
+	if user_id not in list(is_clicked):
+		send_message(update.effective_message, tl(update.effective_message, "Anda sedang tidak dalam mode verifikasi, jika anda sedang di bisukan, anda dapat meminta tolong pada admin di grup yang bersangkutan"))
+		return
+	elif user_id in list(is_clicked) and is_clicked[user_id] == True:
+		send_message(update.effective_message, tl(update.effective_message, "Anda sedang tidak dalam mode verifikasi, jika anda sedang di bisukan, anda dapat meminta tolong pada admin di grup yang bersangkutan"))
+		return
 	real_btn = random.choice(verify_code)
 	verify_code.remove(real_btn)
 	verbox = (random.randint(1, 3), random.randint(1, 3))
@@ -69,6 +80,15 @@ def verify_button_pressed(update, context):
 	message = update.effective_message  # type: Optional[Message]
 	print("-> {} was clicked welcome verify button".format(user.id))
 	if is_ok == "y":
+		try:
+			context.bot.restrict_chat_member(chat_id, user_id, permissions=ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True))
+			sql.add_to_userlist(chat_id, user_id, True)
+		except BadRequest as err:
+			if not update.effective_chat.get_member(context.bot.id).can_restrict_members:
+				query.answer(text=tl(update.effective_message, "Saya tidak dapat membatasi orang disini, tanya admin untuk unmute!"))
+			else:
+				query.answer(text="Error: " + str(err.message))
+			return
 		chat_name = context.bot.get_chat(chat_id).title
 		context.bot.edit_message_media(chat.id, message_id=query.message.message_id, media=InputMediaPhoto(media="https://telegra.ph/file/06d2c5ec80af3858c2d4b.jpg", caption=tl(update.effective_message, "*Berhasil!*\n\nKerja bagus manusia, kini Anda dapat chatting di: *{}*").format(chat_name), parse_mode="markdown"))
 		query.answer(text=tl(update.effective_message, "Berhasil! Anda dapat chatting di {} sekarang").format(chat_name), show_alert=True)

@@ -5,7 +5,7 @@ import requests
 from typing import Optional, List
 
 from telegram import Message, Chat, Update, Bot, User, CallbackQuery
-from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
+from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
 from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, CommandHandler, run_async, CallbackQueryHandler
 from telegram.utils.helpers import mention_markdown, mention_html, escape_markdown
@@ -176,7 +176,7 @@ def new_member(update, context):
 							if mutetime[:1] == "0":
 								if new_mem.id not in list(is_clicked):
 									try:
-										context.bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, permissions=ChatPermissions(can_send_messages=False))
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -186,7 +186,7 @@ def new_member(update, context):
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
 									try:
-										context.bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, permissions=ChatPermissions(can_send_messages=False))
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -251,7 +251,7 @@ def new_member(update, context):
 							if mutetime[:1] == "0":
 								if new_mem.id not in list(is_clicked):
 									try:
-										context.bot.restrict_chat_member(chat.id, new_mem.id, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, permissions=ChatPermissions(can_send_messages=False))
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -261,7 +261,7 @@ def new_member(update, context):
 								if new_mem.id not in list(is_clicked):
 									mutetime = extract_time(update.effective_message, mutetime)
 									try:
-										context.bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, can_send_messages=False)
+										context.bot.restrict_chat_member(chat.id, new_mem.id, until_date=mutetime, permissions=ChatPermissions(can_send_messages=False))
 										canrest = True
 									except BadRequest:
 										canrest = False
@@ -273,9 +273,15 @@ def new_member(update, context):
 							sql.add_to_userlist(chat.id, new_mem.id, False)
 						if canrest:
 							if new_mem.id not in list(is_clicked):
-								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+								if extra_verify:
+									keyb.append([InlineKeyboardButton(text=str(custom_text), url="t.me/{}?start=verify_{}".format(context.bot.username, chat.id))])
+								else:
+									keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
 							elif new_mem.id in list(is_clicked) and is_clicked[new_mem.id] == False:
-								keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
+								if extra_verify:
+									keyb.append([InlineKeyboardButton(text=str(custom_text), url="t.me/{}?start=verify_{}".format(context.bot.username, chat.id))])
+								else:
+									keyb.append([InlineKeyboardButton(text=str(custom_text), callback_data="check_bot_({})".format(new_mem.id))])
 					keyboard = InlineKeyboardMarkup(keyb)
 
 					sent = send(update, res, keyboard,
@@ -352,7 +358,7 @@ def check_bot_button(update, context):
 			print("-> Failed: {}".format(err))
 			return
 		# Unmute user
-		context.bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
+		context.bot.restrict_chat_member(chat.id, user.id, permissions=ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True))
 		# sql.rm_from_userlist(chat.id, user.id)
 		sql.add_to_userlist(chat.id, user.id, True)
 	else:
@@ -380,7 +386,14 @@ def check_bot_button(update, context):
 	if getalluser.get(user.id) and getalluser.get(user.id) == True:
 		query.answer(text=tl(update.effective_message, "Kamu sudah pernah mengklik ini sebelumnya!"))
 		return
-	context.bot.restrict_chat_member(chat.id, user.id, can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True)
+	try:
+		context.bot.restrict_chat_member(chat.id, user.id, permissions=ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True))
+	except BadRequest as err:
+		if not update.effective_chat.get_member(context.bot.id).can_restrict_members:
+			query.answer(text=tl(update.effective_message, "Saya tidak dapat membatasi orang disini, tanya admin untuk unmute!"))
+		else:
+			query.answer(text="Error: " + str(err.message))
+		return
 	sql.add_to_userlist(chat.id, user.id, True)
 	should_welc, cust_welcome, cust_content, welc_type = sql.get_welc_pref(chat.id)
 	# If welcome message is media, send with appropriate function
@@ -567,7 +580,7 @@ def security(update, context):
 		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 		if cur_value[:1] == "0":
 			cur_value = tl(update.effective_message, "Selamanya")
-		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, cur_value, cust_text)
+		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, extra_verify, cur_value, cust_text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 
 
@@ -691,6 +704,7 @@ def welcome(update, context):
 		text += tl(update.effective_message, "Saat ini Saya menghapus pesan selamat datang lama: `{}`\n").format(prev_welc)
 		text += tl(update.effective_message, "Saat ini Saya menghapus layanan pesan: `{}`\n").format(cleanserv)
 		text += tl(update.effective_message, "Saat ini saya membisukan pengguna ketika mereka bergabung: `{}`\n").format(welcsec)
+		text += tl(update.effective_message, "Pengguna baru harus verifikasi tombol: `{}`\n").format(tl(update.effective_message, "Aktif ") if extra_verify else tl(update.effective_message, "Tidak aktif "))
 		text += tl(update.effective_message, "Tombol welcomemute akan mengatakan: `{}`\n").format(cust_text)
 		text += tl(update.effective_message, "\n*Pesan selamat datang (tidak mengisi {{}}) adalah:*")
 		send_message(update.effective_message, text,
@@ -1143,7 +1157,7 @@ def set_verify_welcome(update, context):
 		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 		if cur_value[:1] == "0":
 			cur_value = tl(update.effective_message, "Selamanya")
-		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, cur_value, cust_text)
+		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, extra_verify, cur_value, cust_text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 
 

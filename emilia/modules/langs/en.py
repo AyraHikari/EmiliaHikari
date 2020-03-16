@@ -1240,8 +1240,6 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Berhasil! Anda dapat chatting di {} sekarang": "Success! You can chat in {} now",
 	"Maaf robot, kamu telah salah klik tombol verifikasi.\n\nCoba lagi dengan klik tombol verifikasi pada pesan selamat datang.": "Sorry robot, you are clicked wrong button.\n\nTry again by click welcome security button.",
 	"Gagal! Kamu telah salah mengklik tombol verifikasi": "Failed! You are clicked wrong button",
-	"Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat": "Security for new members is activated! New users are required to complete verification to chat",
-	"Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat": "Disabled, users can once click the button to chat",
 
 # cleaner
 	"Penghapus pesan biru telah di *non-aktifkan* di *{}*.": "Blue text cleaner was *disabled* in *{}*.",
@@ -1266,7 +1264,7 @@ Note:
 	"Di nonaktifkan, saya tidak akan membisukan member masuk lagi": "Disabled, I will not mute new member again",
 	"Silakan tulis `on`/`ya`/`off`/`ga`!": "Please write `on`/`off`!",
 	"Selamanya": "Forever",
-	"Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`": "Current settings are:\nWelcome security: `{}`\nMembers will be muted for: `{}`\nUnmute custom button: `{}`",
+	"Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`": "Current settings are:\nWelcome security: `{}`\nnVerify security: `{}`\nMembers will be muted for: `{}`\nUnmute custom button: `{}`",
 	"Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!": "Every new member will be muted forever until they presses the welcome button!",
 	"Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!": "Every new member will be muted for {} until they presses the welcome button!",
 	"Pengaturan saat ini: member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!": "Current settings: new member will be muted forever until they presses the welcome button!",
@@ -1288,6 +1286,7 @@ Note:
 	"Saat ini Saya menghapus pesan selamat datang lama: `{}`\n": "At this time I deleted the old welcome message: `{}`\n",
 	"Saat ini Saya menghapus layanan pesan: `{}`\n": "I am currently deleting the message service: `{}`\n",
 	"Saat ini saya membisukan pengguna ketika mereka bergabung: `{}`\n": "Currently I mute users when they join: `{}`\n",
+	"Pengguna baru harus verifikasi tombol: `{}`\n": "New users must verify: `{}`\n",
 	"Tombol welcomemute akan mengatakan: `{}`\n": "The button welcomemute will say: `{}`\n",
 	"\n*Pesan selamat datang (tidak mengisi {{}}) adalah:*": "\n*Welcome message (not filling the {{}}) is:*",
 	"Saya akan sopan 😁": "I'll be polite! 😁",
@@ -1306,6 +1305,10 @@ Note:
 	"Saat ini saya *tidak akan* menghapus pesan selamat datang yang lama!": "I'm currently not deleting old welcome messages!",
 	"Saya *akan* mencoba menghapus pesan selamat datang yang lama!": "I'll try to delete old welcome messages!",
 	"Saya *tidak akan* menghapus pesan selamat datang yang lama.": "I won't delete old welcome messages.",
+	"Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat": "Security for new members is activated! New users are required to complete verification to chat",
+	"Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat": "Disabled, users can once click the button to chat",
+	"Anda sedang tidak dalam mode verifikasi, jika anda sedang di bisukan, anda dapat meminta tolong pada admin di grup yang bersangkutan": "You are not in verification mode, if you are muted, you can ask the admin of the group for help",
+	"Saya tidak dapat membatasi orang disini, tanya admin untuk unmute!": "I can't restrict people here, ask admin to unmute you!",
 	"WELC_HELP_TXT": "Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages to be individually generated, like the default welcome message is, you can use *these* variables:\n - `{{first}}`: this represents the user's *first* name\n - `{{last}}`: this represents the user's *last* name. Defaults to *first name* if user has no last name.\n - `{{fullname}}`: this represents the user's *full* name. Defaults to *first name* if user has no last name.\n - `{{username}}`: this represents the user's *username*. Defaults to a *mention* of the user's first name if has no username.\n - `{{mention}}`: this simply *mentions* a user - tagging them with their first name.\n - `{{id}}`: this represents the user's *id*\n - `{{count}}`: this represents the user's *member number*.\n - `{{chatname}}`: this represents the *current chat name*.\n\nEach variable MUST be surrounded by `{{}}` to be replaced.\nWelcome messages also support markdown, so you can make any elements bold/italic/code/links. Buttons are also supported, so you can make your welcomes look awesome with some nice intro buttons.\nTo create a button linking to your rules, use this: `[Rules](buttonurl://t.me/{}?start=group_id)`. Simply replace `group_id` with your group's id, which can be obtained via /id, and you're good to go. Note that group ids are usually preceded by a `-` sign; this is required, so please don't remove it.\nIf you're feeling fun, you can even set images/gifs/videos/voice messages as the welcome message by replying to the desired media, and calling /setwelcome.",
 	"Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\nUntuk preferensi pesan selamat tinggal `{}`.\nBot `{}` menghapus notifikasi member masuk/keluar secara otomatis": "This chat has it's welcome preference set to `{}`.\nIt's goodbye preference is `{}`.",
 	"welcome_help": """
