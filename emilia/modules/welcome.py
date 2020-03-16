@@ -547,7 +547,7 @@ def security(update, context):
 		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
-	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		var = args[0].lower()
 		if (var == "yes" or var == "ya" or var == "on"):
@@ -556,10 +556,10 @@ def security(update, context):
 				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
 				send_message(update.effective_message, text, parse_mode="markdown")
 				return ""
-			sql.set_welcome_security(chat.id, True, str(cur_value), cust_text)
+			sql.set_welcome_security(chat.id, True, extra_verify, str(cur_value), str(timeout), cust_text)
 			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan!"))
 		elif (var == "no" or var == "ga" or var == "off"):
-			sql.set_welcome_security(chat.id, False, str(cur_value), cust_text)
+			sql.set_welcome_security(chat.id, False, extra_verify, str(cur_value), str(timeout), cust_text)
 			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, saya tidak akan membisukan member masuk lagi"))
 		else:
 			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
@@ -580,18 +580,18 @@ def security_mute(update, context):
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
-	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		var = args[0]
 		if var[:1] == "0":
 			mutetime = "0"
-			sql.set_welcome_security(chat.id, getcur, "0", cust_text)
+			sql.set_welcome_security(chat.id, getcur, extra_verify, "0", timeout, cust_text)
 			text = tl(update.effective_message, "Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!")
 		else:
 			mutetime = extract_time(message, var)
 			if mutetime == "":
 				return
-			sql.set_welcome_security(chat.id, getcur, str(var), cust_text)
+			sql.set_welcome_security(chat.id, getcur, extra_verify, str(var), timeout, cust_text)
 			text = tl(update.effective_message, "Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!").format(var)
 		send_message(update.effective_message, text)
 	else:
@@ -610,10 +610,10 @@ def security_text(update, context):
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
-	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 	if len(args) >= 1:
 		text = " ".join(args)
-		sql.set_welcome_security(chat.id, getcur, cur_value, text)
+		sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, text)
 		text = tl(update.effective_message, "Tombol custom teks telah di ubah menjadi: `{}`").format(text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 	else:
@@ -628,8 +628,8 @@ def security_text_reset(update, context):
 		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
-	getcur, cur_value, cust_text = sql.welcome_security(chat.id)
-	sql.set_welcome_security(chat.id, getcur, cur_value, tl(update.effective_message, "Klik disini untuk mensuarakan"))
+	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+	sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, tl(update.effective_message, "Klik disini untuk mensuarakan"))
 	send_message(update.effective_message, tl(update.effective_message, "Tombol custom teks security telah di reset menjadi: `Klik disini untuk mensuarakan`"), parse_mode="markdown")
 
 
@@ -1115,6 +1115,38 @@ def WELC_EDITBTN(update, context):
 """
 
 
+@run_async
+@user_admin
+def set_verify_welcome(update, context):
+	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
+	if spam == True:
+		return
+	args = context.args
+	chat = update.effective_chat  # type: Optional[Chat]
+	getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+	if len(args) >= 1:
+		var = args[0].lower()
+		if (var == "yes" or var == "ya" or var == "on"):
+			check = context.bot.getChatMember(chat.id, context.bot.id)
+			if check.status == 'member' or check['can_restrict_members'] == False:
+				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
+				send_message(update.effective_message, text, parse_mode="markdown")
+				return ""
+			sql.set_welcome_security(chat.id, True, extra_verify, str(cur_value), str(timeout), cust_text)
+			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan!"))
+		elif (var == "no" or var == "ga" or var == "off"):
+			sql.set_welcome_security(chat.id, False, extra_verify, str(cur_value), str(timeout), cust_text)
+			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, saya tidak akan membisukan member masuk lagi"))
+		else:
+			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
+	else:
+		getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+		if cur_value[:1] == "0":
+			cur_value = tl(update.effective_message, "Selamanya")
+		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, cur_value, cust_text)
+		send_message(update.effective_message, text, parse_mode="markdown")
+
+
 CAS_URL = "https://combot.org/api/cas/check"
 SPAMWATCH_URL = "https://api.spamwat.ch/banlist/"
 
@@ -1187,6 +1219,7 @@ SECURITY_MUTE_HANDLER = CommandHandler("welcomemutetime", security_mute, pass_ar
 SECURITY_BUTTONTXT_HANDLER = CommandHandler("setmutetext", security_text, pass_args=True, filters=Filters.group)
 SECURITY_BUTTONRESET_HANDLER = CommandHandler("resetmutetext", security_text_reset, filters=Filters.group)
 CLEAN_SERVICE_HANDLER = CommandHandler("cleanservice", cleanservice, pass_args=True, filters=Filters.group)
+WELCVERIFY_HANDLER = CommandHandler("welcomeverify", set_verify_welcome, pass_args=True, filters=Filters.group)
 
 welcomesec_callback_handler = CallbackQueryHandler(check_bot_button, pattern=r"check_bot_")
 # WELC_BTNSET_HANDLER = CallbackQueryHandler(WELC_EDITBTN, pattern=r"set_welc")

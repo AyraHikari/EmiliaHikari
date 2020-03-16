@@ -81,13 +81,17 @@ class WelcomeSecurity(BASE):
     __tablename__ = "welcome_security"
     chat_id = Column(String(14), primary_key=True)
     security = Column(Boolean, default=False)
+    extra_verify = Column(Boolean, default=False)
     mute_time = Column(UnicodeText, default="0")
+    timeout = Column(UnicodeText, default="0")
     custom_text = Column(UnicodeText, default="Klik disini untuk mensuarakan")
 
-    def __init__(self, chat_id, security=False, mute_time="0", custom_text="Klik disini untuk mensuarakan"):
+    def __init__(self, chat_id, security=False, extra_verify=False, mute_time="0", timeout="0", custom_text="Klik disini untuk mensuarakan"):
         self.chat_id = str(chat_id) # ensure string
         self.security = security
+        self.extra_verify = extra_verify
         self.mute_time = mute_time
+        self.timeout = timeout
         self.custom_text = custom_text
 
 class UserRestrict(BASE):
@@ -165,21 +169,23 @@ def welcome_security(chat_id):
     try:
         security = SESSION.query(WelcomeSecurity).get(str(chat_id))
         if security:
-            return security.security, security.mute_time, security.custom_text
+            return security.security, security.extra_verify, security.mute_time, security.timeout, security.custom_text
         else:
-            return False, "0", "Klik disini untuk mensuarakan"
+            return False, "0", "0", "Klik disini untuk mensuarakan"
     finally:
         SESSION.close()
 
 
-def set_welcome_security(chat_id, security, mute_time, custom_text):
+def set_welcome_security(chat_id, security, extra_verify, mute_time, timeout, custom_text):
     with WS_LOCK:
         curr_setting = SESSION.query(WelcomeSecurity).get((str(chat_id)))
         if not curr_setting:
-            curr_setting = WelcomeSecurity(chat_id, security=security, mute_time=mute_time, custom_text=custom_text)
+            curr_setting = WelcomeSecurity(chat_id, security=security, extra_verify=extra_verify, mute_time=mute_time, timeout=timeout, custom_text=custom_text)
 
         curr_setting.security = bool(security)
+        curr_setting.extra_verify = bool(extra_verify)
         curr_setting.mute_time = str(mute_time)
+        curr_setting.timeout = str(timeout)
         curr_setting.custom_text = str(custom_text)
 
         SESSION.add(curr_setting)
