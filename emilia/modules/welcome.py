@@ -164,7 +164,7 @@ def new_member(update, context):
 					# Build keyboard
 					buttons = sql.get_welc_buttons(chat.id)
 					keyb = build_keyboard(buttons)
-					getsec, mutetime, custom_text = sql.welcome_security(chat.id)
+					getsec, extra_verify, mutetime, timeout, custom_text = sql.welcome_security(chat.id)
 
 					# If user ban protected don't apply security on him
 					if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
@@ -240,7 +240,7 @@ def new_member(update, context):
 						res = sql.DEFAULT_WELCOME.format(first=first_name)
 						keyb = []
 
-					getsec, mutetime, custom_text = sql.welcome_security(chat.id)
+					getsec, extra_verify, mutetime, timeout, custom_text = sql.welcome_security(chat.id)
 					
 					# If user ban protected don't apply security on him
 					if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
@@ -406,7 +406,7 @@ def check_bot_button(update, context):
 		# Build keyboard
 		buttons = sql.get_welc_buttons(chat.id)
 		keyb = build_keyboard(buttons)
-		getsec, mutetime, custom_text = sql.welcome_security(chat.id)
+		getsec, extra_verify, mutetime, timeout, custom_text = sql.welcome_security(chat.id)
 		keyboard = InlineKeyboardMarkup(keyb)
 		# Send message
 		try:
@@ -564,7 +564,7 @@ def security(update, context):
 		else:
 			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
 	else:
-		getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 		if cur_value[:1] == "0":
 			cur_value = tl(update.effective_message, "Selamanya")
 		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, cur_value, cust_text)
@@ -678,7 +678,7 @@ def welcome(update, context):
 		else:
 			prev_welc = False
 		cleanserv = sql.clean_service(chat.id)
-		getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 		if getcur:
 			welcsec = tl(update.effective_message, "Aktif ")
 		else:
@@ -1132,15 +1132,15 @@ def set_verify_welcome(update, context):
 				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
 				send_message(update.effective_message, text, parse_mode="markdown")
 				return ""
-			sql.set_welcome_security(chat.id, True, extra_verify, str(cur_value), str(timeout), cust_text)
-			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan!"))
+			sql.set_welcome_security(chat.id, getcur, True, str(cur_value), str(timeout), cust_text)
+			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat"))
 		elif (var == "no" or var == "ga" or var == "off"):
-			sql.set_welcome_security(chat.id, False, extra_verify, str(cur_value), str(timeout), cust_text)
-			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, saya tidak akan membisukan member masuk lagi"))
+			sql.set_welcome_security(chat.id, getcur, False, str(cur_value), str(timeout), cust_text)
+			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat"))
 		else:
 			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
 	else:
-		getcur, cur_value, cust_text = sql.welcome_security(chat.id)
+		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
 		if cur_value[:1] == "0":
 			cur_value = tl(update.effective_message, "Selamanya")
 		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, cur_value, cust_text)
@@ -1239,6 +1239,7 @@ dispatcher.add_handler(SECURITY_MUTE_HANDLER)
 dispatcher.add_handler(SECURITY_BUTTONTXT_HANDLER)
 dispatcher.add_handler(SECURITY_BUTTONRESET_HANDLER)
 dispatcher.add_handler(CLEAN_SERVICE_HANDLER)
+dispatcher.add_handler(WELCVERIFY_HANDLER)
 
 dispatcher.add_handler(welcomesec_callback_handler)
 #dispatcher.add_handler(WELC_BTNSET_HANDLER)

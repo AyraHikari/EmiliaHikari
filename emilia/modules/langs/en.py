@@ -1240,6 +1240,8 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Berhasil! Anda dapat chatting di {} sekarang": "Success! You can chat in {} now",
 	"Maaf robot, kamu telah salah klik tombol verifikasi.\n\nCoba lagi dengan klik tombol verifikasi pada pesan selamat datang.": "Sorry robot, you are clicked wrong button.\n\nTry again by click welcome security button.",
 	"Gagal! Kamu telah salah mengklik tombol verifikasi": "Failed! You are clicked wrong button",
+	"Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat": "Security for new members is activated! New users are required to complete verification to chat",
+	"Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat": "Disabled, users can once click the button to chat",
 
 # cleaner
 	"Penghapus pesan biru telah di *non-aktifkan* di *{}*.": "Blue text cleaner was *disabled* in *{}*.",
