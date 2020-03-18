@@ -74,7 +74,8 @@ if ENV:
 	STRICT_GBAN = bool(os.environ.get('STRICT_GBAN', False))
 	WORKERS = int(os.environ.get('WORKERS', 8))
 	BAN_STICKER = os.environ.get('BAN_STICKER', 'CAADBAAD4kYAAuOnXQW5LUN400QOBQI')
-	ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
+	# ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
+	CUSTOM_CMD = os.environ.get('CUSTOM_CMD', False)
 	API_WEATHER = os.environ.get('API_OPENWEATHER', None)
 	API_ACCUWEATHER = os.environ.get('API_ACCUWEATHER', None)
 	MAPS_API = os.environ.get('MAPS_API', None)
@@ -130,7 +131,8 @@ else:
 	STRICT_GBAN = Config.STRICT_GBAN
 	WORKERS = Config.WORKERS
 	BAN_STICKER = Config.BAN_STICKER
-	ALLOW_EXCL = Config.ALLOW_EXCL
+	# ALLOW_EXCL = Config.ALLOW_EXCL
+	CUSTOM_CMD = Config.CUSTOM_CMD
 	API_WEATHER = Config.API_OPENWEATHER
 	API_ACCUWEATHER = Config.API_ACCUWEATHER
 	MAPS_API = Config.MAPS_API
@@ -157,7 +159,7 @@ GROUP_BLACKLIST = list(GROUP_BLACKLIST)
 # Load at end to ensure all prev variables have been set
 from emilia.modules.helper_funcs.handlers import CustomCommandHandler
 
-if ALLOW_EXCL:
+if CUSTOM_CMD and len(CUSTOM_CMD) >= 1:
 	tg.CommandHandler = CustomCommandHandler
 
 # Disable this (line 151) if you dont have a antispam script
