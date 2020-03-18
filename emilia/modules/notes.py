@@ -13,7 +13,7 @@ import emilia.modules.sql.notes_sql as sql
 from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamfilters, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
-from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
+from emilia.modules.helper_funcs.misc import build_keyboard_parser, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_note_type
 from emilia.modules.helper_funcs.string_handling import escape_invalid_curly_brackets
 
@@ -91,12 +91,12 @@ def get(bot, update, notename, show_none=True, no_format=False):
 						raise
 		else:
 
-			VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention']
+			VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention', 'rules']
 			valid_format = escape_invalid_curly_brackets(note.value, VALID_WELCOME_FORMATTERS)
 			if valid_format:
 				text = valid_format.format(first=escape_markdown(message.from_user.first_name),
 											  last=escape_markdown(message.from_user.last_name or message.from_user.first_name),
-											  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else [message.from_user.first_name])), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title if message.chat.type != "private" else message.from_user.first_name), id=message.from_user.id)
+											  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else [message.from_user.first_name])), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title if message.chat.type != "private" else message.from_user.first_name), id=message.from_user.id, rules="http://t.me/{}?start={}".format(bot.username, chat_id))
 			else:
 				text = ""
 
@@ -107,7 +107,7 @@ def get(bot, update, notename, show_none=True, no_format=False):
 				parseMode = None
 				text += revert_buttons(buttons)
 			else:
-				keyb = build_keyboard(buttons)
+				keyb = build_keyboard_parser(bot, chat_id, buttons)
 
 			keyboard = InlineKeyboardMarkup(keyb)
 

@@ -13,7 +13,7 @@ from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.extraction import extract_text
 from emilia.modules.helper_funcs.filters import CustomFilters
-from emilia.modules.helper_funcs.misc import build_keyboard
+from emilia.modules.helper_funcs.misc import build_keyboard_parser
 from emilia.modules.helper_funcs.msg_types import get_filter_type
 from emilia.modules.helper_funcs.string_handling import split_quotes, button_markdown_parser, escape_invalid_curly_brackets
 from emilia.modules.sql import cust_filters_sql as sql
@@ -234,7 +234,7 @@ def reply_filter(update, context):
 			filt = sql.get_filter(chat.id, keyword)
 			if filt.reply == "there is should be a new reply":
 				buttons = sql.get_buttons(chat.id, filt.keyword)
-				keyb = build_keyboard(buttons)
+				keyb = build_keyboard_parser(context.bot, chat.id, buttons)
 				keyboard = InlineKeyboardMarkup(keyb)
 
 				VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention']
@@ -287,7 +287,7 @@ def reply_filter(update, context):
 					message.reply_video(filt.reply)
 				elif filt.has_markdown:
 					buttons = sql.get_buttons(chat.id, filt.keyword)
-					keyb = build_keyboard(buttons)
+					keyb = build_keyboard_parser(context.bot, chat.id, buttons)
 					keyboard = InlineKeyboardMarkup(keyb)
 
 					try:

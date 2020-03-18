@@ -99,7 +99,7 @@ def import_data(update, context):
 				imp_warn = False
 				imp_warn_chat = 0
 				imp_warn_filter = 0
-				NOT_IMPORTED = "This cannot be imported because from other context.bot."
+				NOT_IMPORTED = "This cannot be imported because from other bot."
 				NOT_IMPORTED_INT = 0
 				# If backup is from this bot, import all files
 				if data.get('bot_id') == context.bot.id:

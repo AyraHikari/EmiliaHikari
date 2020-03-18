@@ -345,9 +345,9 @@ __mod_name__ = "Reporting"
 __help__ = "reporting_help"
 
 
-REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
+REPORT_HANDLER = CommandHandler("report", report_alt, filters=Filters.group)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
-ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report)
+ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report_alt)
 Callback_Report = CallbackQueryHandler(button, pattern=r"rp_")
 Callback_ReportAsk = CallbackQueryHandler(buttonask, pattern=r"ak_")
 
