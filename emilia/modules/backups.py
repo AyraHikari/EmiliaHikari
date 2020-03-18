@@ -290,7 +290,13 @@ def import_data(update, context):
 					secenable = data['greetings']['security'].get('enable')
 					secbtn = data['greetings']['security'].get('text')
 					sectime = data['greetings']['security'].get('time')
-					welcsql.set_welcome_security(chat_id, bool(secenable), str(sectime), str(secbtn))
+					timeout = data['greetings']['security'].get('timeout')
+					if not timeout:
+						timeout = "0"
+					timeout_mode = data['greetings']['security'].get('timeout_mode')
+					if not timeout_mode:
+						timeout_mode = 1
+					welcsql.set_welcome_security(chat_id, bool(secenable), str(sectime), str(timeout), int(timeout_mode), str(secbtn))
 					imp_greet_pref = True
 
 				# Import language
@@ -599,8 +605,8 @@ def import_data(update, context):
 							welcsql.set_clean_service(chat_id, False)
 						# custom mute btn
 						if data['data']['greetings'].get('mute_text'):
-							getcur, cur_value, cust_text = welcsql.welcome_security(chat_id)
-							welcsql.set_welcome_security(chat_id, getcur, cur_value, data['data']['greetings'].get('mute_text'))
+							getcur, cur_value, timeout, timeout_mode, cust_text = welcsql.welcome_security(chat_id)
+							welcsql.set_welcome_security(chat_id, getcur, cur_value, timeout, timeout_mode, data['data']['greetings'].get('mute_text'))
 						imp_greet_pref = True
 						# TODO parsing unix time and import that
 					# TODO Locks
@@ -869,8 +875,8 @@ def export_data(update, context):
 	curr = welcsql.clean_service(chat_id)
 	greetings["clean_service"] = curr
 
-	getcur, cur_value, cust_text = welcsql.welcome_security(chat_id)
-	greetings["security"] = {"enable": getcur, "text": cust_text, "time": cur_value}
+	getcur, cur_value, timeout, timeout_mode, cust_text = welcsql.welcome_security(chat_id)
+	greetings["security"] = {"enable": getcur, "text": cust_text, "time": cur_value, "timeout": timeout, "timeout_mode": timeout_mode}
 
 	# Backuping chat language
 	getlang = langsql.get_lang(chat_id)
