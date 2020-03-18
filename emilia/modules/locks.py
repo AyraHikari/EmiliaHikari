@@ -27,14 +27,12 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 ad = AlphabetDetector()
 
-LOCK_TYPES = {'sticker': Filters.sticker,
-			  'audio': Filters.audio,
+LOCK_TYPES = {'audio': Filters.audio,
 			  'voice': Filters.voice,
 			  'document': Filters.document,
 			  'video': Filters.video,
 			  'contact': Filters.contact,
 			  'photo': Filters.photo,
-			  'gif': Filters.document & CustomFilters.mime_type("video/mp4"),
 			  'url': Filters.entity(MessageEntity.URL) | Filters.caption_entity(MessageEntity.URL),
 			  'bots': Filters.status_update.new_chat_members,
 			  'forward': Filters.forwarded,
@@ -46,26 +44,28 @@ LOCK_TYPES = {'sticker': Filters.sticker,
 
 
 LOCK_CHAT_RESTRICTION = {"all": {'can_send_messages': False, 'can_send_media_messages': False, 'can_send_polls': False, 'can_send_other_messages': False, 'can_add_web_page_previews': False, 'can_change_info': False, 'can_invite_users': False, 'can_pin_messages': False},
-						"messages": ChatPermissions(can_send_messages=False),
-						"media": ChatPermissions(can_send_media_messages=False),
-						"sticker": ChatPermissions(can_send_media_messages=False),
-						"poll": ChatPermissions(can_send_polls=False),
-						"other": ChatPermissions(can_send_other_messages=False),
-						"previews": ChatPermissions(can_add_web_page_previews=False),
-						"info": ChatPermissions(can_change_info=False),
-						"invite": ChatPermissions(can_invite_users=False),
-						"pin": ChatPermissions(can_pin_messages=False)}
+						"messages": {'can_send_messages': False},
+						"media": {'can_send_media_messages': False},
+						"sticker": {'can_send_other_messages': False},
+						"gif": {'can_send_other_messages': False},
+						"poll": {'can_send_polls': False},
+						"other": {'can_send_other_messages': False},
+						"previews": {'can_add_web_page_previews': False},
+						"info": {'can_change_info': False},
+						"invite": {'can_invite_users': False},
+						"pin": {'can_pin_messages': False}}
 
 UNLOCK_CHAT_RESTRICTION = {"all": {'can_send_messages': True, 'can_send_media_messages': True, 'can_send_polls': True, 'can_send_other_messages': True, 'can_add_web_page_previews': True, 'can_invite_users': True},
-						"messages": ChatPermissions(can_send_messages=True),
-						"media": ChatPermissions(can_send_media_messages=True),
-						"sticker": ChatPermissions(can_send_media_messages=True),
-						"poll": ChatPermissions(can_send_polls=True),
-						"other": ChatPermissions(can_send_other_messages=True),
-						"previews": ChatPermissions(can_add_web_page_previews=True),
-						"info": ChatPermissions(can_change_info=True),
-						"invite": ChatPermissions(can_invite_users=True),
-						"pin": ChatPermissions(can_pin_messages=True)}
+						"messages": {'can_send_messages': True},
+						"media": {'can_send_media_messages': True},
+						"sticker": {'can_send_other_messages': True},
+						"gif": {'can_send_other_messages': True},
+						"poll": {'can_send_polls': True},
+						"other": {'can_send_other_messages': True},
+						"previews": {'can_add_web_page_previews': True},
+						"info": {'can_change_info': True},
+						"invite": {'can_invite_users': True},
+						"pin": {'can_pin_messages': True}}
 
 PERM_GROUP = 1
 REST_GROUP = 2
@@ -181,7 +181,7 @@ def lock(update, context) -> str:
 					text = tl(update.effective_message, "Izin terkunci pesan *{}* untuk semua non-admin!").format(ltype)
 				
 				current_permission = context.bot.getChat(chat_id).permissions
-				chat.set_permissions(permissions=get_permission_list(current_permission, LOCK_CHAT_RESTRICTION[ltype.lower()]))
+				context.bot.set_chat_permissions(chat_id=chat_id, permissions=get_permission_list(eval(str(current_permission)), LOCK_CHAT_RESTRICTION[ltype.lower()]))
 
 				send_message(update.effective_message, text, parse_mode="markdown")
 				return "<b>{}:</b>" \
@@ -257,7 +257,7 @@ def unlock(update, context) -> str:
 					text = tl(update.effective_message, "Izin tidak terkunci *{}* untuk semua orang!").format(ltype)
 				
 				current_permission = context.bot.getChat(chat_id).permissions
-				chat.set_permissions(permissions=get_permission_list(current_permission, UNLOCK_CHAT_RESTRICTION[ltype.lower()]))
+				context.bot.set_chat_permissions(chat_id=chat_id, permissions=get_permission_list(eval(str(current_permission)), UNLOCK_CHAT_RESTRICTION[ltype.lower()]))
 
 				send_message(update.effective_message, text, parse_mode="markdown")
 				
@@ -495,7 +495,8 @@ def get_permission_list(current, new):
 		'can_change_info': None, 'can_invite_users': None, 'can_pin_messages': None}
 	permissions.update(current)
 	permissions.update(new)
-	return permissions
+	new_permissions = ChatPermissions(**permissions)
+	return new_permissions
 
 
 
