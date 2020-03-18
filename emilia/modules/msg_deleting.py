@@ -8,7 +8,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html
 
 from emilia import dispatcher, LOGGER, spamfilters
-from emilia.modules.helper_funcs.chat_status import user_admin, can_delete
+from emilia.modules.helper_funcs.chat_status import user_admin, user_can_delete
 from emilia.modules.log_channel import loggable
 
 from emilia.modules.languages import tl
@@ -27,7 +27,7 @@ def purge(update, context):
     if msg.reply_to_message:
         user = update.effective_user  # type: Optional[User]
         chat = update.effective_chat  # type: Optional[Chat]
-        if can_delete(chat, context.bot.id):
+        if user_can_delete(chat, user, context.bot.id):
             message_id = msg.reply_to_message.message_id
             if args and args[0].isdigit():
                 delete_to = message_id + int(args[0])
@@ -78,7 +78,7 @@ def del_message(update, context) -> str:
     if update.effective_message.reply_to_message:
         user = update.effective_user  # type: Optional[User]
         chat = update.effective_chat  # type: Optional[Chat]
-        if can_delete(chat, context.bot.id):
+        if user_can_delete(chat, user, context.bot.id):
             update.effective_message.reply_to_message.delete()
             update.effective_message.delete()
             return "<b>{}:</b>" \
