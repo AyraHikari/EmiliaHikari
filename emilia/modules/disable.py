@@ -2,7 +2,7 @@ from typing import Union, List, Optional
 
 from future.utils import string_types
 from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity
-from telegram.ext import CommandHandler, Filters
+from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.utils.helpers import escape_markdown
 
 from emilia import dispatcher, spamfilters, OWNER_ID
@@ -41,7 +41,6 @@ if is_module_loaded(FILENAME):
             sql.disableable_cache(command)
 
         def check_update(self, update):
-            # TODO
             if isinstance(update, Update) and update.effective_message:
                 message = update.effective_message
 
@@ -74,6 +73,19 @@ if is_module_loaded(FILENAME):
                         return args, filter_result
                     else:
                         return False
+
+
+    class DisableAbleMessageHandler(MessageHandler):
+        def __init__(self, pattern, callback, friendly="", **kwargs):
+            super().__init__(pattern, callback, **kwargs)
+            DISABLE_OTHER.append(friendly or pattern)
+            sql.disableable_cache(friendly or pattern)
+            self.friendly = friendly or pattern
+
+        def check_update(self, update):
+            if isinstance(update, Update) and update.effective_message:
+                chat = update.effective_chat
+                return self.filters(update) and not sql.is_command_disabled(chat.id, self.friendly)
 
 
     @run_async
@@ -262,6 +274,8 @@ if is_module_loaded(FILENAME):
 
     __help__ = "disable_help"
 
+    print(DISABLE_OTHER)
+
     DISABLE_HANDLER = CommandHandler("disable", disable, pass_args=True)#, filters=Filters.group)
     ENABLE_HANDLER = CommandHandler("enable", enable, pass_args=True)#, filters=Filters.group)
     COMMANDS_HANDLER = CommandHandler(["cmds", "disabled"], commands)#, filters=Filters.group)
@@ -276,3 +290,4 @@ if is_module_loaded(FILENAME):
 
 else:
     DisableAbleCommandHandler = CommandHandler
+    DisableAbleMessageHandler = MessageHandler

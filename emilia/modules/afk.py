@@ -6,7 +6,7 @@ from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, run_async
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, spamfilters
-from emilia.modules.disable import DisableAbleCommandHandler
+from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
 from emilia.modules.sql import afk_sql as sql
 from emilia.modules.users import get_user_id
 
@@ -86,7 +86,7 @@ __help__ = "afk_help"
 __mod_name__ = "AFK"
 
 AFK_HANDLER = DisableAbleCommandHandler("afk", afk)
-AFK_REGEX_HANDLER = MessageHandler(Filters.regex("(?i)brb"), afk)
+AFK_REGEX_HANDLER = DisableAbleMessageHandler(Filters.regex("(?i)brb"), afk, friendly="afk")
 NO_AFK_HANDLER = MessageHandler(Filters.all & Filters.group, no_longer_afk)
 AFK_REPLY_HANDLER = MessageHandler(Filters.all & Filters.group , reply_afk)
 # AFK_REPLY_HANDLER = MessageHandler(Filters.entity(MessageEntity.MENTION) | Filters.entity(MessageEntity.TEXT_MENTION),
