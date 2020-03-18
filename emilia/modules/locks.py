@@ -45,7 +45,7 @@ LOCK_TYPES = {'sticker': Filters.sticker,
 			  }
 
 
-LOCK_CHAT_RESTRICTION = {"all": ChatPermissions(can_send_messages=False, can_send_media_messages=False, can_send_polls=False, can_send_other_messages=False, can_add_web_page_previews=False, can_change_info=False, can_invite_users=False, can_pin_messages=False),
+LOCK_CHAT_RESTRICTION = {"all": {'can_send_messages': False, 'can_send_media_messages': False, 'can_send_polls': False, 'can_send_other_messages': False, 'can_add_web_page_previews': False, 'can_change_info': False, 'can_invite_users': False, 'can_pin_messages': False},
 						"messages": ChatPermissions(can_send_messages=False),
 						"media": ChatPermissions(can_send_media_messages=False),
 						"sticker": ChatPermissions(can_send_media_messages=False),
@@ -56,7 +56,7 @@ LOCK_CHAT_RESTRICTION = {"all": ChatPermissions(can_send_messages=False, can_sen
 						"invite": ChatPermissions(can_invite_users=False),
 						"pin": ChatPermissions(can_pin_messages=False)}
 
-UNLOCK_CHAT_RESTRICTION = {"all": ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_polls=True, can_send_other_messages=True, can_add_web_page_previews=True, can_invite_users=True),
+UNLOCK_CHAT_RESTRICTION = {"all": {'can_send_messages': True, 'can_send_media_messages': True, 'can_send_polls': True, 'can_send_other_messages': True, 'can_add_web_page_previews': True, 'can_invite_users': True},
 						"messages": ChatPermissions(can_send_messages=True),
 						"media": ChatPermissions(can_send_media_messages=True),
 						"sticker": ChatPermissions(can_send_media_messages=True),
@@ -180,7 +180,8 @@ def lock(update, context) -> str:
 					chat_name = update.effective_message.chat.title
 					text = tl(update.effective_message, "Izin terkunci pesan *{}* untuk semua non-admin!").format(ltype)
 				
-				chat.set_permissions(permissions=LOCK_CHAT_RESTRICTION[ltype.lower()])
+				current_permission = context.bot.getChat(chat_id).permissions
+				chat.set_permissions(permissions=get_permission_list(current_permission, LOCK_CHAT_RESTRICTION[ltype.lower()]))
 
 				send_message(update.effective_message, text, parse_mode="markdown")
 				return "<b>{}:</b>" \
@@ -255,7 +256,8 @@ def unlock(update, context) -> str:
 					chat_name = update.effective_message.chat.title
 					text = tl(update.effective_message, "Izin tidak terkunci *{}* untuk semua orang!").format(ltype)
 				
-				chat.set_permissions(permissions=UNLOCK_CHAT_RESTRICTION[ltype.lower()])
+				current_permission = context.bot.getChat(chat_id).permissions
+				chat.set_permissions(permissions=get_permission_list(current_permission, UNLOCK_CHAT_RESTRICTION[ltype.lower()]))
 
 				send_message(update.effective_message, text, parse_mode="markdown")
 				
@@ -485,6 +487,16 @@ def lock_warns(update, context):
 				send_message(update.effective_message, tl(update.effective_message, "Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown")
 			except BadRequest:
 				send_message(update.effective_message, tl(update.effective_message, "Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci"), parse_mode="markdown", quote=False)
+
+
+def get_permission_list(current, new):
+	permissions = {'can_send_messages': None, 'can_send_media_messages': None, 'can_send_polls': None,
+		'can_send_other_messages': None, 'can_add_web_page_previews': None,
+		'can_change_info': None, 'can_invite_users': None, 'can_pin_messages': None}
+	permissions.update(current)
+	permissions.update(new)
+	return permissions
+
 
 
 def __import_data__(chat_id, data):

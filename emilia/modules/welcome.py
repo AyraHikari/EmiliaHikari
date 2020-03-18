@@ -165,7 +165,7 @@ def new_member(update, context):
 					# Build keyboard
 					buttons = sql.get_welc_buttons(chat.id)
 					keyb = build_keyboard(buttons)
-					getsec, extra_verify, mutetime, timeout, custom_text = sql.welcome_security(chat.id)
+					getsec, extra_verify, mutetime, timeout, timeout_mode, custom_text = sql.welcome_security(chat.id)
 
 					# If user ban protected don't apply security on him
 					if is_user_ban_protected(chat, new_mem.id, chat.get_member(new_mem.id)):
@@ -696,7 +696,7 @@ def welcome(update, context):
 		else:
 			prev_welc = False
 		cleanserv = sql.clean_service(chat.id)
-		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+		getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 		if getcur:
 			welcsec = tl(update.effective_message, "Aktif ")
 		else:
