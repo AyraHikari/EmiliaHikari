@@ -58,6 +58,19 @@ if is_module_loaded(FILENAME):
 
                     filter_result = self.filters(update)
                     if filter_result:
+                        chat = update.effective_chat
+                        # disabled, admincmd, user admin
+                        if sql.is_command_disabled(chat.id, command[0].lower()):
+                            # check if command was disabled
+                            is_disabled = command[0] in ADMIN_CMDS and is_user_admin(chat, user.id)
+                            if not is_disabled and sql.is_disable_del(chat.id):
+                                # disabled and should delete
+                                update.effective_message.delete()
+                            if not is_disabled:
+                                return None
+                            else:
+                                return args, filter_result
+
                         return args, filter_result
                     else:
                         return False
