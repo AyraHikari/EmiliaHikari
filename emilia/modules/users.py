@@ -17,7 +17,6 @@ from emilia.modules import languages
 from emilia.modules.helper_funcs.alternate import send_message
 
 USERS_GROUP = 4
-CHAT_GROUP = 5
 
 
 def get_user_id(username):
@@ -119,13 +118,6 @@ def chats(update, context):
                                                 caption="Berikut ini daftar obrolan dalam database saya.")
 
 
-@run_async
-def chat_checker(bot: Bot, update: Update):
-	if update.effective_message.chat.get_member(bot.id).can_send_messages == False:
-		bot.leaveChat(update.effective_message.chat.id)
-		bot.sendMessage(-1001287670948, "I am leave from {}".format(update.effective_message.chat.title))
-
-
 def __user_info__(user_id, chat_id):
     if user_id == dispatcher.bot.id:
         return languages.tl(chat_id, """Saya telah melihatnya... Wow. Apakah mereka menguntit saya? Mereka ada di semua tempat yang sama dengan saya... oh. Ini aku.""")
@@ -148,9 +140,7 @@ __mod_name__ = "Users"
 BROADCAST_HANDLER = CommandHandler("broadcast", broadcast, filters=Filters.user(OWNER_ID))
 USER_HANDLER = MessageHandler(Filters.all & Filters.group, log_user)
 CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=CustomFilters.sudo_filter)
-CHAT_CHECKER_HANDLER = MessageHandler(Filters.all & Filters.group, chat_checker)
 
 dispatcher.add_handler(USER_HANDLER, USERS_GROUP)
 dispatcher.add_handler(BROADCAST_HANDLER)
 dispatcher.add_handler(CHATLIST_HANDLER)
-dispatcher.add_handler(CHAT_CHECKER_HANDLER, CHAT_GROUP)
