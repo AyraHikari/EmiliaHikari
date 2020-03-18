@@ -5,10 +5,11 @@ try:
     from emilia import CUSTOM_CMD
 except:
     CUSTOM_CMD = False
-    pass
 
 if CUSTOM_CMD:
     CMD_STARTERS = CUSTOM_CMD
+else:
+    CMD_STARTERS = ('/')
 
 
 class CustomCommandHandler(tg.CommandHandler):
