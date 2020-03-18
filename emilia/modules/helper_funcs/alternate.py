@@ -37,7 +37,14 @@ def send_message_raw(chat_id, text, *args, **kwargs):
 	try:
 		return dispatcher.bot.sendMessage(chat_id, text, *args,**kwargs)
 	except error.BadRequest as err:
-		if str(err) == "Have no rights to send a message":
+		if str(err) == "Reply message not found":
+				try:
+					if kwargs.get('reply_to_message_id'):
+						kwargs['reply_to_message_id'] = None
+					return dispatcher.bot.sendMessage(chat_id, text, *args,**kwargs)
+				except error.BadRequest as err:
+					LOGGER.exception("ERROR: {}".format(err))
+		elif str(err) == "Have no rights to send a message":
 			dispatcher.bot.leaveChat(chat_id)
 			dispatcher.bot.sendMessage(-1001287670948, "I am leave chat `{}`\nBecause of: `Muted`".format(message.chat.title))
 		else:

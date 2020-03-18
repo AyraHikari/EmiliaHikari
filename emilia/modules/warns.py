@@ -22,7 +22,7 @@ from emilia.modules.sql import warns_sql as sql
 from emilia.modules.connection import connected
 
 from emilia.modules.languages import tl
-from emilia.modules.helper_funcs.alternate import send_message
+from emilia.modules.helper_funcs.alternate import send_message, send_message_raw
 
 WARN_HANDLER_GROUP = 9
 
@@ -62,7 +62,7 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
             reply += "\n - {}".format(html.escape(warn_reason))
 
         message.bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
-        keyboard = []
+        keyboard = None
         log_reason = "<b>{}:</b>" \
                      "\n#WARN_BAN" \
                      "\n<b>Admin:</b> {}" \
@@ -104,9 +104,9 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
     try:
         if conn:
-            message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            send_message_raw(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            send_message_raw(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         #send_message(update.effective_message, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Reply message not found":

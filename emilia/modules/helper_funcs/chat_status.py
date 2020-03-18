@@ -15,6 +15,9 @@ from emilia.modules import languages
 def can_delete(chat: Chat, bot_id: int) -> bool:
     return chat.get_member(bot_id).can_delete_messages
 
+def user_can_delete(chat: Chat, user: User, bot_id: int) -> bool:
+    return chat.get_member(bot_id).can_delete_messages and chat.get_member(user.id).can_delete_messages
+
 def bot_can_restrict(chat: Chat, bot_id: int) -> bool:
     return chat.get_member(bot_id).can_restrict_members
 
@@ -153,7 +156,6 @@ def user_admin_no_reply(func):
             update.effective_message.delete()
 
         else:
-            print(update.message.from_user.id)
             context.bot.answer_callback_query(update.callback_query.id, languages.tl(update.effective_message, "Anda bukan admin di grup ini!"))
 
     return is_admin

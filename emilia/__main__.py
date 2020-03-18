@@ -349,8 +349,8 @@ def settings_button(update, context):
         if mod_match:
             chat_id = mod_match.group(1)
             module = mod_match.group(2)
-            chat = bot.get_chat(chat_id)
-            getstatusadmin = bot.get_chat_member(chat_id, user.id)
+            chat = context.bot.get_chat(chat_id)
+            getstatusadmin = context.bot.get_chat_member(chat_id, user.id)
             isadmin = getstatusadmin.status in ('administrator', 'creator')
             if isadmin == False or user.id != OWNER_ID:
                 query.message.edit_text("Status admin anda telah berubah")
@@ -372,7 +372,7 @@ def settings_button(update, context):
         elif prev_match:
             chat_id = prev_match.group(1)
             curr_page = int(prev_match.group(2))
-            chat = bot.get_chat(chat_id)
+            chat = context.bot.get_chat(chat_id)
             query.message.reply_text(text=tl(update.effective_message, "Hai! Ada beberapa pengaturan untuk {} - lanjutkan dan pilih "
                                        "apa yang Anda minati.").format(chat.title),
                                   reply_markup=InlineKeyboardMarkup(
@@ -382,7 +382,7 @@ def settings_button(update, context):
         elif next_match:
             chat_id = next_match.group(1)
             next_page = int(next_match.group(2))
-            chat = bot.get_chat(chat_id)
+            chat = context.bot.get_chat(chat_id)
             query.message.reply_text(text=tl(update.effective_message, "Hai! Ada beberapa pengaturan untuk {} - lanjutkan dan pilih "
                                        "apa yang Anda minati.").format(chat.title),
                                   reply_markup=InlineKeyboardMarkup(
@@ -391,7 +391,7 @@ def settings_button(update, context):
 
         elif back_match:
             chat_id = back_match.group(1)
-            chat = bot.get_chat(chat_id)
+            chat = context.bot.get_chat(chat_id)
             query.message.reply_text(text=tl(update.effective_message, "Hai! Ada beberapa pengaturan untuk {} - lanjutkan dan pilih "
                                        "apa yang Anda minati.").format(escape_markdown(chat.title)),
                                   parse_mode=ParseMode.MARKDOWN,
@@ -400,7 +400,7 @@ def settings_button(update, context):
 
         # ensure no spinny white circle
         query.message.delete()
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
     except Exception as excp:
         if excp.message == "Message is not modified":
             pass
@@ -432,7 +432,7 @@ def get_settings(update, context):
                            reply_markup=InlineKeyboardMarkup(
                                [[InlineKeyboardButton(text="Pengaturan",
                                                       url="t.me/{}?start=stngs_{}".format(
-                                                          bot.username, chat.id))]]))
+                                                          context.bot.username, chat.id))]]))
         else:
             text = tl(update.effective_message, "Klik di sini untuk memeriksa pengaturan Anda.")
 
@@ -459,7 +459,7 @@ def donate(update, context):
 
     else:
         try:
-            bot.send_message(user.id, tl(update.effective_message, DONATE_STRING), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+            context.bot.send_message(user.id, tl(update.effective_message, DONATE_STRING), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
             update.effective_message.reply_text(tl(update.effective_message, "Saya sudah PM Anda tentang donasi untuk pencipta saya!"))
         except Unauthorized:

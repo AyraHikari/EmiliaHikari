@@ -328,43 +328,6 @@ def kamusbesarbahasaindonesia(update, context):
 	else:
 		return
 
-@run_async
-def kitabgaul(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-	msg = update.effective_message
-	chat_id = update.effective_chat.id
-	message = update.effective_message
-	try:
-		args = update.effective_message.text.split(None, 1)
-		teks = args[1]
-	except IndexError:
-		trend = requests.get("https://kitabgaul.com/api/entries;trending").json()
-		best = requests.get("https://kitabgaul.com/api/entries;best").json()
-		tbalas = ""
-		bbalas = ""
-		if len(trend.get('entries')) == 0:
-			return send_message(update.effective_message, "Tidak ada Hasil yang ditampilkan!", parse_mode=ParseMode.MARKDOWN)
-		for x in range(3):
-			tbalas += "*{}. {}*\n*Slug:* `{}`\n*Definisi:* `{}`\n*Contoh:* `{}`\n\n".format(x+1, trend.get('entries')[x].get('word'), trend.get('entries')[x].get('slug'), trend.get('entries')[x].get('definition'), trend.get('entries')[x].get('example'))
-		if len(best.get('entries')) == 0:
-			return send_message(update.effective_message, "Tidak ada Hasil yang ditampilkan!", parse_mode=ParseMode.MARKDOWN)
-		for x in range(3):
-			bbalas += "*{}. {}*\n*Slug:* `{}`\n*Definisi:* `{}`\n*Contoh:* `{}`\n\n".format(x+1, best.get('entries')[x].get('word'), best.get('entries')[x].get('slug'), best.get('entries')[x].get('definition'), best.get('entries')[x].get('example'))
-		balas = "*<== Trending saat ini ==>*\n\n{}*<== Terbaik saat ini ==>*\n\n{}".format(tbalas, bbalas)
-		send_message(update.effective_message, balas, parse_mode=ParseMode.MARKDOWN)
-	kbgaul = requests.get("https://kitabgaul.com/api/entries/{}".format(teks)).json()
-	balas = "*Hasil dari {}*\n\n".format(teks)
-	if len(kbgaul.get('entries')) == 0:
-		return send_message(update.effective_message, "Tidak ada Hasil dari {}".format(teks), parse_mode=ParseMode.MARKDOWN)
-	if len(kbgaul.get('entries')) >= 3:
-		jarak = 3
-	else:
-		jarak = len(kbgaul.get('entries'))
-	for x in range(jarak):
-		balas += "*{}. {}*\n*Slug:* `{}`\n*Definisi:* `{}`\n*Contoh:* `{}`\n\n".format(x+1, kbgaul.get('entries')[x].get('word'), kbgaul.get('entries')[x].get('slug'), kbgaul.get('entries')[x].get('definition'), kbgaul.get('entries')[x].get('example'))
-	send_message(update.effective_message, balas, parse_mode=ParseMode.MARKDOWN)
 
 @run_async
 def urbandictionary(update, context):
@@ -422,7 +385,6 @@ RAMALAN_HANDLER = DisableAbleCommandHandler(["ramalan", "fortune"], ramalan)
 TERJEMAH_HANDLER = DisableAbleCommandHandler(["tr", "tl"], terjemah)
 WIKIPEDIA_HANDLER = DisableAbleCommandHandler("wiki", wiki)
 KBBI_HANDLER = DisableAbleCommandHandler("kbbi", kamusbesarbahasaindonesia)
-KBGAUL_HANDLER = DisableAbleCommandHandler("kbgaul", kitabgaul)
 UD_HANDLER = DisableAbleCommandHandler("ud", urbandictionary, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 
@@ -437,6 +399,5 @@ dispatcher.add_handler(RAMALAN_HANDLER)
 dispatcher.add_handler(TERJEMAH_HANDLER)
 dispatcher.add_handler(WIKIPEDIA_HANDLER)
 dispatcher.add_handler(KBBI_HANDLER)
-dispatcher.add_handler(KBGAUL_HANDLER)
 dispatcher.add_handler(UD_HANDLER)
 dispatcher.add_handler(LOG_HANDLER)
