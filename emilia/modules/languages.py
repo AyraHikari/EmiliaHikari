@@ -33,7 +33,7 @@ def tl(message, text):
 	if type(message) == int or type(message) == str and message[1:].isdigit():
 		getlang = sql.get_lang(message)
 		if getlang == 'None' or not getlang:
-			getlang = 'id'
+			getlang = 'en'
 	else:
 		getlang = sql.get_lang(message.chat.id)
 		if getlang == 'None' or not getlang:
@@ -45,12 +45,8 @@ def tl(message, text):
 					sql.set_lang(message.chat.id, 'en')
 					getlang = 'en'
 			else:
-				if message.chat.type == "private":
-					sql.set_lang(message.chat.id, 'en')
-					getlang = 'en'
-				else:
-					sql.set_lang(message.chat.id, 'id')
-					getlang = 'id'
+				sql.set_lang(message.chat.id, 'en')
+				getlang = 'en'
 
 	getlangid = {}
 	for x in LOADED_LANGS_ID:
@@ -95,12 +91,8 @@ def set_language(update, context):
 			sql.set_lang(msg.chat.id, msg.from_user.language_code)
 			getlang = msg.from_user.language_code
 		else:
-			if msg.chat.type == "private":
-				sql.set_lang(msg.chat.id, 'en')
-				getlang = 'en'
-			else:
-				sql.set_lang(msg.chat.id, 'id')
-				getlang = 'id'
+			sql.set_lang(msg.chat.id, 'en')
+			getlang = 'en'
 	loaded_langs = []
 	counter = 0
 
