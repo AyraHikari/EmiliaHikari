@@ -165,10 +165,10 @@ if CUSTOM_CMD and len(CUSTOM_CMD) >= 1:
 # Disable this (line 151) if you dont have a antispam script
 try:
 	from emilia.antispam import antispam_restrict_user, antispam_cek_user, detect_user
+	LOGGER.info("Note: AntiSpam loaded!")
 	antispam_module = True
 except ModuleNotFoundError:
 	antispam_module = False
-	LOGGER.info("Note: Can't load antispam module. This is an optional.")
 
 def spamfilters(text, user_id, chat_id, message):
 	# If msg from self, return True
