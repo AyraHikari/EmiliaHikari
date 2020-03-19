@@ -22,8 +22,8 @@ if is_module_loaded(FILENAME):
 
     def loggable(func):
         @wraps(func)
-        def log_action(bot: Bot, update: Update, *args, **kwargs):
-            result = func(bot, update, *args, **kwargs)
+        def log_action(update, context, *args, **kwargs):
+            result = func(update, context, *args, **kwargs)
             chat = update.effective_chat  # type: Optional[Chat]
             message = update.effective_message  # type: Optional[Message]
             if result:
@@ -34,7 +34,7 @@ if is_module_loaded(FILENAME):
                 log_chat = sql.get_chat_log_channel(chat.id)
                 if log_chat:
                     try:
-                        send_log(bot, log_chat, chat.id, result)
+                        send_log(context.bot, log_chat, chat.id, result)
                     except Unauthorized:
                         sql.stop_chat_logging(chat.id)
             elif result == "":
@@ -64,7 +64,7 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def logging(bot: Bot, update: Update):
+    def logging(update, context):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
@@ -73,7 +73,7 @@ if is_module_loaded(FILENAME):
 
         log_channel = sql.get_chat_log_channel(chat.id)
         if log_channel:
-            log_channel_info = bot.get_chat(log_channel)
+            log_channel_info = context.bot.get_chat(log_channel)
             send_message(update.effective_message, 
                 tl(update.effective_message, "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)").format(escape_markdown(log_channel_info.title),
                                                                          log_channel),
@@ -85,7 +85,7 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def setlog(bot: Bot, update: Update):
+    def setlog(update, context):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
@@ -105,18 +105,18 @@ if is_module_loaded(FILENAME):
                     LOGGER.exception("Error deleting message in log channel. Should work anyway though.")
                     
             try:
-                bot.send_message(message.forward_from_chat.id,
+                context.bot.send_message(message.forward_from_chat.id,
                              tl(update.effective_message, "Saluran ini telah ditetapkan sebagai saluran log untuk {}.").format(
                                  chat.title or chat.first_name))
             except Unauthorized as excp:
                 if excp.message == "Forbidden: bot is not a member of the channel chat":
-                    bot.send_message(chat.id, tl(update.effective_message, "Gagal menyetel saluran log!\nSaya mungkin bukan admin di channel tersebut."))
+                    context.bot.send_message(chat.id, tl(update.effective_message, "Gagal menyetel saluran log!\nSaya mungkin bukan admin di channel tersebut."))
                     sql.stop_chat_logging(chat.id)
                     return
                 else:
                     LOGGER.exception("ERROR in setting the log channel.")
                     
-            bot.send_message(chat.id, tl(update.effective_message, "Berhasil mengatur saluran log!"))
+            context.bot.send_message(chat.id, tl(update.effective_message, "Berhasil mengatur saluran log!"))
 
         else:
             send_message(update.effective_message, tl(update.effective_message, "Langkah-langkah untuk mengatur saluran log adalah:\n"
@@ -127,7 +127,7 @@ if is_module_loaded(FILENAME):
 
     @run_async
     @user_admin
-    def unsetlog(bot: Bot, update: Update):
+    def unsetlog(update, context):
         spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
         if spam == True:
             return
@@ -136,7 +136,7 @@ if is_module_loaded(FILENAME):
 
         log_channel = sql.stop_chat_logging(chat.id)
         if log_channel:
-            bot.send_message(log_channel, tl(update.effective_message, "Channel telah dibatalkan tautannya {}").format(chat.title))
+            context.bot.send_message(log_channel, tl(update.effective_message, "Channel telah dibatalkan tautannya {}").format(chat.title))
             send_message(update.effective_message, tl(update.effective_message, "Log saluran telah dinonaktifkan."))
 
         else:
