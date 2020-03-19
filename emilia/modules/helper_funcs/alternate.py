@@ -23,8 +23,12 @@ def send_message(message, text, target_id=None, *args,**kwargs):
 				except error.BadRequest as err:
 					LOGGER.exception("ERROR: {}".format(err))
 			elif str(err) == "Have no rights to send a message":
-				dispatcher.bot.leaveChat(message.chat.id)
-				dispatcher.bot.sendMessage(-1001287670948, "I am leave chat `{}`\nBecause of: `Muted`".format(message.chat.title))
+				try:
+					dispatcher.bot.leaveChat(message.chat.id)
+					dispatcher.bot.sendMessage(-1001287670948, "I am leave chat `{}`\nBecause of: `Muted`".format(message.chat.title))
+				except error.BadRequest as err:
+					if str(err) == "Chat not found":
+						pass
 			else:
 				LOGGER.exception("ERROR: {}".format(err))
 	else:
@@ -45,7 +49,11 @@ def send_message_raw(chat_id, text, *args, **kwargs):
 				except error.BadRequest as err:
 					LOGGER.exception("ERROR: {}".format(err))
 		elif str(err) == "Have no rights to send a message":
-			dispatcher.bot.leaveChat(chat_id)
-			dispatcher.bot.sendMessage(-1001287670948, "I am leave chat `{}`\nBecause of: `Muted`".format(message.chat.title))
+			try:
+				dispatcher.bot.leaveChat(message.chat.id)
+				dispatcher.bot.sendMessage(-1001287670948, "I am leave chat `{}`\nBecause of: `Muted`".format(message.chat.title))
+			except error.BadRequest as err:
+				if str(err) == "Chat not found":
+					pass
 		else:
 			LOGGER.exception("ERROR: {}".format(err))

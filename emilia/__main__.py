@@ -162,11 +162,11 @@ def start(update, context):
 
 def m_connect_button(update, context):
     context.bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
-    connect_button(context.bot, update)
+    connect_button(update, context)
 
 def m_change_langs(update, context):
     context.bot.delete_message(update.effective_chat.id, update.effective_message.message_id)
-    set_language(context.bot, update)
+    set_language(update, context)
 
 # for test purposes
 def error_callback(update, context):
@@ -433,8 +433,8 @@ def get_settings(update, context):
                                [[InlineKeyboardButton(text="Pengaturan",
                                                       url="t.me/{}?start=stngs_{}".format(
                                                           context.bot.username, chat.id))]]))
-        else:
-            text = tl(update.effective_message, "Klik di sini untuk memeriksa pengaturan Anda.")
+        # else:
+        #     text = tl(update.effective_message, "Klik di sini untuk memeriksa pengaturan Anda.")
 
     else:
         send_settings(chat.id, user.id, True)
