@@ -201,13 +201,11 @@ def connected(bot, update, chat, user_id, need_admin=True):
                     return conn_id
                 else:
                     send_message(update.effective_message, languages.tl(update.effective_message, "Anda harus menjadi admin dalam grup yang terhubung!"))
-                    raise Exception("Bukan admin!")
             else:
                 return conn_id
         else:
             send_message(update.effective_message, languages.tl(update.effective_message, "Grup mengubah koneksi hak atau Anda bukan admin lagi.\nSaya putuskan koneksi Anda."))
-            disconnect_chat(bot, update)
-            raise Exception("Bukan admin!")
+            disconnect_chat(update, bot)
     else:
         return False
 
