@@ -8,7 +8,7 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamfilters, TEMPORARY_DATA
+from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamcheck, TEMPORARY_DATA
 from emilia.__main__ import DATA_IMPORT
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
@@ -38,6 +38,7 @@ from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
+@spamcheck
 @user_admin
 def import_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
@@ -45,9 +46,6 @@ def import_data(update, context):
 	user = update.effective_user  # type: Optional[User]
 	# TODO: allow uploading doc with command, not just as reply
 	# only work with a doc
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
@@ -762,13 +760,11 @@ def import_data(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def export_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	chat_id = update.effective_chat.id
 	chat = update.effective_chat

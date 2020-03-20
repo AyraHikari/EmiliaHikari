@@ -6,7 +6,7 @@ from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, CommandHandler, run_async, CallbackQueryHandler
 from telegram.utils.helpers import mention_html, escape_markdown
 
-from emilia import dispatcher, spamfilters
+from emilia import dispatcher, spamcheck
 from emilia.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict
 from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.log_channel import loggable
@@ -81,6 +81,7 @@ def check_flood(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def set_flood(update, context) -> str:
@@ -88,9 +89,6 @@ def set_flood(update, context) -> str:
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
     args = context.args
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
@@ -151,12 +149,10 @@ def set_flood(update, context) -> str:
 
 
 @run_async
+@spamcheck
 def flood(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     conn = connected(context.bot, update, chat, user.id, need_admin=False)
     if conn:
@@ -185,11 +181,9 @@ def flood(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def set_flood_mode(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]

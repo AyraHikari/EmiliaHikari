@@ -6,7 +6,7 @@ from telegram.error import BadRequest
 from telegram.ext import run_async, CommandHandler, Filters
 from telegram.utils.helpers import mention_html
 
-from emilia import dispatcher, BAN_STICKER, LOGGER, spamfilters
+from emilia import dispatcher, BAN_STICKER, LOGGER, spamcheck
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import bot_admin, user_admin, is_user_ban_protected, can_restrict, \
     is_user_admin, is_user_in_chat
@@ -20,6 +20,7 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def ban(update, context):
@@ -28,10 +29,6 @@ def ban(update, context):
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
     args = context.args
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     user_id, reason = extract_user_and_text(message, args)
     if user_id == "error":
@@ -137,6 +134,7 @@ def ban(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def temp_ban(update, context):
@@ -145,10 +143,6 @@ def temp_ban(update, context):
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
     args = context.args
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     user_id, reason = extract_user_and_text(message, args)
     if user_id == "error":
@@ -268,6 +262,7 @@ def temp_ban(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def kick(update, context):
@@ -276,10 +271,6 @@ def kick(update, context):
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
     args = context.args
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     user_id, reason = extract_user_and_text(message, args)
     if user_id == "error":
@@ -386,16 +377,13 @@ def kick(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 @can_restrict
 def kickme(update, context):
     user_id = update.effective_message.from_user.id
     if is_user_admin(update.effective_chat, user_id):
         send_message(update.effective_message, tl(update.effective_message, "Saya berharap saya bisa... tetapi Anda seorang admin 😒"))
-        return
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
         return
 
     res = update.effective_chat.unban_member(user_id)  # unban on current user = kick
@@ -406,6 +394,7 @@ def kickme(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def unban(update, context):
@@ -413,10 +402,6 @@ def unban(update, context):
     user = update.effective_user  # type: Optional[User]
     chat = update.effective_chat  # type: Optional[Chat]
     args = context.args
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     user_id, reason = extract_user_and_text(message, args)
     if user_id == "error":

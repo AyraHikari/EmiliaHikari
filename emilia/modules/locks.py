@@ -12,7 +12,7 @@ from telegram.utils.helpers import mention_html
 from alphabet_detector import AlphabetDetector
 
 import emilia.modules.sql.locks_sql as sql
-from emilia import dispatcher, SUDO_USERS, LOGGER, spamfilters
+from emilia import dispatcher, spamcheck, SUDO_USERS, LOGGER
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import can_delete, is_user_admin, user_not_admin, user_admin, \
 	bot_can_delete, is_bot_admin
@@ -113,10 +113,8 @@ def unrestr_members(bot, chat_id, members, messages=True, media=True, other=True
 
 
 @run_async
+@spamcheck
 def locktypes(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	locklist = list(LOCK_TYPES)
 	locklist.sort()
 	perm = list(LOCK_CHAT_RESTRICTION)
@@ -125,11 +123,9 @@ def locktypes(update, context):
 
 
 @user_admin
+@spamcheck
 @loggable
 def lock(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -202,12 +198,10 @@ def lock(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def unlock(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -405,11 +399,9 @@ def build_lock_message(chat_id):
 
 
 @run_async
+@spamcheck
 @user_admin
 def list_locks(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user
 
@@ -435,10 +427,8 @@ def list_locks(update, context):
 
 
 @run_async
+@spamcheck
 def lock_warns(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user

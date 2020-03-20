@@ -7,7 +7,7 @@ from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown
 
 import emilia.modules.sql.rules_sql as sql
-from emilia import dispatcher, spamfilters, OWNER_ID
+from emilia import dispatcher, spamcheck, OWNER_ID
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 from emilia.modules.helper_funcs.string_handling import markdown_parser, button_markdown_parser
@@ -18,10 +18,8 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
+@spamcheck
 def get_rules(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat_id = update.effective_chat.id
     send_rules(update, chat_id)
 
@@ -86,11 +84,9 @@ def send_rules(update, chat_id, from_pm=False):
 
 
 @run_async
+@spamcheck
 @user_admin
 def set_rules(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat
     chat_id = update.effective_chat.id
     user = update.effective_user
@@ -135,11 +131,9 @@ def set_rules(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def clear_rules(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat
     chat_id = update.effective_chat.id
     user = update.effective_user
@@ -163,11 +157,9 @@ def clear_rules(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def private_rules(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]

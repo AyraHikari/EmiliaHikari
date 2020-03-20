@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, run_async
 from telegram.utils.helpers import mention_html, escape_markdown
 
 import emilia.modules.sql.blacklist_sql as sql
-from emilia import dispatcher, LOGGER, spamfilters, OWNER_ID
+from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from telegram.utils.helpers import mention_markdown
 from emilia.modules.helper_funcs.chat_status import user_admin, user_not_admin
@@ -26,15 +26,12 @@ BLACKLIST_GROUP = 11
 
 
 @run_async
+@spamcheck
 def blacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	
 	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
@@ -70,16 +67,13 @@ def blacklist(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def add_blacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	words = msg.text.split(None, 1)
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id)
 	if conn:
@@ -110,16 +104,13 @@ def add_blacklist(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def unblacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	words = msg.text.split(None, 1)
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id)
 	if conn:
@@ -166,12 +157,10 @@ def unblacklist(update, context):
 
 
 @run_async
+@spamcheck
 @loggable
 @user_admin
 def blacklist_mode(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]

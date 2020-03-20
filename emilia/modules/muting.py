@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html
 
-from emilia import dispatcher, LOGGER, spamfilters
+from emilia import dispatcher, LOGGER, spamcheck
 from emilia.modules.helper_funcs.chat_status import bot_admin, user_admin, is_user_admin, can_restrict
 from emilia.modules.helper_funcs.extraction import extract_user, extract_user_and_text
 from emilia.modules.helper_funcs.string_handling import extract_time
@@ -20,14 +20,12 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
+@spamcheck
 @bot_admin
 #@can_restrict
 @user_admin
 @loggable
 def mute(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
@@ -87,13 +85,11 @@ def mute(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 @user_admin
 @loggable
 def unmute(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
@@ -161,14 +157,12 @@ def unmute(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 #@can_restrict
 @user_admin
 @loggable
 def temp_mute(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]

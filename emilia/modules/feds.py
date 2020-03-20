@@ -16,7 +16,7 @@ from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity, InlineKe
 from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER, spamfilters
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER, spamcheck
 from emilia.modules.helper_funcs.handlers import CMD_STARTERS
 from emilia.modules.helper_funcs.misc import is_module_loaded, send_to_list
 from emilia.modules.helper_funcs.chat_status import is_user_admin
@@ -71,11 +71,8 @@ UNFBAN_ERRORS = {
 }
 
 @run_async
+@spamcheck
 def new_fed(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message
@@ -116,11 +113,8 @@ def new_fed(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Tolong tulis nama federasinya!"))
 
 @run_async
+@spamcheck
 def del_fed(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -152,11 +146,8 @@ def del_fed(update, context):
 						[InlineKeyboardButton(text=tl(update.effective_message, "Batalkan"), callback_data="rmfed_cancel")]]))
 
 @run_async
+@spamcheck
 def fed_chat(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	fed_id = sql.get_fed_id(chat.id)
@@ -180,11 +171,8 @@ def fed_chat(update, context):
 	send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
 
 @run_async
+@spamcheck
 def join_fed(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 
@@ -231,11 +219,8 @@ def join_fed(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Obrolan ini telah bergabung dengan federasi {}!").format(getfed['fname']))
 
 @run_async
+@spamcheck
 def leave_fed(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -262,11 +247,8 @@ def leave_fed(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Hanya pembuat grup yang dapat melakukannya!"))
 
 @run_async
+@spamcheck
 def user_join_fed(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -315,11 +297,8 @@ def user_join_fed(update, context):
 
 
 @run_async
+@spamcheck
 def user_demote_fed(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -365,11 +344,8 @@ def user_demote_fed(update, context):
 		return
 
 @run_async
+@spamcheck
 def fed_info(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -413,11 +389,8 @@ def fed_info(update, context):
 	send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
 
 @run_async
+@spamcheck
 def fed_admin(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -462,11 +435,8 @@ def fed_admin(update, context):
 
 
 @run_async
+@spamcheck
 def fed_ban(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -760,11 +730,8 @@ def fed_ban(update, context):
 
 
 @run_async
+@spamcheck
 def unfban(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message  # type: Optional[Message]
@@ -927,11 +894,8 @@ def unfban(update, context):
 
 
 @run_async
+@spamcheck
 def set_frules(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -975,11 +939,8 @@ def set_frules(update, context):
 
 
 @run_async
+@spamcheck
 def get_frules(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	args = context.args
 
@@ -999,11 +960,8 @@ def get_frules(update, context):
 
 
 @run_async
+@spamcheck
 def fed_broadcast(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -1052,11 +1010,8 @@ def fed_broadcast(update, context):
 		send_message(update.effective_message, send_text)
 
 @run_async
+@spamcheck
 def fed_ban_list(update, context, chat_data):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -1172,11 +1127,8 @@ def fed_ban_list(update, context, chat_data):
 													caption=tl(update.effective_message, "Berikut adalah daftar pengguna yang saat ini difban pada federasi {}.").format(info['fname']))
 
 @run_async
+@spamcheck
 def fed_notif(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1201,11 +1153,8 @@ def fed_notif(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Preferensi laporan federasi anda saat ini: `{}`").format(getreport), parse_mode="markdown")
 
 @run_async
+@spamcheck
 def fed_chats(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -1246,11 +1195,8 @@ def fed_chats(update, context):
 													caption=tl(update.effective_message, "Berikut adalah daftar obrolan yang bergabung federasi {}.").format(info['fname']))
 
 @run_async
+@spamcheck
 def fed_import_bans(update, context, chat_data):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1446,11 +1392,8 @@ def del_fed_button(update, context):
 			query.message.edit_text(tl(update.effective_message, "Anda telah menghapus federasi Anda! Sekarang semua Grup yang terhubung dengan `{}` sekarang tidak memiliki federasi.").format(getfed['fname']), parse_mode='markdown')
 
 @run_async
+@spamcheck
 def fed_stat_user(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1535,11 +1478,8 @@ def fed_stat_user(update, context):
 
 
 @run_async
+@spamcheck
 def set_fed_log(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1565,11 +1505,8 @@ def set_fed_log(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Anda belum memberikan ID federasinya!"))
 
 @run_async
+@spamcheck
 def unset_fed_log(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1596,11 +1533,8 @@ def unset_fed_log(update, context):
 
 
 @run_async
+@spamcheck
 def subs_feds(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1639,11 +1573,8 @@ def subs_feds(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Anda belum memberikan ID federasinya!"))
 
 @run_async
+@spamcheck
 def unsubs_feds(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1682,11 +1613,8 @@ def unsubs_feds(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Anda belum memberikan ID federasinya!"))
 
 @run_async
+@spamcheck
 def get_myfedsubs(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -1720,11 +1648,8 @@ def get_myfedsubs(update, context):
 		send_message(update.effective_message, listfed, parse_mode="markdown")
 
 @run_async
+@spamcheck
 def get_myfeds_list(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]

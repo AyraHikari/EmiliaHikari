@@ -15,7 +15,7 @@ from telegram.ext import CommandHandler, Filters, MessageHandler, CallbackQueryH
 from telegram.ext.dispatcher import run_async, DispatcherHandlerStop, Dispatcher
 from telegram.utils.helpers import escape_markdown, mention_html
 
-from emilia import dispatcher, updater, TOKEN, WEBHOOK, OWNER_ID, DONATION_LINK, CERT_PATH, PORT, URL, LOGGER, spamfilters
+from emilia import dispatcher, updater, TOKEN, WEBHOOK, OWNER_ID, DONATION_LINK, CERT_PATH, PORT, URL, LOGGER, spamcheck
 # needed to dynamically load modules
 # NOTE: Module order is not guaranteed, specify that in the config file!
 from emilia.modules import ALL_MODULES
@@ -100,10 +100,8 @@ def test(update, context):
 
 
 @run_async
+@spamcheck
 def start(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     if update.effective_chat.type == "private":
         args = context.args
         if len(args) >= 1:
@@ -282,13 +280,10 @@ def help_button(update, context):
 
 
 @run_async
+@spamcheck
 def get_help(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     args = update.effective_message.text.split(None, 1)
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     # ONLY send help in PM
     if chat.type != chat.PRIVATE:
@@ -414,15 +409,12 @@ def settings_button(update, context):
 
 
 @run_async
+@spamcheck
 def get_settings(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
     args = msg.text.split(None, 1)
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     # ONLY send settings in PM
     if chat.type != chat.PRIVATE:
@@ -441,13 +433,10 @@ def get_settings(update, context):
 
 
 @run_async
+@spamcheck
 def donate(update, context):
     user = update.effective_message.from_user
     chat = update.effective_chat  # type: Optional[Chat]
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     if chat.type == "private":
         update.effective_message.reply_text(tl(update.effective_message, DONATE_STRING), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)

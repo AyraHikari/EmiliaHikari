@@ -10,7 +10,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html, mention_markdown
 
 import emilia.modules.sql.blsticker_sql as sql
-from emilia import dispatcher, SUDO_USERS, LOGGER, spamfilters, OWNER_ID
+from emilia import dispatcher, SUDO_USERS, LOGGER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import can_delete, is_user_admin, user_not_admin, user_admin, \
 		bot_can_delete, is_bot_admin
@@ -26,15 +26,12 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
+@spamcheck
 def blackliststicker(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 		
 	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
@@ -67,16 +64,13 @@ def blackliststicker(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def add_blackliststicker(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	words = msg.text.split(None, 1)
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id)
 	if conn:
@@ -130,16 +124,13 @@ def add_blackliststicker(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Beri tahu saya stiker apa yang ingin Anda tambahkan ke daftar hitam stiker."))
 
 @run_async
+@spamcheck
 @user_admin
 def unblackliststicker(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	words = msg.text.split(None, 1)
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id)
 	if conn:
@@ -198,12 +189,10 @@ def unblackliststicker(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Beri tahu saya stiker apa yang ingin Anda tambahkan ke daftar hitam stiker."))
 
 @run_async
+@spamcheck
 @loggable
 @user_admin
 def blacklist_mode(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]

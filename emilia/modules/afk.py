@@ -5,7 +5,7 @@ from telegram import MessageEntity
 from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, run_async
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, spamfilters
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, spamcheck
 from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
 from emilia.modules.sql import afk_sql as sql
 from emilia.modules.users import get_user_id
@@ -18,11 +18,8 @@ AFK_REPLY_GROUP = 8
 
 
 @run_async
+@spamcheck
 def afk(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-
     args = update.effective_message.text.split(None, 1)
     if len(args) >= 2:
         reason = args[1]

@@ -9,7 +9,7 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, DispatcherHandlerStop, MessageHandler, Filters, CallbackQueryHandler
 from telegram.utils.helpers import mention_html, escape_markdown
 
-from emilia import dispatcher, BAN_STICKER, spamfilters, OWNER_ID
+from emilia import dispatcher, BAN_STICKER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import is_user_admin, bot_admin, user_admin_no_reply, user_admin, \
     can_restrict, is_user_ban_protected
@@ -157,13 +157,11 @@ def button(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 #@can_restrict
 @loggable
 def warn_user(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     warner = update.effective_user  # type: Optional[User]
@@ -213,13 +211,11 @@ def warn_user(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 #@bot_admin
 @loggable
 def reset_warns(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
@@ -269,10 +265,8 @@ def reset_warns(update, context):
 
 
 @run_async
+@spamcheck
 def warns(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
@@ -324,11 +318,9 @@ def warns(update, context):
 
 
 # Dispatcher handler stop - do not async
+@spamcheck
 @user_admin
 def add_warn_filter(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
@@ -376,11 +368,9 @@ def add_warn_filter(update, context):
     raise DispatcherHandlerStop
 
 
+@spamcheck
 @user_admin
 def remove_warn_filter(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
     user = update.effective_user  # type: Optional[User]
@@ -473,11 +463,9 @@ def remove_warn_filter(update, context):
     send_message(update.effective_message, text, parse_mode="markdown")
 
 
+@spamcheck
 @run_async
 def list_warn_filters(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
 
@@ -540,12 +528,10 @@ def reply_filter(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def set_warn_limit(update, context) -> str:
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
@@ -593,11 +579,9 @@ def set_warn_limit(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 def set_warn_strength(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
@@ -664,11 +648,9 @@ def set_warn_strength(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def set_warn_mode(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]

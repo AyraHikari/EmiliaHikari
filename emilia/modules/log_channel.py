@@ -1,7 +1,7 @@
 from functools import wraps
 from typing import Optional
 
-from emilia import spamfilters, OWNER_ID
+from emilia import spamcheck, OWNER_ID
 from emilia.modules.helper_funcs.misc import is_module_loaded
 
 from emilia.modules.languages import tl
@@ -63,11 +63,9 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     @user_admin
     def logging(update, context):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
 
@@ -84,11 +82,9 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     @user_admin
     def setlog(update, context):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == chat.CHANNEL:
@@ -126,11 +122,9 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     @user_admin
     def unsetlog(update, context):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
 

@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, updater, spamfilters, LOGGER
+from emilia import dispatcher, updater, spamcheck, LOGGER
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import bot_admin, can_promote, user_admin, can_pin
 from emilia.modules.helper_funcs.extraction import extract_user
@@ -34,6 +34,7 @@ ENUM_FUNC_MAP = {
 
 
 @run_async
+@spamcheck
 @bot_admin
 @can_promote
 @user_admin
@@ -44,10 +45,6 @@ def promote(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
@@ -111,6 +108,7 @@ def promote(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 @can_promote
 @user_admin
@@ -120,10 +118,6 @@ def demote(update, context):
 	message = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
@@ -185,6 +179,7 @@ def demote(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 @can_pin
 @user_admin
@@ -193,10 +188,6 @@ def pin(update, context):
 	user = update.effective_user  # type: Optional[User]
 	chat = update.effective_chat  # type: Optional[Chat]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
@@ -246,6 +237,7 @@ def pin(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 @can_pin
 @user_admin
@@ -254,10 +246,6 @@ def unpin(update, context):
 	chat = update.effective_chat
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
@@ -289,16 +277,13 @@ def unpin(update, context):
 
 
 @run_async
+@spamcheck
 @bot_admin
 @user_admin
 def invite(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
@@ -327,14 +312,11 @@ def invite(update, context):
 
 
 @run_async
+@spamcheck
 def adminlist(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
@@ -381,18 +363,15 @@ def adminlist(update, context):
 		send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN, quote=False)
 
 
+@run_async
+@spamcheck
 @can_pin
 @user_admin
-@run_async
 def permapin(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	message = update.effective_message  # type: Optional[Message]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
@@ -428,17 +407,14 @@ def permapin(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Saya tidak punya akses untuk pin pesan!"))
 
 
+@run_async
+@spamcheck
 @can_pin
 @user_admin
-@run_async
 def permanent_pin_set(update, context):
 	user = update.effective_user  # type: Optional[User]
 	chat = update.effective_chat  # type: Optional[Chat]
 	args = context.args
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:

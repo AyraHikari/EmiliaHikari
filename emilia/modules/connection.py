@@ -10,7 +10,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html
 
 import emilia.modules.sql.connection_sql as sql
-from emilia import dispatcher, LOGGER, SUDO_USERS, spamfilters
+from emilia import dispatcher, LOGGER, SUDO_USERS, spamcheck
 from emilia.modules.helper_funcs.chat_status import bot_admin, user_admin, is_user_admin, can_restrict
 from emilia.modules.helper_funcs.extraction import extract_user, extract_user_and_text
 from emilia.modules.helper_funcs.string_handling import extract_time
@@ -45,13 +45,11 @@ def allow_connections(update, context) -> str:
         send_message(update.effective_message, languages.tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
 
 @run_async
+@spamcheck
 def connection_chat(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
 
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
@@ -72,14 +70,11 @@ def connection_chat(update, context):
     send_message(update.effective_message, teks, parse_mode="markdown")
 
 @run_async
+@spamcheck
 def connect_chat(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     args = context.args
-
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     if update.effective_chat.type == 'private':
         if args and len(args) >= 1:
@@ -169,10 +164,6 @@ def connect_chat(update, context):
 
 
 def disconnect_chat(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-
     if update.effective_chat.type == 'private':
         disconnection_status = sql.disconnect(update.effective_message.from_user.id)
         if disconnection_status:
@@ -185,9 +176,6 @@ def disconnect_chat(update, context):
 
 def connected(bot, update, chat, user_id, need_admin=True):
     user = update.effective_user  # type: Optional[User]
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
         
     if chat.type == chat.PRIVATE and sql.get_connected_chat(user_id):
         conn_id = sql.get_connected_chat(user_id).chat_id
@@ -210,14 +198,12 @@ def connected(bot, update, chat, user_id, need_admin=True):
         return False
 
 @run_async
+@spamcheck
 def help_connect_chat(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     args = context.args
 
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     if update.effective_message.chat.type != "private":
         send_message(update.effective_message, languages.tl(update.effective_message, "PM saya dengan command itu untuk mendapatkan bantuan Koneksi"))
         return

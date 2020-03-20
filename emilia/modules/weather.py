@@ -6,17 +6,15 @@ from pyowm import timeutils, exceptions
 from telegram import Message, Chat, Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import run_async
 
-from emilia import dispatcher, updater, API_WEATHER, API_ACCUWEATHER, spamfilters
+from emilia import dispatcher, updater, API_WEATHER, API_ACCUWEATHER, spamcheck
 from emilia.modules.disable import DisableAbleCommandHandler
 
 from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
+@spamcheck
 def cuaca(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     location = " ".join(args)
     if location.lower() == context.bot.first_name.lower():
@@ -71,12 +69,10 @@ def cuaca(update, context):
         return
 
 @run_async
+@spamcheck
 def accuweather(update, context):
     chat_id = update.effective_chat.id
     message = update.effective_message
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     if not args:
         return send_message(update.effective_message, tl(update.effective_message, "Masukan nama lokasinya untuk mengecek cuacanya!"))

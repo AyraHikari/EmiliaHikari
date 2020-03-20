@@ -7,7 +7,7 @@ from telegram.error import BadRequest, Unauthorized
 from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, CallbackQueryHandler
 from telegram.utils.helpers import mention_html, mention_markdown
 
-from emilia import dispatcher, LOGGER, spamfilters, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
+from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
 from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
@@ -21,11 +21,9 @@ CURRENT_REPORT = {}
 
 
 @run_async
+@spamcheck
 @user_admin
 def report_setting(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	msg = update.effective_message  # type: Optional[Message]
 	args = context.args
@@ -59,12 +57,10 @@ def report_setting(update, context):
 
 
 @run_async
+@spamcheck
 @user_not_admin
 @loggable
 def report(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	message = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -146,12 +142,10 @@ def report(update, context) -> str:
 	return ""
 
 @run_async
+@spamcheck
 @user_not_admin
 @loggable
 def report_alt(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	message = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]

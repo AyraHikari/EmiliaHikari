@@ -10,7 +10,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown, mention_markdown
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamfilters, OWNER_ID
+from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard_parser, revert_buttons
@@ -178,10 +178,8 @@ def get(bot, update, notename, show_none=True, no_format=False):
 
 
 @run_async
+@spamcheck
 def cmd_get(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	if len(args) >= 2 and args[1].lower() == "noformat":
 		get(context.bot, update, args[0], show_none=True, no_format=True)
@@ -192,10 +190,8 @@ def cmd_get(update, context):
 
 
 @run_async
+@spamcheck
 def hash_get(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	message = update.effective_message.text
 	fst_word = message.split()[0]
 	no_hash = fst_word[1:]
@@ -204,11 +200,9 @@ def hash_get(update, context):
 
 # TODO: FIX THIS
 @run_async
+@spamcheck
 @user_admin
 def save(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	conn = connected(context.bot, update, chat, user.id)
@@ -272,11 +266,9 @@ def save(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def clear(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -344,11 +336,9 @@ def clear(update, context):
 		send_message(update.effective_message, tl(update.effective_message, "Apa yang ingin dihapus?"))
 
 @run_async
+@spamcheck
 @user_admin
 def private_note(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -387,10 +377,8 @@ def private_note(update, context):
 
 
 @run_async
+@spamcheck
 def list_notes(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	conn = connected(context.bot, update, chat, user.id, need_admin=False)

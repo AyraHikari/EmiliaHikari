@@ -7,7 +7,7 @@ from telegram.ext import CommandHandler, CallbackQueryHandler, Filters, run_asyn
 from telegram.error import BadRequest
 from telegram.utils.helpers import mention_markdown
 
-from emilia import dispatcher, updater, spamfilters
+from emilia import dispatcher, updater, spamcheck, IS_DEBUG
 import emilia.modules.sql.welcome_sql as sql
 from emilia.modules.languages import tl
 from emilia.modules.connection import connected
@@ -21,7 +21,6 @@ def welcome_timeout(context):
 		user_id = cht.user_id
 		chat_id = cht.chat_id
 		if int(time.time()) >= int(cht.timeout_int):
-			print("Timeout!")
 			getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat_id)
 			if timeout_mode == 1:
 				try:
@@ -40,11 +39,9 @@ def welcome_timeout(context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def set_verify_welcome(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
@@ -72,11 +69,9 @@ def set_verify_welcome(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def set_welctimeout(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
@@ -101,11 +96,9 @@ def set_welctimeout(update, context):
 			send_message(update.effective_message, tl(update.effective_message, "Pengaturan batas waktu ketika join: *{}*").format(make_time(int(timeout))), parse_mode="markdown")
 
 @run_async
+@spamcheck
 @user_admin
 def timeout_mode(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]

@@ -25,7 +25,7 @@ from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamfilters
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamcheck
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
@@ -36,10 +36,8 @@ from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
+@spamcheck
 def stickerid(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	msg = update.effective_message
 	if msg.reply_to_message and msg.reply_to_message.sticker:
 		send_message(update.effective_message, tl(update.effective_message, "Hai {}, Id stiker yang anda balas adalah :\n```{}```").format(mention_markdown(msg.from_user.id, msg.from_user.first_name), msg.reply_to_message.sticker.file_id),
@@ -49,10 +47,8 @@ def stickerid(update, context):
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
+@spamcheck
 def getsticker(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	if msg.reply_to_message and msg.reply_to_message.sticker:
@@ -74,10 +70,8 @@ def getsticker(update, context):
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
+@spamcheck
 def stiker(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat_id = update.effective_chat.id
 	args = update.effective_message.text.split(None, 1)
 	message = update.effective_message
@@ -88,10 +82,8 @@ def stiker(update, context):
 		context.bot.sendSticker(chat_id, args[1])
 
 @run_async
+@spamcheck
 def file(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat_id = update.effective_chat.id
 	args = update.effective_message.text.split(None, 1)
 	message = update.effective_message
@@ -138,10 +130,8 @@ def leavechat(update, context):
 			return
 
 @run_async
+@spamcheck
 def ping(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	start_time = time.time()
 	test = send_message(update.effective_message, "Pong!")
 	end_time = time.time()
@@ -150,10 +140,8 @@ def ping(update, context):
 						text=tl(update.effective_message, "Pong!\nKecepatannya: {0:.2f} detik").format(round(ping_time, 2) % 60))
 
 @run_async
+@spamcheck
 def ramalan(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	text = ""
 	if random.randint(1,10) >= 7:
 		text += random.choice(tl(update.effective_message, "RAMALAN_FIRST"))
@@ -161,10 +149,8 @@ def ramalan(update, context):
 	send_message(update.effective_message, text)    
 
 @run_async
+@spamcheck
 def terjemah(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	getlang = langsql.get_lang(update.effective_message.from_user.id)
@@ -238,10 +224,8 @@ def terjemah(update, context):
 
 
 @run_async
+@spamcheck
 def wiki(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	args = update.effective_message.text.split(None, 1)
@@ -292,10 +276,8 @@ def wiki(update, context):
 
 
 @run_async
+@spamcheck
 def kamusbesarbahasaindonesia(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	try:
@@ -330,10 +312,8 @@ def kamusbesarbahasaindonesia(update, context):
 
 
 @run_async
+@spamcheck
 def urbandictionary(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
@@ -388,7 +368,7 @@ KBBI_HANDLER = DisableAbleCommandHandler("kbbi", kamusbesarbahasaindonesia)
 UD_HANDLER = DisableAbleCommandHandler("ud", urbandictionary, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 
-dispatcher.add_handler(PING_HANDLER)
+#dispatcher.add_handler(PING_HANDLER)
 dispatcher.add_handler(STICKERID_HANDLER)
 #dispatcher.add_handler(GETSTICKER_HANDLER)
 dispatcher.add_handler(STIKER_HANDLER)

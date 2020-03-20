@@ -13,7 +13,7 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamfilters, MAPS_API
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamcheck, MAPS_API
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
@@ -149,17 +149,13 @@ GMAPS_TIME = "https://maps.googleapis.com/maps/api/timezone/json"
 
 
 @run_async
+@spamcheck
 def runs(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     send_message(update.effective_message, random.choice(tl(update.effective_message, "RUN_STRINGS")))
 
 @run_async
+@spamcheck
 def slap(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     msg = update.effective_message  # type: Optional[Message]
 
@@ -206,10 +202,8 @@ def get_bot_ip(update, context):
 
 
 @run_async
+@spamcheck
 def get_id(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     user_id = extract_user(update.effective_message, args)
     if user_id and user_id != "error":
@@ -256,10 +250,8 @@ def get_id(update, context):
 
 
 @run_async
+@spamcheck
 def info(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     msg = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
@@ -326,10 +318,8 @@ def info(update, context):
 
 
 @run_async
+@spamcheck
 def get_time(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     location = " ".join(args)
     if location.lower() == context.bot.first_name.lower():
@@ -373,10 +363,8 @@ def get_time(update, context):
 
 
 @run_async
+@spamcheck
 def get_time_alt(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     if args:
         location = " ".join(args)
@@ -427,10 +415,8 @@ def echo(update, context):
 
 
 @run_async
+@spamcheck
 def markdown_help(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     send_message(update.effective_message, tl(update.effective_message, "MARKDOWN_HELP").format(dispatcher.bot.first_name), parse_mode=ParseMode.HTML)
     send_message(update.effective_message, tl(update.effective_message, "Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!"))
     send_message(update.effective_message, tl(update.effective_message, "/save test Ini adalah tes markdown. _miring_, *tebal*, `kode`, "

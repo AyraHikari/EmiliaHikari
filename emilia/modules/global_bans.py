@@ -8,7 +8,7 @@ from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, Cal
 from telegram.utils.helpers import mention_html, escape_markdown
 
 import emilia.modules.sql.global_bans_sql as sql
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN, spamfilters
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN, spamcheck
 from emilia.modules.helper_funcs.chat_status import user_admin, is_user_admin
 from emilia.modules.helper_funcs.extraction import extract_user, extract_user_and_text
 from emilia.modules.helper_funcs.filters import CustomFilters
@@ -245,11 +245,9 @@ def enforce_gban(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def gbanstat(update, context):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     args = context.args
     if len(args) > 0:
         if args[0].lower() in ["on", "yes"]:

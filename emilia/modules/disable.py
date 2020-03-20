@@ -5,7 +5,7 @@ from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity
 from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.utils.helpers import escape_markdown
 
-from emilia import dispatcher, spamfilters, OWNER_ID
+from emilia import dispatcher, spamcheck, OWNER_ID
 from emilia.modules.helper_funcs.handlers import CMD_STARTERS
 from emilia.modules.helper_funcs.misc import is_module_loaded
 from emilia.modules.connection import connected
@@ -89,14 +89,12 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     @user_admin
     def disable(update, context):
         chat = update.effective_chat  # type: Optional[Chat]
         user = update.effective_user
         args = context.args
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
 
         conn = connected(context.bot, update, chat, user.id, need_admin=True)
         if conn:
@@ -132,14 +130,12 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     @user_admin
     def enable(update, context):
         chat = update.effective_chat  # type: Optional[Chat]
         user = update.effective_user
         args = context.args
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
 
         conn = connected(context.bot, update, chat, user.id, need_admin=True)
         if conn:
@@ -174,12 +170,9 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     @user_admin
     def list_cmds(update, context):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
-
         if DISABLE_CMDS + DISABLE_OTHER:
             result = ""
             for cmd in set(DISABLE_CMDS + DISABLE_OTHER):
@@ -190,12 +183,9 @@ if is_module_loaded(FILENAME):
             send_message(update.effective_message, languages.tl(update.effective_message, "Tidak ada perintah yang dapat dinonaktifkan."))
 
     @run_async
+    @spamcheck
     @user_admin
     def disable_del(update, context):
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
-
         msg = update.effective_message
         chat = update.effective_chat
 
@@ -228,13 +218,10 @@ if is_module_loaded(FILENAME):
 
 
     @run_async
+    @spamcheck
     def commands(update, context):
         chat = update.effective_chat
         user = update.effective_user
-        spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-        if spam == True:
-            return
-
         conn = connected(context.bot, update, chat, user.id, need_admin=True)
         if conn:
             chat = dispatcher.bot.getChat(conn)

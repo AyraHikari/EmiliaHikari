@@ -11,7 +11,7 @@ from telegram.ext import MessageHandler, Filters, CommandHandler, run_async, Cal
 from telegram.utils.helpers import mention_markdown, mention_html, escape_markdown
 
 import emilia.modules.sql.welcome_sql as sql
-from emilia import dispatcher, OWNER_ID, LOGGER, spamfilters
+from emilia import dispatcher, OWNER_ID, LOGGER, spamcheck, IS_DEBUG
 try:
 	from emilia import SPAMWATCH_TOKEN
 except:
@@ -100,7 +100,8 @@ def send(update, message, keyboard, backup_message):
 													  parse_mode=ParseMode.MARKDOWN)
 				LOGGER.exception("ERROR!")
 			except BadRequest:
-				print("Cannot send welcome msg, bot is muted!")
+				if IS_DEBUG:
+					print("Cannot send welcome msg, bot is muted!")
 				return ""
 	return msg
 
@@ -324,7 +325,8 @@ def check_bot_button(update, context):
 	match = re.match(r"check_bot_\((.+?)\)", query.data)
 	user_id = int(match.group(1))
 	message = update.effective_message  # type: Optional[Message]
-	print("-> {} was clicked welcome sec button".format(user.id))
+	if IS_DEBUG:
+		print("-> {} was clicked welcome sec button".format(user.id))
 
 	# This method will unmute user when that user is clicked welc security button
 	# It has two method, so select one method. I'm using first method as default.
@@ -385,7 +387,8 @@ def check_bot_button(update, context):
 	# => Or use this to unmute specific user and remove that security button
 	getalluser = sql.get_chat_userlist(chat.id)
 	if int(user.id) != int(user_id):
-		print("Not that user")
+		if IS_DEBUG:
+			print("Not that user")
 		query.answer(text=tl(update.effective_message, "Kamu bukan pengguna yang di tuju!"))
 		return
 	if getalluser.get(user.id) and getalluser.get(user.id) == True:
@@ -558,11 +561,9 @@ def left_member(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def security(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
@@ -590,11 +591,9 @@ def security(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def security_mute(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
@@ -620,11 +619,9 @@ def security_mute(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def security_text(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
@@ -639,11 +636,9 @@ def security_text(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def security_text_reset(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
@@ -652,11 +647,9 @@ def security_text_reset(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def cleanservice(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	if chat.type != chat.PRIVATE:
@@ -814,12 +807,10 @@ def goodbye(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def set_welcome(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -847,12 +838,10 @@ def set_welcome(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def reset_welcome(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	sql.set_custom_welcome(chat.id, None, sql.DEFAULT_WELCOME, sql.Types.TEXT)
@@ -865,12 +854,10 @@ def reset_welcome(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def set_goodbye(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
@@ -897,12 +884,10 @@ def set_goodbye(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def reset_goodbye(update, context) -> str:
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	sql.set_custom_gdbye(chat.id, sql.DEFAULT_GOODBYE, sql.Types.TEXT)
@@ -915,12 +900,10 @@ def reset_goodbye(update, context) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
 def clean_welcome(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
@@ -956,11 +939,9 @@ def clean_welcome(update, context):
 
 
 @run_async
+@spamcheck
 @user_admin
 def welcome_help(update, context):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 	send_message(update.effective_message, tl(update.effective_message, "WELC_HELP_TXT").format(dispatcher.bot.username), parse_mode=ParseMode.MARKDOWN)
 
 
