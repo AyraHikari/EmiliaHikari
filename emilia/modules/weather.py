@@ -6,21 +6,20 @@ from pyowm import timeutils, exceptions
 from telegram import Message, Chat, Update, Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import run_async
 
-from emilia import dispatcher, updater, API_WEATHER, API_ACCUWEATHER, spamfilters
+from emilia import dispatcher, updater, API_WEATHER, API_ACCUWEATHER, spamcheck
 from emilia.modules.disable import DisableAbleCommandHandler
 
 from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
-def cuaca(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
+@spamcheck
+def cuaca(update, context):
+    args = context.args
     location = " ".join(args)
-    if location.lower() == bot.first_name.lower():
+    if location.lower() == context.bot.first_name.lower():
         send_message(update.effective_message, tl(update.effective_message, "Saya akan terus mengawasi di saat senang maupun sedih!"))
-        bot.send_sticker(update.effective_chat.id, BAN_STICKER)
+        context.bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
     try:
@@ -70,18 +69,17 @@ def cuaca(bot, update, args):
         return
 
 @run_async
-def accuweather(bot, update, args):
+@spamcheck
+def accuweather(update, context):
     chat_id = update.effective_chat.id
     message = update.effective_message
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-    if args == []:
+    args = context.args
+    if not args:
         return send_message(update.effective_message, tl(update.effective_message, "Masukan nama lokasinya untuk mengecek cuacanya!"))
     location = " ".join(args)
-    if location.lower() == bot.first_name.lower():
+    if location.lower() == context.bot.first_name.lower():
         send_message(update.effective_message, tl(update.effective_message, "Saya akan terus mengawasi di saat senang maupun sedih!"))
-        bot.send_sticker(update.effective_chat.id, BAN_STICKER)
+        context.bot.send_sticker(update.effective_chat.id, BAN_STICKER)
         return
 
     if True:
@@ -163,7 +161,7 @@ def accuweather(bot, update, args):
         teks += tl(update.effective_message, "*Lokasi:* `{}`\n\n").format(", ".join(lok))
 
         # try:
-        #     bot.send_photo(chat_id, photo=datas.get('Photos')[0].get('LandscapeLink'), caption=teks, parse_mode="markdown", reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="More info", url=datas.get('Link'))]]))
+        #     context.bot.send_photo(chat_id, photo=datas.get('Photos')[0].get('LandscapeLink'), caption=teks, parse_mode="markdown", reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="More info", url=datas.get('Link'))]]))
         # except:
         send_message(update.effective_message, teks, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton(text="More info", url=datas.get('Link'))]]))
 

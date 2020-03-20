@@ -8,9 +8,8 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamfilters
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamcheck
 from emilia.__main__ import STATS, USER_INFO
-from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleRegexHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
 
@@ -18,7 +17,7 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
-def reboot(bot: Bot, update: Update):
+def reboot(update, context):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	send_message(update.effective_message, "Rebooting...", parse_mode=ParseMode.MARKDOWN)
@@ -30,7 +29,7 @@ def reboot(bot: Bot, update: Update):
 		send_message(update.effective_message, "Reboot Gagal!", parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-def executor(bot: Bot, update: Update):
+def executor(update, context):
 	msg = update.effective_message
 	if msg.text:
 		args = msg.text.split(None, 1)

@@ -7,7 +7,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, User
 from telegram import Message, Chat, Update, Bot
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, DispatcherHandlerStop, MessageHandler, Filters, CallbackQueryHandler
-from emilia import dispatcher, spamfilters, LOGGER
+from emilia import dispatcher, spamcheck, LOGGER
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin_no_reply, user_admin
 
@@ -33,7 +33,7 @@ def tl(message, text):
 	if type(message) == int or type(message) == str and message[1:].isdigit():
 		getlang = sql.get_lang(message)
 		if getlang == 'None' or not getlang:
-			getlang = 'id'
+			getlang = 'en'
 	else:
 		getlang = sql.get_lang(message.chat.id)
 		if getlang == 'None' or not getlang:
@@ -45,12 +45,8 @@ def tl(message, text):
 					sql.set_lang(message.chat.id, 'en')
 					getlang = 'en'
 			else:
-				if message.chat.type == "private":
-					sql.set_lang(message.chat.id, 'en')
-					getlang = 'en'
-				else:
-					sql.set_lang(message.chat.id, 'id')
-					getlang = 'id'
+				sql.set_lang(message.chat.id, 'en')
+				getlang = 'en'
 
 	getlangid = {}
 	for x in LOADED_LANGS_ID:
@@ -79,15 +75,12 @@ def tl(message, text):
 
 
 @run_async
+@spamcheck
 @user_admin
-def set_language(bot, update):
+def set_language(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	getlang = sql.get_lang(chat.id)
 	if getlang == 'None' or not getlang:
@@ -95,12 +88,8 @@ def set_language(bot, update):
 			sql.set_lang(msg.chat.id, msg.from_user.language_code)
 			getlang = msg.from_user.language_code
 		else:
-			if msg.chat.type == "private":
-				sql.set_lang(msg.chat.id, 'en')
-				getlang = 'en'
-			else:
-				sql.set_lang(msg.chat.id, 'id')
-				getlang = 'id'
+			sql.set_lang(msg.chat.id, 'en')
+			getlang = 'en'
 	loaded_langs = []
 	counter = 0
 
@@ -127,7 +116,7 @@ def set_language(bot, update):
 
 @run_async
 @user_admin_no_reply
-def button(bot, update):
+def button(update, context):
 	query = update.callback_query  # type: Optional[CallbackQuery]
 	user = update.effective_user  # type: Optional[User]
 	match = re.match(r"set_lang\((.+?)\)", query.data)

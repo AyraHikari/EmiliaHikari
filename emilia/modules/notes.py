@@ -5,15 +5,15 @@ from typing import Optional, List
 from telegram import MAX_MESSAGE_LENGTH, ParseMode, InlineKeyboardMarkup
 from telegram import Message, Update, Bot
 from telegram.error import BadRequest, Unauthorized
-from telegram.ext import CommandHandler, RegexHandler
+from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown, mention_markdown
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamfilters, OWNER_ID
+from emilia import dispatcher, MESSAGE_DUMP, LOGGER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
-from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
+from emilia.modules.helper_funcs.misc import build_keyboard_parser, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_note_type
 from emilia.modules.helper_funcs.string_handling import escape_invalid_curly_brackets
 
@@ -91,12 +91,12 @@ def get(bot, update, notename, show_none=True, no_format=False):
 						raise
 		else:
 
-			VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention']
+			VALID_WELCOME_FORMATTERS = ['first', 'last', 'fullname', 'username', 'id', 'chatname', 'mention', 'rules']
 			valid_format = escape_invalid_curly_brackets(note.value, VALID_WELCOME_FORMATTERS)
 			if valid_format:
 				text = valid_format.format(first=escape_markdown(message.from_user.first_name),
 											  last=escape_markdown(message.from_user.last_name or message.from_user.first_name),
-											  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else [message.from_user.first_name])), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title if message.chat.type != "private" else message.from_user.first_name), id=message.from_user.id)
+											  fullname=escape_markdown(" ".join([message.from_user.first_name, message.from_user.last_name] if message.from_user.last_name else [message.from_user.first_name])), username="@" + message.from_user.username if message.from_user.username else mention_markdown(message.from_user.id, message.from_user.first_name), mention=mention_markdown(message.from_user.id, message.from_user.first_name), chatname=escape_markdown(message.chat.title if message.chat.type != "private" else message.from_user.first_name), id=message.from_user.id, rules="http://t.me/{}?start={}".format(bot.username, chat_id))
 			else:
 				text = ""
 
@@ -107,7 +107,7 @@ def get(bot, update, notename, show_none=True, no_format=False):
 				parseMode = None
 				text += revert_buttons(buttons)
 			else:
-				keyb = build_keyboard(buttons)
+				keyb = build_keyboard_parser(bot, chat_id, buttons)
 
 			keyboard = InlineKeyboardMarkup(keyb)
 
@@ -178,39 +178,34 @@ def get(bot, update, notename, show_none=True, no_format=False):
 
 
 @run_async
-def cmd_get(bot: Bot, update: Update, args: List[str]):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+@spamcheck
+def cmd_get(update, context):
+	args = context.args
 	if len(args) >= 2 and args[1].lower() == "noformat":
-		get(bot, update, args[0], show_none=True, no_format=True)
+		get(context.bot, update, args[0], show_none=True, no_format=True)
 	elif len(args) >= 1:
-		get(bot, update, args[0], show_none=True)
+		get(context.bot, update, args[0], show_none=True)
 	else:
 		send_message(update.effective_message, tl(update.effective_message, "Get apa?"))
 
 
 @run_async
-def hash_get(bot: Bot, update: Update):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+@spamcheck
+def hash_get(update, context):
 	message = update.effective_message.text
 	fst_word = message.split()[0]
 	no_hash = fst_word[1:]
-	get(bot, update, no_hash, show_none=False)
+	get(context.bot, update, no_hash, show_none=False)
 
 
 # TODO: FIX THIS
 @run_async
+@spamcheck
 @user_admin
-def save(bot: Bot, update: Update):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+def save(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -271,14 +266,13 @@ def save(bot: Bot, update: Update):
 
 
 @run_async
+@spamcheck
 @user_admin
-def clear(bot: Bot, update: Update, args: List[str]):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+def clear(update, context):
+	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -342,14 +336,13 @@ def clear(bot: Bot, update: Update, args: List[str]):
 		send_message(update.effective_message, tl(update.effective_message, "Apa yang ingin dihapus?"))
 
 @run_async
+@spamcheck
 @user_admin
-def private_note(bot: Bot, update: Update, args: List[str]):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+def private_note(update, context):
+	args = context.args
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -384,13 +377,11 @@ def private_note(bot: Bot, update: Update, args: List[str]):
 
 
 @run_async
-def list_notes(bot: Bot, update: Update):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+@spamcheck
+def list_notes(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-	conn = connected(bot, update, chat, user.id, need_admin=False)
+	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -541,7 +532,7 @@ __help__ = "notes_help"
 __mod_name__ = "Notes"
 
 GET_HANDLER = CommandHandler("get", cmd_get, pass_args=True)
-HASH_GET_HANDLER = RegexHandler(r"^#[^\s]+", hash_get)
+HASH_GET_HANDLER = MessageHandler(Filters.regex(r"^#[^\s]+"), hash_get)
 
 SAVE_HANDLER = CommandHandler("save", save)
 DELETE_HANDLER = CommandHandler("clear", clear, pass_args=True)

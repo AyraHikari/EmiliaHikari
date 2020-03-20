@@ -8,7 +8,7 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamfilters, TEMPORARY_DATA
+from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamcheck, TEMPORARY_DATA
 from emilia.__main__ import DATA_IMPORT
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
@@ -24,7 +24,7 @@ from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.sql import cust_filters_sql as filtersql
 from emilia.modules.sql import languages_sql as langsql
 import emilia.modules.sql.locks_sql as locksql
-from emilia.modules.locks import LOCK_TYPES, RESTRICTION_TYPES
+from emilia.modules.locks import LOCK_TYPES
 from emilia.modules.sql import notes_sql as notesql
 from emilia.modules.sql import reporting_sql as reportsql
 import emilia.modules.sql.rules_sql as rulessql
@@ -38,18 +38,16 @@ from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
+@spamcheck
 @user_admin
-def import_data(bot: Bot, update):
+def import_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	# TODO: allow uploading doc with command, not just as reply
 	# only work with a doc
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat = dispatcher.bot.getChat(conn)
 		chat_id = conn
@@ -68,7 +66,7 @@ def import_data(bot: Bot, update):
 			send_message(update.effective_message, tl(update.effective_message, "File cadangan tidak valid!"))
 			return
 		try:
-			file_info = bot.get_file(msg.reply_to_message.document.file_id)
+			file_info = context.bot.get_file(msg.reply_to_message.document.file_id)
 		except BadRequest:
 			send_message(update.effective_message, tl(update.effective_message, "Coba unduh dan unggah ulang file seperti Anda sendiri sebelum mengimpor - yang ini sepertinya rusak!"))
 			return
@@ -102,10 +100,14 @@ def import_data(bot: Bot, update):
 				NOT_IMPORTED = "This cannot be imported because from other bot."
 				NOT_IMPORTED_INT = 0
 				# If backup is from this bot, import all files
-				if data.get('bot_id') == bot.id:
+				if data.get('bot_id') == context.bot.id:
 					is_self = True
 				else:
 					is_self = False
+				if data.get('bot_base') == "Emilia":
+					is_emilia = True
+				else:
+					is_emilia = False
 				# Import antiflood
 				if data.get('antiflood'):
 					imp_antiflood = True
@@ -184,7 +186,25 @@ def import_data(bot: Bot, update):
 								has_markdown = True
 							note_data, buttons = button_markdown_parser(x['reply'], entities=0)
 							filtersql.add_filter(chat_id, x['name'], note_data, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
-							imp_filters_count += 1	
+							imp_filters_count += 1
+						elif is_emilia:
+							is_sticker = False
+							is_document = False
+							is_image = False
+							is_audio = False
+							is_voice = False
+							is_video = False
+							has_markdown = False
+							universal = False
+							if x['type'] == 0:
+								has_markdown = True
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['name'])
+								NOT_IMPORTED_INT += 1
+								continue
+							note_data, buttons = button_markdown_parser(x['reply'], entities=0)
+							filtersql.add_filter(chat_id, x['name'], note_data, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
+							imp_filters_count += 1
 						else:
 							if x['has_markdown']:
 								note_data, buttons = button_markdown_parser(x['reply'], entities=0)
@@ -268,7 +288,16 @@ def import_data(bot: Bot, update):
 					secenable = data['greetings']['security'].get('enable')
 					secbtn = data['greetings']['security'].get('text')
 					sectime = data['greetings']['security'].get('time')
-					welcsql.set_welcome_security(chat_id, bool(secenable), str(sectime), str(secbtn))
+					extra_verify = data['greetings']['security'].get('extra_verify')
+					if not extra_verify:
+						extra_verify = False
+					timeout = data['greetings']['security'].get('timeout')
+					if not timeout:
+						timeout = "0"
+					timeout_mode = data['greetings']['security'].get('timeout_mode')
+					if not timeout_mode:
+						timeout_mode = 1
+					welcsql.set_welcome_security(chat_id, extra_verify, bool(secenable), str(sectime), str(timeout), int(timeout_mode), str(secbtn))
 					imp_greet_pref = True
 
 				# Import language
@@ -290,10 +319,6 @@ def import_data(bot: Bot, update):
 							if x in LOCK_TYPES:
 								is_locked = data['locks']['locks'].get('x')
 								locksql.update_lock(chat_id, x, locked=is_locked)
-								imp_locks = True
-							if x in RESTRICTION_TYPES:
-								is_locked = data['locks']['locks'].get('x')
-								locksql.update_restriction(chat_id, x, locked=is_locked)
 								imp_locks = True
 
 				# Import notes
@@ -329,6 +354,24 @@ def import_data(bot: Bot, update):
 								note_type = Types.VIDEO_NOTE
 							else:
 								note_type = None
+							if note_type <= 8:
+								notesql.add_note_to_db(chat_id, note_name, note_data, note_type, buttons, note_file)
+								imp_notes += 1
+						elif is_emilia:
+							note_data, buttons = button_markdown_parser(x['note_data'], entities=0)
+							note_name = x['note_tag']
+							note_file = None
+							note_type = x['note_type']
+							if x['note_file']:
+								note_file = x['note_file']
+							if note_type == 0:
+								note_type = Types.TEXT
+							elif note_type == 1:
+								note_type = Types.BUTTON_TEXT
+							else:
+								NOT_IMPORTED += "- {}\n".format(x['note_tag'])
+								NOT_IMPORTED_INT += 1
+								continue
 							if note_type <= 8:
 								notesql.add_note_to_db(chat_id, note_name, note_data, note_type, buttons, note_file)
 								imp_notes += 1
@@ -431,11 +474,11 @@ def import_data(bot: Bot, update):
 					f = open("{}-notimported.txt".format(chat_id), "w")
 					f.write(str(NOT_IMPORTED))
 					f.close()
-					bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+					context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
 					os.remove("{}-notimported.txt".format(chat_id))
 				return
 		except Exception as err:
-			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
+			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/EmiliaOfficial) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
 			LOGGER.exception("An error when importing from Emilia base!")
 			return
 
@@ -563,8 +606,8 @@ def import_data(bot: Bot, update):
 							welcsql.set_clean_service(chat_id, False)
 						# custom mute btn
 						if data['data']['greetings'].get('mute_text'):
-							getcur, cur_value, cust_text = welcsql.welcome_security(chat_id)
-							welcsql.set_welcome_security(chat_id, getcur, cur_value, data['data']['greetings'].get('mute_text'))
+							getcur, cur_value, extra_verify, timeout, timeout_mode, cust_text = welcsql.welcome_security(chat_id)
+							welcsql.set_welcome_security(chat_id, getcur, extra_verify, cur_value, timeout, timeout_mode, data['data']['greetings'].get('mute_text'))
 						imp_greet_pref = True
 						# TODO parsing unix time and import that
 					# TODO Locks
@@ -656,7 +699,7 @@ def import_data(bot: Bot, update):
 						f = open("{}-notimported.txt".format(chat_id), "w")
 						f.write(str(NOT_IMPORTED))
 						f.close()
-						bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+						context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
 						os.remove("{}-notimported.txt".format(chat_id))
 					return
 		except Exception as err:
@@ -717,19 +760,18 @@ def import_data(bot: Bot, update):
 
 
 @run_async
+@spamcheck
 @user_admin
-def export_data(bot: Bot, update: Update, chat_data):
+def export_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	user = update.effective_user  # type: Optional[User]
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
 
 	chat_id = update.effective_chat.id
 	chat = update.effective_chat
 	current_chat_id = update.effective_chat.id
+	chat_data = context.chat_data
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat = dispatcher.bot.getChat(conn)
 		chat_id = conn
@@ -764,7 +806,7 @@ def export_data(bot: Bot, update: Update, chat_data):
 	bot_base = "Emilia"
 
 	# Make sure this backup is for this bot
-	bot_id = bot.id
+	bot_id = context.bot.id
 
 	# Backuping antiflood
 	flood_mode, flood_duration = antifloodsql.get_flood_setting(chat_id)
@@ -832,8 +874,8 @@ def export_data(bot: Bot, update: Update, chat_data):
 	curr = welcsql.clean_service(chat_id)
 	greetings["clean_service"] = curr
 
-	getcur, cur_value, cust_text = welcsql.welcome_security(chat_id)
-	greetings["security"] = {"enable": getcur, "text": cust_text, "time": cur_value}
+	getcur, cur_value, extra_verify, timeout, timeout_mode, cust_text = welcsql.welcome_security(chat_id)
+	greetings["security"] = {"enable": getcur, "text": cust_text, "time": cur_value, "extra_verify": extra_verify, "timeout": timeout, "timeout_mode": timeout_mode}
 
 	# Backuping chat language
 	getlang = langsql.get_lang(chat_id)
@@ -933,16 +975,16 @@ def export_data(bot: Bot, update: Update, chat_data):
 	f = open("{}-Emilia.backup".format(chat_id), "w")
 	f.write(str(all_backups))
 	f.close()
-	bot.sendChatAction(current_chat_id, "upload_document")
+	context.bot.sendChatAction(current_chat_id, "upload_document")
 	tgl = time.strftime("%H:%M:%S - %d/%m/%Y", time.localtime(time.time()))
 	try:
-		bot.sendMessage(TEMPORARY_DATA, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
+		context.bot.sendMessage(TEMPORARY_DATA, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
 	except BadRequest:
 		pass
-	send = bot.sendDocument(current_chat_id, document=open('{}-Emilia.backup'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
+	send = context.bot.sendDocument(current_chat_id, document=open('{}-Emilia.backup'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
 	try:
 		# Send to temp data for prevent unexpected issue
-		bot.sendDocument(TEMPORARY_DATA, document=send.document.file_id, caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, parse_mode=ParseMode.MARKDOWN)
+		context.bot.sendDocument(TEMPORARY_DATA, document=send.document.file_id, caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, parse_mode=ParseMode.MARKDOWN)
 	except BadRequest:
 		pass
 	os.remove("{}-Emilia.backup".format(chat_id)) # Cleaning file

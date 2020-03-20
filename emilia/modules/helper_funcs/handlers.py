@@ -1,7 +1,15 @@
 import telegram.ext as tg
 from telegram import Update
 
-CMD_STARTERS = ('/', '!')
+try:
+    from emilia import CUSTOM_CMD
+except:
+    CUSTOM_CMD = False
+
+if CUSTOM_CMD:
+    CMD_STARTERS = CUSTOM_CMD
+else:
+    CMD_STARTERS = ('/')
 
 
 class CustomCommandHandler(tg.CommandHandler):
@@ -11,28 +19,22 @@ class CustomCommandHandler(tg.CommandHandler):
         super().__init__(command, callback, **kwargs)
 
     def check_update(self, update):
-        if (isinstance(update, Update)
-                and (update.message or update.edited_message and self.allow_edited)):
-            message = update.message or update.edited_message
+        if isinstance(update, Update) and update.effective_message:
+            message = update.effective_message
 
             if message.text and len(message.text) > 1:
-                fst_word = message.text_html.split(None, 1)[0]
+                fst_word = message.text.split(None, 1)[0]
                 if len(fst_word) > 1 and any(fst_word.startswith(start) for start in CMD_STARTERS):
+                    args = message.text.split()[1:]
                     command = fst_word[1:].split('@')
                     command.append(message.bot.username)  # in case the command was sent without a username
-                    if self.filters is None:
-                        res = True
-                    elif isinstance(self.filters, list):
-                        res = any(func(message) for func in self.filters)
+
+                    if not (command[0].lower() in self.command
+                            and command[1].lower() == message.bot.username.lower()):
+                        return None
+
+                    filter_result = self.filters(update)
+                    if filter_result:
+                        return args, filter_result
                     else:
-                        res = self.filters(message)
-
-                    return res and (command[0].lower() in self.command
-                                    and command[1].lower() == message.bot.username.lower())
-
-            return False
-
-
-class CustomRegexHandler(tg.RegexHandler):
-    def __init__(self, pattern, callback, friendly="", **kwargs):
-        super().__init__(pattern, callback, **kwargs)
+                        return False

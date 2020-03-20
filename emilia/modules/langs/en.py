@@ -92,6 +92,7 @@ If you really are interested in donating, please visit ayrahikari.github.io/dona
 	"Bagaimana saya ingin menaikan jabatan seseorang yang sudah menjadi admin?": "How am I meant to promote someone that's already an admin?",
 	"Saya tidak bisa menaikan jabatan diri saya sendiri! Hanya admin yang dapat melakukanya untuk saya.": "I can't promote myself! Get an admin to do it for me.",
 	"Tidak dapat mempromosikan pengguna, mungkin saya bukan admin atau tidak punya izin untuk mempromosikan pengguna.": "Cannot promote users, maybe I am not admin or do not have permission to promote users.",
+	"Gagal menaikan jabatan: Bot terkunci": "Failed to promote: Bot was locked",
 	"💖 Berhasil dinaikan jabatannya!": "💖 Successfully promoted!",
 	"Orang ini MENCIPTAKAN obrolan ini, bagaimana saya menurunkannya?": "This person CREATED the chat, how would I demote them?",
 	"Tidak dapat menurunkan jabatan apa yang tidak dipromosikan!": "Can't demote what wasn't promoted!",
@@ -228,6 +229,7 @@ Examples of time values: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 week.
 	"- Pesan salam\n": "- Greetings message\n",
 	"- Pesan selamat tinggal\n": "- Goodbye message\n",
 	"- {} catatan\n": "- {} notes\n",
+	"- Penguncian\n": "- Locked\n",
 	"- Pengaturan pelaporan\n": "- Reporting setting\n",
 	"- Pesan peraturan grup\n": "- Rules group\n",
 	"- Pengaturan bahasa\n": "- Language settings\n",
@@ -788,9 +790,14 @@ you and your groups by removing spam flooders as quickly as possible. They can b
 """,
 	
 # locks
-	"Jenis kunci yang tersedia adalah: ": "Locks: ",
-	"Terkunci *{}* pesan untuk semua non-admin pada *{}*!": "Locked *{}* messages for all non-admins at *{}*!",
-	"Terkunci *{}* pesan untuk semua non-admin!": "Locked *{}* messages for all non-admins!",
+	"*Jenis kunci yang tersedia adalah:* ": "Locks: ",
+	"*Jenis izin kunci yang tersedia adalah:* ": "Permissions: ",
+	"Terkunci pesan *{}* untuk semua non-admin pada *{}*!": "Locked *{}* messages for all non-admins at *{}*!",
+	"Terkunci pesan *{}* untuk semua non-admin!": "Locked *{}* messages for all non-admins!",
+	"Izin terkunci pesan *{}* untuk semua non-admin pada *{}*!": "Permission *{}* was locked for all non-admins at *{}*!",
+	"Izin terkunci pesan *{}* untuk semua non-admin!": "Permission *{}* was locked for all non-admins!",
+	"Izin tidak terkunci *{}* untuk semua orang pada *{}*!": "Permission *{}* was unlocked for all non-admins at *{}*!",
+	"Izin tidak terkunci *{}* untuk semua orang!": "Permission *{}* was unlocked for all non-admins!",
 	"Apa yang Anda coba untuk kunci...? Coba /locktypes untuk daftar kunci yang dapat dikunci": "What are you trying to lock...? Try /locktypes for the list of lockables",
 	"Apa yang Anda ingin kunci...?": "What do you want to lock...?",
 	"Saya bukan admin, atau tidak punya hak menghapus.": "I'm not an administrator, or haven't got delete rights.",
@@ -801,12 +808,14 @@ you and your groups by removing spam flooders as quickly as possible. They can b
 	"Hanya admin yang diizinkan menambahkan bot ke obrolan ini! Keluar dari sini!": "Only admins are allowed to add bots to this chat! Get outta here.",
 	"Tidak ada kunci saat ini dalam obrolan ini.": "There are no current locks in this chat.",
 	"Ini adalah kunci dalam obrolan ini:": "These are the locks in this chat:",
+	"Ini adalah izin dalam obrolan ini:": "These are permissions in this chat:",
 	"obrolan ini": "this chat",
 	"Saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will warn* user if send any message/media which currently locked",
 	"Saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "I *will not warn* user if send any message/media which currently locked",
 	"Saat ini saya *akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will warn* user if send any message/media which currently locked",
 	"Saat ini saya *tidak akan* memperingati pengguna jika dia mengirim pesan yang dikunci": "Currently I *will not warn* user if send any message/media which currently locked",
 	"Mengirim 'Teks RTL' yang sedang di kunci saat ini": "Send 'RTL Text' which currently locked",
+	"Mengirim 'Pesan Tombol' yang sedang di kunci saat ini": "Send 'Button Message' which currently locked",
 	"Memasukan 'Bot' yang sedang di kunci saat ini": "Invite 'Bot' which currently locked",
 	"Mengirim '{}' yang sedang di kunci saat ini": "Send '{}' which currently locked",
 	"locks_help": """
@@ -1226,6 +1235,11 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Kamu telah disuarakan!": "You've been unmuted!",
 	"Kamu bukan pengguna baru!": "You are not a new member!",
 	"Kamu sudah pernah mengklik ini sebelumnya!": "You've clicked this before!",
+	"Tolong pilih emoji yang sama dibawah ini:": "Please select matching emoji below:",
+	"*Berhasil!*\n\nKerja bagus manusia, kini Anda dapat chatting di: *{}*": "*Success!*\n\nGood work human, you can now chat in: *{}*",
+	"Berhasil! Anda dapat chatting di {} sekarang": "Success! You can chat in {} now",
+	"Maaf robot, kamu telah salah klik tombol verifikasi.\n\nCoba lagi dengan klik tombol verifikasi pada pesan selamat datang.": "Sorry robot, you are clicked wrong button.\n\nTry again by click welcome security button.",
+	"Gagal! Kamu telah salah mengklik tombol verifikasi": "Failed! You are clicked wrong button",
 
 # cleaner
 	"Penghapus pesan biru telah di *non-aktifkan* di *{}*.": "Blue text cleaner was *disabled* in *{}*.",
@@ -1250,7 +1264,7 @@ Note:
 	"Di nonaktifkan, saya tidak akan membisukan member masuk lagi": "Disabled, I will not mute new member again",
 	"Silakan tulis `on`/`ya`/`off`/`ga`!": "Please write `on`/`off`!",
 	"Selamanya": "Forever",
-	"Pengaturan saat ini adalah:\nWelcome security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`": "Current settings are:\nWelcome security: `{}`\nMembers will be muted for: `{}`\nUnmute custom button: `{}`",
+	"Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nWaktu verifikasi timeout: `{}`\nTombol unmute custom: `{}`": "Current settings are:\nWelcome security: `{}`\nVerify security: `{}`\nMembers will be muted for: `{}`\nVerification timeout: `{}`\nUnmute custom button: `{}`",
 	"Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!": "Every new member will be muted forever until they presses the welcome button!",
 	"Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!": "Every new member will be muted for {} until they presses the welcome button!",
 	"Pengaturan saat ini: member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!": "Current settings: new member will be muted forever until they presses the welcome button!",
@@ -1272,6 +1286,7 @@ Note:
 	"Saat ini Saya menghapus pesan selamat datang lama: `{}`\n": "At this time I deleted the old welcome message: `{}`\n",
 	"Saat ini Saya menghapus layanan pesan: `{}`\n": "I am currently deleting the message service: `{}`\n",
 	"Saat ini saya membisukan pengguna ketika mereka bergabung: `{}`\n": "Currently I mute users when they join: `{}`\n",
+	"Pengguna baru harus verifikasi tombol: `{}`\n": "New users must verify: `{}`\n",
 	"Tombol welcomemute akan mengatakan: `{}`\n": "The button welcomemute will say: `{}`\n",
 	"\n*Pesan selamat datang (tidak mengisi {{}}) adalah:*": "\n*Welcome message (not filling the {{}}) is:*",
 	"Saya akan sopan 😁": "I'll be polite! 😁",
@@ -1290,7 +1305,11 @@ Note:
 	"Saat ini saya *tidak akan* menghapus pesan selamat datang yang lama!": "I'm currently not deleting old welcome messages!",
 	"Saya *akan* mencoba menghapus pesan selamat datang yang lama!": "I'll try to delete old welcome messages!",
 	"Saya *tidak akan* menghapus pesan selamat datang yang lama.": "I won't delete old welcome messages.",
-	"WELC_HELP_TXT": "Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages to be individually generated, like the default welcome message is, you can use *these* variables:\n - `{{first}}`: this represents the user's *first* name\n - `{{last}}`: this represents the user's *last* name. Defaults to *first name* if user has no last name.\n - `{{fullname}}`: this represents the user's *full* name. Defaults to *first name* if user has no last name.\n - `{{username}}`: this represents the user's *username*. Defaults to a *mention* of the user's first name if has no username.\n - `{{mention}}`: this simply *mentions* a user - tagging them with their first name.\n - `{{id}}`: this represents the user's *id*\n - `{{count}}`: this represents the user's *member number*.\n - `{{chatname}}`: this represents the *current chat name*.\n\nEach variable MUST be surrounded by `{{}}` to be replaced.\nWelcome messages also support markdown, so you can make any elements bold/italic/code/links. Buttons are also supported, so you can make your welcomes look awesome with some nice intro buttons.\nTo create a button linking to your rules, use this: `[Rules](buttonurl://t.me/{}?start=group_id)`. Simply replace `group_id` with your group's id, which can be obtained via /id, and you're good to go. Note that group ids are usually preceded by a `-` sign; this is required, so please don't remove it.\nIf you're feeling fun, you can even set images/gifs/videos/voice messages as the welcome message by replying to the desired media, and calling /setwelcome.",
+	"Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat": "Security for new members is activated! New users are required to complete verification to chat",
+	"Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat": "Disabled, users can once click the button to chat",
+	"Anda sedang tidak dalam mode verifikasi, jika anda sedang di bisukan, anda dapat meminta tolong pada admin di grup yang bersangkutan": "You are not in verification mode, if you are muted, you can ask the admin of the group for help",
+	"Saya tidak dapat membatasi orang disini, tanya admin untuk unmute!": "I can't restrict people here, ask admin to unmute you!",
+	"WELC_HELP_TXT": "Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages to be individually generated, like the default welcome message is, you can use *these* variables:\n - `{{first}}`: this represents the user's *first* name\n - `{{last}}`: this represents the user's *last* name. Defaults to *first name* if user has no last name.\n - `{{fullname}}`: this represents the user's *full* name. Defaults to *first name* if user has no last name.\n - `{{username}}`: this represents the user's *username*. Defaults to a *mention* of the user's first name if has no username.\n - `{{mention}}`: this simply *mentions* a user - tagging them with their first name.\n - `{{id}}`: this represents the user's *id*\n - `{{count}}`: this represents the user's *member number*.\n - `{{chatname}}`: this represents the *current chat name*.\n\nEach variable MUST be surrounded by `{{}}` to be replaced.\nWelcome messages also support markdown, so you can make any elements bold/italic/code/links. Buttons are also supported, so you can make your welcomes look awesome with some nice intro buttons.\nTo create a button linking to your rules, use this: `[Rules](buttonurl:{{rules}})`.\nIf you're feeling fun, you can even set images/gifs/videos/voice messages as the welcome message by replying to the desired media, and calling /setwelcome.",
 	"Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\nUntuk preferensi pesan selamat tinggal `{}`.\nBot `{}` menghapus notifikasi member masuk/keluar secara otomatis": "This chat has it's welcome preference set to `{}`.\nIt's goodbye preference is `{}`.",
 	"welcome_help": """
 *Admin only:*
@@ -1310,6 +1329,10 @@ Note:
  - /setmutetext <new text>: Customise the "Click here to unmute" button obtained from enabling welcomemutes.
  - /resetmutetext: Reset teks tombol unmute menjadi default.
 
+ - /welcomeverify <on/off>: Enable welcome verification with images and buttons, best for anti bots
+ - /wtimeout <Xw/d/h/m>: Set welcome timeout, when user wasn't verify for X, then that user will be kicked/banned
+ - /wtmode <kick/ban>: Set welcome timeout should be kicked or banned
+
 Read /welcomehelp and /markdownhelp to learn about formatting your text and mentioning new users when the join!
 
 If you want to save an image, gif, or sticker, or any other data, do the following:
@@ -1319,6 +1342,22 @@ Tip: use /welcome noformat to retrieve the unformatted welcome message.
 This will retrieve the welcome message and send it without formatting it; getting you the raw markdown, allowing you to make easy edits.
 This also works with /goodbye.
 """,
+
+# Welcome timeout
+	"Verifikasi gagal!\n{} telah di tendang!": "Verification failed!\n{} was kicked!",
+	"Verifikasi gagal!\nTetapi gagal menendang {}: {}": "Verification failed!\nBut was failed to kick {}: {}",
+	"Verifikasi gagal!\n{} telah di banned!": "Verification failed!\n{} was banned!",
+	"Verifikasi gagal!\nTetapi gagal membanned {}: {}": "Verification failed!\nut was failed to banned {}: {}",
+	"Keamanan untuk member baru di aktifkan! Pengguna baru di wajibkan harus menyelesaikan verifikasi untuk chat": "Security for new members is activated! New users are required to complete verification to chat",
+	"Di nonaktifkan, pengguna dapat mengklik tombol untuk langsung chat": "Disabled, users can click the button to chat immediately",
+	"Batas waktu verifikasi telah di nonaktifkan!": "Verification timeout has been deactivated!",
+	"Jika member baru tidak memverifikasi selama *{}* maka dia akan di *{}*": "If the new member doesn't verify for *{}* then he/she will *{}*",
+	"Pengaturan batas waktu ketika join: *{}*": "Timeout settings: *{}*",
+	"Saya hanya mengerti kick/banned!": "I only understand kick/banned!",
+	"Mode timeout diubah, Pengguna akan di `{}` pada *{}*!": "Timeout mode changed, User will be `{}` at *{}*!",
+	"Mode timeout diubah, Pengguna akan di `{}`!": "Timeout mode changed, User will be `{}`!",
+	"Mode timeout saat ini disetel ke *{}* pada *{}*.": "The current timeout mode is set to *{}* at *{}*.",
+	"Mode timeout saat ini disetel ke *{}*.": "The current timeout mode is set to *{}*.",
 
 # Only for Special module
 	"Hai {}, Id stiker yang anda balas adalah :\n```{}```": "Hi {}, sticker id that you reply is :\n```{}```",
@@ -1346,7 +1385,11 @@ This also works with /goodbye.
  - /tr <to> <text>: translate text written or reply for any language to the intended language
  - /wiki <text>: search for text written from the wikipedia source
  - /ud <text>: search from urban dictionary
-"""
+""",
+
+# Misc
+	"Saya tidak memiliki pengguna di db saya. Anda akan dapat berinteraksi dengan mereka jika Anda membalas pesan orang itu, atau meneruskan salah satu dari pesan pengguna itu.": "I don't have that user in my db. You'll be able to interact with them if you reply to that person's message instead, or forward one of that user's messages.",
+	"Saya sepertinya tidak pernah berinteraksi dengan pengguna ini sebelumnya - silakan meneruskan pesan dari mereka untuk memberi saya kontrol! (Seperti boneka voodoo, saya butuh sepotong untuk bisa untuk menjalankan perintah tertentu...)": "I don't seem to have interacted with this user before - please forward a message from them to give me control! (like a voodoo doll, I need a piece of them to be able to execute certain commands...)"
 }
 
 

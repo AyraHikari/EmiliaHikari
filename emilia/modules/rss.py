@@ -5,18 +5,16 @@ from feedparser import parse
 from telegram import ParseMode, constants, error
 from telegram.ext import CommandHandler, Filters
 
-from emilia import dispatcher, updater, spamfilters
+from emilia import dispatcher, updater, spamcheck
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.sql import rss_sql as sql
 
 from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
+@spamcheck
 def show_url(bot, update, args):
     tg_chat_id = str(update.effective_chat.id)
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
     if len(args) >= 1:
         tg_feed_link = args[0]
@@ -56,10 +54,8 @@ def show_url(bot, update, args):
         send_message(update.effective_message, tl(update.effective_message, "URL hilang"))
 
 
+@spamcheck
 def list_urls(bot, update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     tg_chat_id = str(update.effective_chat.id)
 
     user_data = sql.get_urls(tg_chat_id)
@@ -79,11 +75,9 @@ def list_urls(bot, update):
                          text=tl(update.effective_message, "<b>Peringatan:</b> Pesan terlalu panjang untuk dikirim"))
 
 
+@spamcheck
 @user_admin
 def add_url(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     if len(args) >= 1:
         chat = update.effective_chat
 
@@ -121,11 +115,9 @@ def add_url(bot, update, args):
         send_message(update.effective_message, tl(update.effective_message, "URL hilang"))
 
 
+@spamcheck
 @user_admin
 def remove_url(bot, update, args):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
     if len(args) >= 1:
         tg_chat_id = str(update.effective_chat.id)
 

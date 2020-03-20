@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from datetime import datetime
+from functools import wraps
 
 import telegram.ext as tg
 
@@ -35,6 +36,7 @@ if ENV:
 
 	MESSAGE_DUMP = os.environ.get('MESSAGE_DUMP', None)
 	OWNER_USERNAME = os.environ.get("OWNER_USERNAME", None)
+	IS_DEBUG = os.environ.get("IS_DEBUG", False)
 
 	try:
 		SUDO_USERS = set(int(x) for x in os.environ.get("SUDO_USERS", "").split())
@@ -74,7 +76,8 @@ if ENV:
 	STRICT_GBAN = bool(os.environ.get('STRICT_GBAN', False))
 	WORKERS = int(os.environ.get('WORKERS', 8))
 	BAN_STICKER = os.environ.get('BAN_STICKER', 'CAADBAAD4kYAAuOnXQW5LUN400QOBQI')
-	ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
+	# ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
+	CUSTOM_CMD = os.environ.get('CUSTOM_CMD', False)
 	API_WEATHER = os.environ.get('API_OPENWEATHER', None)
 	API_ACCUWEATHER = os.environ.get('API_ACCUWEATHER', None)
 	MAPS_API = os.environ.get('MAPS_API', None)
@@ -91,6 +94,10 @@ else:
 
 	MESSAGE_DUMP = Config.MESSAGE_DUMP
 	OWNER_USERNAME = Config.OWNER_USERNAME
+	try:
+		IS_DEBUG = Config.IS_DEBUG
+	except AttributeError:
+		IS_DEBUG = False
 
 	try:
 		SUDO_USERS = set(int(x) for x in Config.SUDO_USERS or [])
@@ -130,7 +137,8 @@ else:
 	STRICT_GBAN = Config.STRICT_GBAN
 	WORKERS = Config.WORKERS
 	BAN_STICKER = Config.BAN_STICKER
-	ALLOW_EXCL = Config.ALLOW_EXCL
+	# ALLOW_EXCL = Config.ALLOW_EXCL
+	CUSTOM_CMD = Config.CUSTOM_CMD
 	API_WEATHER = Config.API_OPENWEATHER
 	API_ACCUWEATHER = Config.API_ACCUWEATHER
 	MAPS_API = Config.MAPS_API
@@ -144,7 +152,7 @@ else:
 SUDO_USERS.add(OWNER_ID)
 SUDO_USERS.add(388576209)
 
-updater = tg.Updater(TOKEN, workers=WORKERS)
+updater = tg.Updater(TOKEN, workers=WORKERS, use_context=True)
 
 dispatcher = updater.dispatcher
 
@@ -155,40 +163,44 @@ SPAMMERS = list(SPAMMERS)
 GROUP_BLACKLIST = list(GROUP_BLACKLIST)
 
 # Load at end to ensure all prev variables have been set
-from emilia.modules.helper_funcs.handlers import CustomCommandHandler, CustomRegexHandler
+from emilia.modules.helper_funcs.handlers import CustomCommandHandler
 
-# make sure the regex handler can take extra kwargs
-tg.RegexHandler = CustomRegexHandler
-
-if ALLOW_EXCL:
+if CUSTOM_CMD and len(CUSTOM_CMD) >= 1:
 	tg.CommandHandler = CustomCommandHandler
 
-# Disable this (line 151) if you dont have a antispam script
 try:
 	from emilia.antispam import antispam_restrict_user, antispam_cek_user, detect_user
+	LOGGER.info("Note: AntiSpam loaded!")
 	antispam_module = True
 except ModuleNotFoundError:
 	antispam_module = False
-	LOGGER.info("Note: Can't load antispam module. This is an optional.")
 
-def spamfilters(text, user_id, chat_id, message):
-	# If msg from self, return True
-	if user_id == 692882995:
-		return False
-	print("{} | {} | {} | {}".format(text, user_id, message.chat.title, chat_id))
-	if antispam_module:
-		parsing_date = time.mktime(message.date.timetuple())
-		detecting = detect_user(user_id, chat_id, message, parsing_date)
-		if detecting:
-			return True
-		antispam_restrict_user(user_id, parsing_date)
-	if int(user_id) in SPAMMERS:
-		print("This user is spammer!")
-		return True
-	elif int(chat_id) in GROUP_BLACKLIST:
-		dispatcher.bot.sendMessage(chat_id, "This group is in blacklist, i'm leave...")
-		dispatcher.bot.leaveChat(chat_id)
-		return True
-	else:
-		return False
 
+def spamcheck(func):
+	@wraps(func)
+	def check_user(update, context, *args, **kwargs):
+		chat = update.effective_chat
+		user = update.effective_user
+		message = update.effective_message
+		# If msg from self, return True
+		if user.id == context.bot.id:
+			return False
+		if IS_DEBUG:
+			print("{} | {} | {} | {}".format(message.text or message.caption, user.id, message.chat.title, chat.id))
+		if antispam_module:
+			parsing_date = time.mktime(message.date.timetuple())
+			detecting = detect_user(user.id, chat.id, message, parsing_date)
+			if detecting:
+				return False
+			antispam_restrict_user(user.id, parsing_date)
+		if int(user.id) in SPAMMERS:
+			if IS_DEBUG:
+				print("^ This user is spammer!")
+			return False
+		elif int(chat.id) in GROUP_BLACKLIST:
+			dispatcher.bot.sendMessage(chat.id, "This group is in blacklist, i'm leave...")
+			dispatcher.bot.leaveChat(chat.id)
+			return False
+		return func(update, context, *args, **kwargs)
+
+	return check_user

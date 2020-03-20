@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, run_async
 from telegram.utils.helpers import mention_html, escape_markdown
 
 import emilia.modules.sql.blacklist_sql as sql
-from emilia import dispatcher, LOGGER, spamfilters, OWNER_ID
+from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from telegram.utils.helpers import mention_markdown
 from emilia.modules.helper_funcs.chat_status import user_admin, user_not_admin
@@ -26,16 +26,14 @@ BLACKLIST_GROUP = 11
 
 
 @run_async
-def blacklist(bot: Bot, update: Update, args: List[str]):
+@spamcheck
+def blacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
-
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+	args = context.args
 	
-	conn = connected(bot, update, chat, user.id, need_admin=False)
+	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -69,18 +67,15 @@ def blacklist(bot: Bot, update: Update, args: List[str]):
 
 
 @run_async
+@spamcheck
 @user_admin
-def add_blacklist(bot: Bot, update: Update):
+def add_blacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	words = msg.text.split(None, 1)
 
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -109,18 +104,15 @@ def add_blacklist(bot: Bot, update: Update):
 
 
 @run_async
+@spamcheck
 @user_admin
-def unblacklist(bot: Bot, update: Update):
+def unblacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	words = msg.text.split(None, 1)
 
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
-
-	conn = connected(bot, update, chat, user.id)
+	conn = connected(context.bot, update, chat, user.id)
 	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
@@ -165,17 +157,16 @@ def unblacklist(bot: Bot, update: Update):
 
 
 @run_async
+@spamcheck
 @loggable
 @user_admin
-def blacklist_mode(bot: Bot, update: Update, args: List[str]):
-	spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-	if spam == True:
-		return
+def blacklist_mode(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	msg = update.effective_message  # type: Optional[Message]
+	args = context.args
 
-	conn = connected(bot, update, chat, user.id, need_admin=True)
+	conn = connected(context.bot, update, chat, user.id, need_admin=True)
 	if conn:
 		chat = dispatcher.bot.getChat(conn)
 		chat_id = conn
@@ -283,7 +274,7 @@ def findall(p, s):
 
 @run_async
 @user_not_admin
-def del_blacklist(bot: Bot, update: Update):
+def del_blacklist(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	user = update.effective_user
@@ -372,8 +363,7 @@ BLACKLIST_HANDLER = DisableAbleCommandHandler("blacklist", blacklist, pass_args=
 ADD_BLACKLIST_HANDLER = CommandHandler("addblacklist", add_blacklist)
 UNBLACKLIST_HANDLER = CommandHandler(["unblacklist", "rmblacklist"], unblacklist)
 BLACKLISTMODE_HANDLER = CommandHandler("blacklistmode", blacklist_mode, pass_args=True)
-BLACKLIST_DEL_HANDLER = MessageHandler(
-	(Filters.text | Filters.command | Filters.sticker | Filters.photo) & Filters.group, del_blacklist, edited_updates=True)
+BLACKLIST_DEL_HANDLER = MessageHandler((Filters.text | Filters.command | Filters.sticker | Filters.photo) & Filters.group, del_blacklist)
 
 dispatcher.add_handler(BLACKLIST_HANDLER)
 dispatcher.add_handler(ADD_BLACKLIST_HANDLER)

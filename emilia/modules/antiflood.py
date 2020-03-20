@@ -1,12 +1,12 @@
 import html
 from typing import Optional, List
 
-from telegram import Message, Chat, Update, Bot, User, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
+from telegram import Message, Chat, Update, Bot, User, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, ChatPermissions
 from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, CommandHandler, run_async, CallbackQueryHandler
 from telegram.utils.helpers import mention_html, escape_markdown
 
-from emilia import dispatcher, spamfilters
+from emilia import dispatcher, spamcheck
 from emilia.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict
 from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.log_channel import loggable
@@ -21,7 +21,7 @@ FLOOD_GROUP = 3
 
 @run_async
 @loggable
-def check_flood(bot: Bot, update: Update) -> str:
+def check_flood(update, context) -> str:
     user = update.effective_user  # type: Optional[User]
     chat = update.effective_chat  # type: Optional[Chat]
     msg = update.effective_message  # type: Optional[Message]
@@ -50,7 +50,7 @@ def check_flood(bot: Bot, update: Update) -> str:
             execstrings = tl(update.effective_message, "Keluar!")
             tag = "KICKED"
         elif getmode == 3:
-            bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
+            context.bot.restrict_chat_member(chat.id, user.id, permissions=ChatPermissions(can_send_messages=False))
             execstrings = tl(update.effective_message, "Sekarang kamu diam!")
             tag = "MUTED"
         elif getmode == 4:
@@ -60,7 +60,7 @@ def check_flood(bot: Bot, update: Update) -> str:
             tag = "TBAN"
         elif getmode == 5:
             mutetime = extract_time(msg, getvalue)
-            bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
+            context.bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, permissions=ChatPermissions(can_send_messages=False))
             execstrings = tl(update.effective_message, "Sekarang kamu diam selama {}!").format(getvalue)
             tag = "TMUTE"
         send_message(update.effective_message, tl(update.effective_message, "Saya tidak suka orang yang mengirim pesan beruntun. Tapi kamu hanya membuat "
@@ -81,17 +81,16 @@ def check_flood(bot: Bot, update: Update) -> str:
 
 
 @run_async
+@spamcheck
 @user_admin
 @loggable
-def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
+def set_flood(update, context) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
+    args = context.args
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
@@ -150,14 +149,12 @@ def set_flood(bot: Bot, update: Update, args: List[str]) -> str:
 
 
 @run_async
-def flood(bot: Bot, update: Update):
+@spamcheck
+def flood(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
 
-    conn = connected(bot, update, chat, user.id, need_admin=False)
+    conn = connected(context.bot, update, chat, user.id, need_admin=False)
     if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
@@ -184,16 +181,15 @@ def flood(bot: Bot, update: Update):
 
 
 @run_async
+@spamcheck
 @user_admin
-def set_flood_mode(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
+def set_flood_mode(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     msg = update.effective_message  # type: Optional[Message]
+    args = context.args
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -292,14 +288,14 @@ def __chat_settings_btn__(chat_id, user_id):
     button.append([InlineKeyboardButton(text="{}".format(status), callback_data="set_flim=exec|{}".format(chat_id))])
     return button
 
-def FLOOD_EDITBTN(bot: Bot, update: Update):
+def FLOOD_EDITBTN(update, context):
     query = update.callback_query
     user = update.effective_user
     print("User {} clicked button FLOOD EDIT".format(user.id))
     qdata = query.data.split("=")[1].split("|")[0]
     chat_id = query.data.split("|")[1]
     if qdata == "?":
-        bot.answerCallbackQuery(query.id, "Batas dari pesan beruntun. Jika pengguna mengirim pesan lebih dari batas, maka akan langsung di banned.", show_alert=True)
+        context.bot.answerCallbackQuery(query.id, "Batas dari pesan beruntun. Jika pengguna mengirim pesan lebih dari batas, maka akan langsung di banned.", show_alert=True)
     if qdata == "-":
         button = []
         limit = sql.get_flood_limit(chat_id)
@@ -309,10 +305,10 @@ def FLOOD_EDITBTN(bot: Bot, update: Update):
         else:
             status = "✅ Aktif"
         if limit <= 2:
-            bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 3", show_alert=True)
+            context.bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 3", show_alert=True)
             return
         sql.set_flood(chat_id, int(limit))
-        chat = bot.get_chat(chat_id)
+        chat = context.bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Anti Pesan Beruntun*:\n\n".format(escape_markdown(chat.title))
         text += "Batas maksimal pesan beruntun telah di setel menjadi `{}`.".format(limit)
         button.append([InlineKeyboardButton(text="➖", callback_data="set_flim=-|{}".format(chat_id)),
@@ -323,7 +319,7 @@ def FLOOD_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
     if qdata == "+":
         button = []
         limit = sql.get_flood_limit(chat_id)
@@ -333,10 +329,10 @@ def FLOOD_EDITBTN(bot: Bot, update: Update):
         else:
             status = "✅ Aktif"
         if limit <= 0:
-            bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 0", show_alert=True)
+            context.bot.answerCallbackQuery(query.id, "Batas limit Tidak boleh kurang dari 0", show_alert=True)
             return
         sql.set_flood(chat_id, int(limit))
-        chat = bot.get_chat(chat_id)
+        chat = context.bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Anti Pesan Beruntun*:\n\n".format(escape_markdown(chat.title))
         text += "Batas maksimal pesan beruntun telah di setel menjadi `{}`.".format(limit)
         button.append([InlineKeyboardButton(text="➖", callback_data="set_flim=-|{}".format(chat_id)),
@@ -347,7 +343,7 @@ def FLOOD_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
     if qdata == "exec":
         button = []
         limit = sql.get_flood_limit(chat_id)
@@ -359,7 +355,7 @@ def FLOOD_EDITBTN(bot: Bot, update: Update):
             sql.set_flood(chat_id, 0)
             limit = 0
             status = "❎ Tidak Aktif"
-        chat = bot.get_chat(chat_id)
+        chat = context.bot.get_chat(chat_id)
         text = "*{}* memiliki pengaturan berikut untuk modul *Anti Pesan Beruntun*:\n\n".format(escape_markdown(chat.title))
         text += "Batas maksimal pesan beruntun telah di setel menjadi `{}`.".format(status)
         button.append([InlineKeyboardButton(text="➖", callback_data="set_flim=-|{}".format(chat_id)),
@@ -370,7 +366,7 @@ def FLOOD_EDITBTN(bot: Bot, update: Update):
         query.message.edit_text(text=text,
                                   parse_mode=ParseMode.MARKDOWN,
                                   reply_markup=InlineKeyboardMarkup(button))
-        bot.answer_callback_query(query.id)
+        context.bot.answer_callback_query(query.id)
 """
 
 

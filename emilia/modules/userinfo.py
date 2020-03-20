@@ -7,7 +7,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown
 
 import emilia.modules.sql.userinfo_sql as sql
-from emilia import dispatcher, SUDO_USERS, spamfilters
+from emilia import dispatcher, SUDO_USERS, spamcheck
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 
@@ -16,12 +16,10 @@ from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
-def about_me(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-
+@spamcheck
+def about_me(update, context):
     message = update.effective_message  # type: Optional[Message]
+    args = context.args
     user_id = extract_user(message, args)
 
     if user_id and user_id != "error":
@@ -42,11 +40,8 @@ def about_me(bot: Bot, update: Update, args: List[str]):
 
 
 @run_async
-def set_about_me(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-
+@spamcheck
+def set_about_me(update, context):
     message = update.effective_message  # type: Optional[Message]
     user_id = message.from_user.id
     text = message.text
@@ -61,12 +56,10 @@ def set_about_me(bot: Bot, update: Update):
 
 
 @run_async
-def about_bio(bot: Bot, update: Update, args: List[str]):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-
+@spamcheck
+def about_bio(update, context):
     message = update.effective_message  # type: Optional[Message]
+    args = context.args
 
     user_id = extract_user(message, args)
     if user_id and user_id != "error":
@@ -87,11 +80,8 @@ def about_bio(bot: Bot, update: Update, args: List[str]):
 
 
 @run_async
-def set_about_bio(bot: Bot, update: Update):
-    spam = spamfilters(update.effective_message.text, update.effective_message.from_user.id, update.effective_chat.id, update.effective_message)
-    if spam == True:
-        return
-
+@spamcheck
+def set_about_bio(update, context):
     message = update.effective_message  # type: Optional[Message]
     sender = update.effective_user  # type: Optional[User]
     if message.reply_to_message:
