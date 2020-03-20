@@ -20,13 +20,13 @@ from emilia.modules.helper_funcs.chat_status import user_admin, is_user_ban_prot
 from emilia.modules.helper_funcs.misc import build_keyboard_parser, revert_buttons
 from emilia.modules.helper_funcs.msg_types import get_welcome_type
 from emilia.modules.helper_funcs.string_handling import markdown_parser, \
-	escape_invalid_curly_brackets, extract_time
+	escape_invalid_curly_brackets, extract_time, make_time
 from emilia.modules.helper_funcs.welcome_timeout import welcome_timeout
 from emilia.modules.log_channel import loggable
 
 import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules.languages import tl
-from emilia.modules.helper_funcs.alternate import send_message
+from emilia.modules.helper_funcs.alternate import send_message, leave_chat
 
 
 OWNER_SPECIAL = False
@@ -102,6 +102,7 @@ def send(update, message, keyboard, backup_message):
 			except BadRequest:
 				if IS_DEBUG:
 					print("Cannot send welcome msg, bot is muted!")
+				leave_chat(message)
 				return ""
 	return msg
 
@@ -583,10 +584,10 @@ def security(update, context):
 		else:
 			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
 	else:
-		getcur, extra_verify, cur_value, timeout, cust_text = sql.welcome_security(chat.id)
+		getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 		if cur_value[:1] == "0":
 			cur_value = tl(update.effective_message, "Selamanya")
-		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nTombol unmute custom: `{}`").format(getcur, extra_verify, cur_value, cust_text)
+		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nWaktu verifikasi timeout: `{}` ({})\nTombol unmute custom: `{}`").format(getcur, extra_verify, cur_value, make_time(int(timeout)), "kick" if 1 else "banned", cust_text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 
 
