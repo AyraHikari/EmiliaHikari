@@ -58,6 +58,7 @@ if is_module_loaded(FILENAME):
                     filter_result = self.filters(update)
                     if filter_result:
                         chat = update.effective_chat
+                        user = update.effective_user
                         # disabled, admincmd, user admin
                         if sql.is_command_disabled(chat.id, command[0].lower()):
                             # check if command was disabled

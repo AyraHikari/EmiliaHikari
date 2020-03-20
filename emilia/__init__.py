@@ -183,7 +183,7 @@ def spamcheck(func):
 		user = update.effective_user
 		message = update.effective_message
 		# If msg from self, return True
-		if user.id == context.bot.id:
+		if user and user.id == context.bot.id:
 			return False
 		if IS_DEBUG:
 			print("{} | {} | {} | {}".format(message.text or message.caption, user.id, message.chat.title, chat.id))

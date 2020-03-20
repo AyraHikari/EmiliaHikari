@@ -91,6 +91,8 @@ def send(update, message, keyboard, backup_message):
 			LOGGER.warning(message)
 			LOGGER.warning(keyboard)
 			LOGGER.exception("Could not parse! got invalid url host errors")
+		elif excp.message == "Reply message not found":
+			msg = dispatcher.bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, disable_web_page_preview=True)
 		else:
 			try:
 				msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
@@ -99,10 +101,11 @@ def send(update, message, keyboard, backup_message):
 													  reply_to_message_id=reply, 
 													  parse_mode=ParseMode.MARKDOWN)
 				LOGGER.exception("ERROR!")
-			except BadRequest:
+			except BadRequest as err:
 				if IS_DEBUG:
-					print("Cannot send welcome msg, bot is muted!")
-				leave_chat(message)
+					print("Cannot send welcome msg at {} ({})".format(chat.title, chat.id))
+				if str(err) == "Have no rights to send a message":
+					leave_chat(update.message)
 				return ""
 	return msg
 
