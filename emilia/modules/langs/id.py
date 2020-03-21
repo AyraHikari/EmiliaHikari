@@ -319,6 +319,10 @@ seperti:
 Mengunci url akan otomatis menghapus semua pesan dengan url yang belum masuk daftar putih, mengunci stiker akan menghapus semua \
 stiker, dll.
 Mengunci bot akan menghentikan non-admin menambahkan bots ke obrolan.
+
+*Catatan:*
+ - Membuka kunci izin *info* akan membiarkan pengguna biasa mengubah info grup, seperti deskripsi grup atau nama grup
+ - Membuka kunci izin *pin* akan membiarkan pengguna biasa menyematkan pesan di grup
 """,
 	"logchannel_help": """
 *Hanya admin:*

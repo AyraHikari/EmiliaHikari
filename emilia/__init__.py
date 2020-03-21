@@ -182,6 +182,9 @@ def spamcheck(func):
 		chat = update.effective_chat
 		user = update.effective_user
 		message = update.effective_message
+		# If not user, return function
+		if not user:
+			return func(update, context, *args, **kwargs)
 		# If msg from self, return True
 		if user and user.id == context.bot.id:
 			return False

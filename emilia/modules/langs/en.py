@@ -832,6 +832,10 @@ eg:
 Locking urls will auto-delete all messages with urls, locking stickers will delete all \
 stickers, etc.
 Locking bots will stop non-admins from adding bots to the chat.
+
+*Note:*
+ - Unlocking permission *info* will allow members (non-admins) to change the group information, such as the description or the group name
+ - Unlocking permission *pin* will allow members (non-admins) to pinned a message in a group
 """,
 
 # log channel
