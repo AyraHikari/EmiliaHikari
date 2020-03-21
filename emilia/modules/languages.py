@@ -71,6 +71,13 @@ def tl(message, text):
 			langtxt = text
 		return langtxt
 	else:
+		sql.set_lang(message.chat.id, 'en')
+		get = getattr(FUNC_LANG['en'], 'en')
+		if text in tuple(get):
+			return get.get(text)
+		if text in ("RUN_STRINGS", "SLAP_TEMPLATES", "ITEMS", "THROW", "HIT", "RAMALAN_STRINGS", "RAMALAN_FIRST"):
+			runstr = getattr(FUNC_LANG['en'], text)
+			return runstr
 		return text
 
 
@@ -91,16 +98,17 @@ def set_language(update, context):
 			sql.set_lang(msg.chat.id, 'en')
 			getlang = 'en'
 	loaded_langs = []
+	tmp_list = []
 	counter = 0
 
 	for x in LOADED_LANGS_ID:
-		if counter % 2 == 0:
-			loaded_langs.append(InlineKeyboardButton(LANGS_TEXT[x], callback_data="set_lang({})".format(x)))
-		else:
-			loaded_langs.append(InlineKeyboardButton(LANGS_TEXT[x], callback_data="set_lang({})".format(x)))
 		counter += 1
-
-	loaded_langs = list(zip(loaded_langs[::2], loaded_langs[1::2]))
+		tmp_list.append(InlineKeyboardButton(LANGS_TEXT[x], callback_data="set_lang({})".format(x)))
+		if counter % 2 == 0:
+			loaded_langs.append(tmp_list)
+			tmp_list = []
+		if counter == len(LOADED_LANGS_ID):
+			loaded_langs.append(tmp_list)
 
 	keyboard = InlineKeyboardMarkup(loaded_langs)
 
@@ -112,7 +120,8 @@ def set_language(update, context):
 		else:
 			chatname = tl(update.effective_message, "obrolan saat ini")
 
-	send_message(update.effective_message, tl(msg, "Bahasa di *{}* saat ini adalah:\n{}.\n\nPilih bahasa:").format(chatname, LANGS_TEXT[getlang]), parse_mode="markdown", reply_markup=keyboard)
+	currlang = LANGS_TEXT[getlang] if LANGS_TEXT.get(getlang) else "(Deleted langs)"
+	send_message(update.effective_message, tl(msg, "Bahasa di *{}* saat ini adalah:\n{}.\n\nPilih bahasa:").format(chatname, currlang), parse_mode="markdown", reply_markup=keyboard)
 
 @run_async
 @user_admin_no_reply
