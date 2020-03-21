@@ -94,7 +94,7 @@ def set_rules(update, context):
     raw_text = msg.text
     args = raw_text.split(None, 1)  # use python's maxsplit to separate cmd and args
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -138,7 +138,7 @@ def clear_rules(update, context):
     chat_id = update.effective_chat.id
     user = update.effective_user
 
-    conn = connected(bot, update, chat, user.id, need_admin=True)
+    conn = connected(context.bot, update, chat, user.id, need_admin=True)
     if conn:
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
@@ -163,7 +163,7 @@ def private_rules(update, context):
     args = context.args
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
-    conn = connected(bot, update, chat, user.id)
+    conn = connected(context.bot, update, chat, user.id)
     if conn:
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
