@@ -210,7 +210,7 @@ if is_module_loaded(FILENAME):
     def build_curr_disabled(chat_id: Union[str, int]) -> str:
         disabled = sql.get_all_disabled(chat_id)
         if not disabled:
-            return languages.tl(update.effective_message, "Tidak ada perintah yang dinonaktifkan!")
+            return languages.tl(chat_id, "Tidak ada perintah yang dinonaktifkan!")
 
         result = ""
         for cmd in disabled:

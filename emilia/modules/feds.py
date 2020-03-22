@@ -359,10 +359,6 @@ def fed_info(update, context):
 			return
 		info = sql.get_fed_info(fed_id)
 
-	if is_user_fed_admin(fed_id, user.id) == False:
-		send_message(update.effective_message, tl(update.effective_message, "Hanya admin federasi yang dapat melakukan ini!"))
-		return
-
 	owner = context.bot.get_chat(info['owner'])
 	try:
 		owner_name = owner.first_name + " " + owner.last_name
