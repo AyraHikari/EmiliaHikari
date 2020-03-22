@@ -101,7 +101,7 @@ def gban(update, context):
     send_message(update.effective_message, tl(update.effective_message, "*It's global banned time* 😉"))
 
     banner = update.effective_user  # type: Optional[User]
-    send_to_list(bot, SUDO_USERS + SUPPORT_USERS,
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS,
                  tl(update.effective_message, "{} melarang secara global pengguna {} "
                  "karena:\n{}").format(mention_html(banner.id, banner.first_name),
                                        mention_html(user_chat.id, user_chat.first_name), reason or tl(update.effective_message, "Tidak ada alasan yang diberikan")),
@@ -124,13 +124,13 @@ def gban(update, context):
                 pass
             else:
                 send_message(update.effective_message, tl(update.effective_message, "Tidak dapat melarang secara global karena: {}").format(excp.message))
-                send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Tidak dapat melarang secara global karena: {}").format(excp.message))
+                send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Tidak dapat melarang secara global karena: {}").format(excp.message))
                 sql.ungban_user(user_id)
                 return
         except TelegramError:
             pass
 
-    send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Melarang secara global selesai!"))
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Melarang secara global selesai!"))
     send_message(update.effective_message, tl(update.effective_message, "Orang ini telah dilarang secara global."))
 
 
@@ -160,7 +160,7 @@ def ungban(update, context):
 
     send_message(update.effective_message, tl(update.effective_message, "Saya akan berikan {} kesempatan kedua, secara global.").format(user_chat.first_name))
 
-    send_to_list(bot, SUDO_USERS + SUPPORT_USERS,
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS,
                  tl(update.effective_message, "{} telah menghapus larangan global untuk pengguna {}").format(mention_html(banner.id, banner.first_name),
                                                    mention_html(user_chat.id, user_chat.first_name)),
                  html=True)
@@ -190,7 +190,7 @@ def ungban(update, context):
         except TelegramError:
             pass
 
-    send_to_list(bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Menghapus larangan global selesai!"))
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, tl(update.effective_message, "Menghapus larangan global selesai!"))
 
     send_message(update.effective_message, tl(update.effective_message, "Orang ini telah dihapus larangannya."))
 
