@@ -25,15 +25,17 @@ def welcome_timeout(context):
 			if timeout_mode == 1:
 				try:
 					context.bot.unbanChatMember(chat_id, user_id)
-					send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\n{} telah di tendang!").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name)), parse_mode="markdown")
+					# send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\n{} telah di tendang!").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name)), parse_mode="markdown")
 				except Exception as err:
-					send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\nTetapi gagal menendang {}: {}").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name), str(err)), parse_mode="markdown")
+					pass
+					# send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\nTetapi gagal menendang {}: {}").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name), str(err)), parse_mode="markdown")
 			elif timeout_mode == 2:
 				try:
 					context.bot.kickChatMember(chat_id, user_id)
-					send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\n{} telah di banned!").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name)), parse_mode="markdown")
+					# send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\n{} telah di banned!").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name)), parse_mode="markdown")
 				except Exception as err:
-					send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\nTetapi gagal membanned {}: {}").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name), str(err)), parse_mode="markdown")
+					pass
+					# send_message_raw(chat_id, tl(user_id, "Verifikasi gagal!\nTetapi gagal membanned {}: {}").format(mention_markdown(user_id, context.bot.getChatMember(chat_id, user_id).user.first_name), str(err)), parse_mode="markdown")
 			sql.rm_from_timeout(chat_id, user_id)
 
 

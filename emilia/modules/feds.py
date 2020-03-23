@@ -1007,10 +1007,11 @@ def fed_broadcast(update, context):
 
 @run_async
 @spamcheck
-def fed_ban_list(update, context, chat_data):
+def fed_ban_list(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	args = context.args
+	chat_data = context.chat_data
 
 	if chat.type == 'private':
 		send_message(update.effective_message, tl(update.effective_message, "Perintah ini di khususkan untuk grup, bukan pada PM!"))
