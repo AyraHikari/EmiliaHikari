@@ -24,7 +24,7 @@ from emilia.modules.helper_funcs.extraction import extract_user, extract_unt_fed
 from emilia.modules.helper_funcs.string_handling import markdown_parser
 from emilia.modules.disable import DisableAbleCommandHandler
 
-import emilia.modules.sql.feds_sql as sql
+import emilia.modules.sql.feds_sql as sqlk
 from emilia.modules.languages import tl
 
 from emilia.modules.connection import connected
