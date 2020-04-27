@@ -278,6 +278,7 @@ def del_blacklist(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	user = update.effective_user
+	bot = context.bot
 	to_match = extract_text(message)
 	if not to_match:
 		return
