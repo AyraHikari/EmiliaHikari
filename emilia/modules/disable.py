@@ -44,8 +44,7 @@ if is_module_loaded(FILENAME):
             if isinstance(update, Update) and update.effective_message:
                 message = update.effective_message
 
-                if (message.entities and message.entities[0].type == MessageEntity.BOT_COMMAND
-                        and message.entities[0].offset == 0):
+                if message.text and len(message.text) > 1 and any(message.text.startswith(start) for start in CMD_STARTERS):
                     command = message.text[1:message.entities[0].length]
                     args = message.text.split()[1:]
                     command = command.split('@')
