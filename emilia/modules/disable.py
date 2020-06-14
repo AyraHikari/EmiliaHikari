@@ -2,7 +2,7 @@ from typing import Union, List, Optional
 
 from future.utils import string_types
 from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity
-from telegram.ext import CommandHandler, MessageHandler, Filters
+from telegram.ext import CommandHandler, MessageHandler, Filters, RegexHandler
 from telegram.utils.helpers import escape_markdown
 
 from emilia import dispatcher, spamcheck, OWNER_ID
@@ -74,6 +74,15 @@ if is_module_loaded(FILENAME):
                     else:
                         return False
 
+    class DisableAbleRegexHandler(RegexHandler):
+        def __init__(self, pattern, callback, friendly="", **kwargs):
+            super().__init__(pattern, callback, **kwargs)
+            DISABLE_OTHER.append(friendly or pattern)
+            self.friendly = friendly or pattern
+
+        def check_update(self, update):
+            chat = update.effective_chat
+            return super().check_update(update) and not sql.is_command_disabled(chat.id, self.friendly)
 
     class DisableAbleMessageHandler(MessageHandler):
         def __init__(self, pattern, callback, friendly="", **kwargs):
@@ -276,3 +285,4 @@ if is_module_loaded(FILENAME):
 else:
     DisableAbleCommandHandler = CommandHandler
     DisableAbleMessageHandler = MessageHandler
+    DisableAbleRegexHandler = RegexHandler
