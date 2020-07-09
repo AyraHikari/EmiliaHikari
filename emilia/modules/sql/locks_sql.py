@@ -25,6 +25,7 @@ class Permissions(BASE):
     location = Column(Boolean, default=False)
     rtl = Column(Boolean, default=False)
     button = Column(Boolean, default=False)
+    egame = Column(Boolean, default=False)
 
     def __init__(self, chat_id):
         self.chat_id = str(chat_id)  # ensure string
@@ -43,6 +44,7 @@ class Permissions(BASE):
         self.location = False
         self.rtl = False
         self.button = False
+        self.egame = False
 
     def __repr__(self):
         return "<Permissions for %s>" % self.chat_id
@@ -149,6 +151,8 @@ def update_lock(chat_id, lock_type, locked):
             curr_perm.rtl = locked
         elif lock_type == 'button':
             curr_perm.button = locked
+        elif lock_type == 'egame':
+            curr_perm.egame = locked
 
         SESSION.add(curr_perm)
         SESSION.commit()
@@ -214,6 +218,8 @@ def is_locked(chat_id, lock_type):
         return curr_perm.rtl
     elif lock_type == "button":
         return curr_perm.button
+    elif lock_type == "egame":
+        return curr_perm.egame
 
 
 def is_restr_locked(chat_id, lock_type):
