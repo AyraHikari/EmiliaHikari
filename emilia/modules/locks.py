@@ -523,16 +523,17 @@ def del_lockables(update, context):
                             LOGGER.exception("ERROR in lockables")
                     getconf = sql.get_lockconf(chat.id)
                     if getconf:
-                                warn(
-                                update.effective_user,
-                                chat,
-                                tl(                                                                                                           update.effective_message,
-                                    "Mengirim '{}' yang sedang di kunci saat ini",
-                                ).format(lockable),
-                                message,
-                                update.effective_user,
-                                conn=False,
-                            )
+                        warn(
+                            update.effective_user,
+                            chat,
+                            tl(
+                                update.effective_message,
+                                "Mengirim '{}' yang sedang di kunci saat ini",
+                            ).format(lockable),
+                            message,
+                            update.effective_user,
+                            conn=False,
+                        )
                     break
             continue
         if (
