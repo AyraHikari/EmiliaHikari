@@ -26,6 +26,8 @@ class Permissions(BASE):
     rtl = Column(Boolean, default=False)
     button = Column(Boolean, default=False)
     egame = Column(Boolean, default=False)
+    inline = Column(Boolean, default=False)
+
 
     def __init__(self, chat_id):
         self.chat_id = str(chat_id)  # ensure string
@@ -45,6 +47,7 @@ class Permissions(BASE):
         self.rtl = False
         self.button = False
         self.egame = False
+        self.inline = False
 
     def __repr__(self):
         return "<Permissions for %s>" % self.chat_id
@@ -153,6 +156,8 @@ def update_lock(chat_id, lock_type, locked):
             curr_perm.button = locked
         elif lock_type == 'egame':
             curr_perm.egame = locked
+        elif lock_type == "inline":
+            curr_perm.inline = locked
 
         SESSION.add(curr_perm)
         SESSION.commit()
@@ -220,6 +225,8 @@ def is_locked(chat_id, lock_type):
         return curr_perm.button
     elif lock_type == "egame":
         return curr_perm.egame
+    elif lock_type == "inline":
+        return curr_perm.inline
 
 
 def is_restr_locked(chat_id, lock_type):
