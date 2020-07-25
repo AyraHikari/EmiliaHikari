@@ -1240,6 +1240,7 @@ be a sentence, encompass it with quotes, as such: `/addwarn "very angry" This is
 	"Kamu bukan pengguna baru!": "You are not a new member!",
 	"Kamu sudah pernah mengklik ini sebelumnya!": "You've clicked this before!",
 	"Tolong pilih emoji yang sama dibawah ini:": "Please select matching emoji below:",
+	"Jika tidak ada emoji yang sama, harap klik tombol refresh": "If there is no same emoji, please click the refresh button",
 	"*Berhasil!*\n\nKerja bagus manusia, kini Anda dapat chatting di: *{}*": "*Success!*\n\nGood work human, you can now chat in: *{}*",
 	"Berhasil! Anda dapat chatting di {} sekarang": "Success! You can chat in {} now",
 	"Maaf robot, kamu telah salah klik tombol verifikasi.\n\nCoba lagi dengan klik tombol verifikasi pada pesan selamat datang.": "Sorry robot, you are clicked wrong button.\n\nTry again by click welcome security button.",

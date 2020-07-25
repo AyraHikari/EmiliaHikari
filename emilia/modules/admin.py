@@ -60,6 +60,13 @@ def promote(update, context):
 		chat_name = update.effective_message.chat.title
 
 	user_id = extract_user(message, args)
+	user_send = dispatcher.bot.getChatMember(chat_id, message.from_user.id)
+	if (user_send.status == "administrator" and user_send.can_promote_members) or (user_send.status == "creator"):
+		pass
+	else:
+		send_message(update.effective_message, "You don't have permission to do this command")
+		return ""
+
 	if not user_id:
 		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
 		return ""
