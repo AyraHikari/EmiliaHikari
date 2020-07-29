@@ -832,6 +832,7 @@ def export_data(update, context):
 	filters_gen = []
 	for x in all_filters:
 		filt = filtersql.get_filter(chat.id, x)
+		filter_text = filt.reply_text if filt.reply_text else ""
 		if filt.is_sticker:
 			filt_type = 1
 		elif filt.is_document:
@@ -846,9 +847,12 @@ def export_data(update, context):
 			filt_type = 6
 		elif filt.has_markdown:
 			filt_type = 0
+			buttons = filtersql.get_buttons(chat.id, filt.keyword)
+			filter_text += revert_buttons(buttons)
 		else:
 			filt_type = 7
-		filters_gen.append({"name": x, "reply": filt.reply, "type": filt_type})
+		filters_gen.append({"name": x, "reply": filter_text, "type": filt_type})
+
 	filters = {'filters': filters_gen}
 
 	# Backuping greetings msg and config
