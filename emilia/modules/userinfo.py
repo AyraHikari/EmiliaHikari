@@ -111,6 +111,10 @@ def set_about_bio(update, context):
 def __user_info__(user_id, chat_id):
     bio = html.escape(sql.get_user_bio(user_id) or "")
     me = html.escape(sql.get_user_me_info(user_id) or "")
+    if bio and len(bio) > 500:
+        bio = bio[:500]
+    if me and len(me) > 500:
+        me = me[:500]
     if bio and me:
         return tl(chat_id, "<b>Tentang pengguna:</b>\n{me}\n<b>Apa yang orang lain katakan:</b>\n{bio}").format(me=me, bio=bio)
     elif bio:
