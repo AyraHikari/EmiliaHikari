@@ -26,4 +26,3 @@ hourly_backupdb
 
 # Remove some configs
 emilia/config.py
-emilia/antispam.py
