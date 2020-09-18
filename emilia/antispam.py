@@ -1,7 +1,14 @@
 from . import dispatcher
 
-Owner = 388576209
-NoResUser = [3885762091]
+try:
+	from emilia.config import Development as Config
+except:
+	import sys
+	print("There is no config file, quitting...", file=sys.stderr)
+	quit(1)
+
+Owner = Config.OWNER_ID
+NoResUser = [Config.OWNER_ID]
 AntiSpamValue = 15
 
 GLOBAL_USER_DATA = {}
@@ -76,7 +83,7 @@ def antispam_cek_user(user_id, time):
 								restrict_time = None
 								number += 1
 						else:
-							dispatcher.bot.sendMessage(Owner, "⚠ Peringatan: pengguna `{}` telah spam saya berkali-kali. Lebih baik kita gban saja.".format(user_id), parse_mode="markdown")
+							dispatcher.bot.sendMessage(Owner, "⚠ Warning: user `{}` was detected spam.".format(user_id), parse_mode="markdown")
 							GLOBAL_USER_DATA["AntiSpamHard"] = {user_id: {"status": False, "user": user_id, "value": 0, "restrict": restime, "level": level}}
 							# print(GLOBAL_USER_DATA["AntiSpamHard"])
 							return value
@@ -117,13 +124,13 @@ def detect_user(user_id, chat_id, message, parsing_date):
 			try:
 				if getbotinfo.status in ('administrator', 'creator'):
 					dispatcher.bot.kickChatMember(chat_id, user_id)
-					dispatcher.bot.sendMessage(chat_id, "Saya blokir dia agar tidak spam lagi disini!", reply_to_message_id=message.message_id)
+					dispatcher.bot.sendMessage(chat_id, "I've banned them!", reply_to_message_id=message.message_id)
 					return True
 			except:
 				pass
 			if message.chat.type != 'private':
-				dispatcher.bot.sendMessage(chat_id, "Pesan beruntun terdeteksi!\nSaya keluar, undang saya lagi jika pesan beruntun telah reda ya 🙂\n\nTerima Kasih")
+				dispatcher.bot.sendMessage(chat_id, "Flood message was detected!\nI'm out, invite me again if the flood has stopped 🙂\n\nThanks")
 				dispatcher.bot.leaveChat(chat_id)
 				return True
-		dispatcher.bot.sendMessage(chat_id, "Hei! Anti pesan beruntun terdeteksi pada pengguna ini!\n\nAkses kamu telah saya blokir untuk sementara.\n\nJika masih berlanjut saya akan membanned dan membuat laporan spam untuk pengguna ini!", reply_to_message_id=message.message_id)
+		dispatcher.bot.sendMessage(chat_id, "Hei! Smart Antiflood was detected for this user!\n\nYou will be restricted for a while.\n\nIf you still continues I will ban and create a spam report for this user!", reply_to_message_id=message.message_id)
 		return True
