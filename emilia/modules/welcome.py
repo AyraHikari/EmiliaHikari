@@ -3,6 +3,7 @@ import re
 import threading
 import requests
 from typing import Optional, List
+from html import escape
 
 from telegram import Message, Chat, Update, Bot, User, CallbackQuery
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton, ChatPermissions
@@ -43,6 +44,8 @@ ENUM_FUNC_MAP = {
 	sql.Types.VIDEO.value: dispatcher.bot.send_video
 }
 
+def escape_html(word):
+    return escape(word)
 
 # do not async
 def send(update, message, keyboard, backup_message):
@@ -60,34 +63,34 @@ def send(update, message, keyboard, backup_message):
 																  "karena masalah markdown. Bisa jadi "
 																  "karena nama pengguna.")),
 												  reply_to_message_id=reply, 
-												  parse_mode=ParseMode.MARKDOWN)
+												  parse_mode=ParseMode.HTML)
 	except KeyError:
 		msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
 																  tl(update.effective_message, "\nCatatan: pesan saat ini tidak valid "
 																  "karena ada masalah dengan beberapa salah tempat. "
 																  "Harap perbarui")),
 												  reply_to_message_id=reply, 
-												  parse_mode=ParseMode.MARKDOWN)
+												  parse_mode=ParseMode.HTML)
 	except BadRequest as excp:
 		if excp.message == "Button_url_invalid":
 			msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
 																	  tl(update.effective_message, "\nCatatan: pesan saat ini memiliki url yang tidak "
 																	  "valid di salah satu tombolnya. Harap perbarui.")),
 													  reply_to_message_id=reply, 
-													  parse_mode=ParseMode.MARKDOWN)
+													  parse_mode=ParseMode.HTML)
 		elif excp.message == "Unsupported url protocol":
 			msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
 																	  tl(update.effective_message, "\nCatatan: pesan saat ini memiliki tombol yang "
 																	  "menggunakan protokol url yang tidak didukung "
 																	  "oleh telegram. Harap perbarui.")),
 													  reply_to_message_id=reply, 
-													  parse_mode=ParseMode.MARKDOWN)
+													  parse_mode=ParseMode.HTML)
 		elif excp.message == "Wrong url host":
 			msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
 																	  tl(update.effective_message, "\nCatatan: pesan saat ini memiliki beberapa url "
 																	  "yang buruk. Harap perbarui.")),
 													  reply_to_message_id=reply, 
-													  parse_mode=ParseMode.MARKDOWN)
+													  parse_mode=ParseMode.HTML)
 			LOGGER.warning(message)
 			LOGGER.warning(keyboard)
 			LOGGER.exception("Could not parse! got invalid url host errors")
@@ -153,18 +156,18 @@ def new_member(update, context):
 					else:
 						fullname = first_name
 					count = chat.get_members_count()
-					mention = mention_markdown(new_mem.id, first_name)
+					mention = mention_html(new_mem.id, first_name)
 					if new_mem.username:
-						username = "@" + escape_markdown(new_mem.username)
+						username = "@" + escape_html(new_mem.username)
 					else:
 						username = mention
 					rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 					if cust_welcome:
-						formatted_text = cust_welcome.format(first=escape_markdown(first_name),
-											  last=escape_markdown(new_mem.last_name or first_name),
-											  fullname=escape_markdown(fullname), username=username, mention=mention,
-											  count=count, chatname=escape_markdown(chat.title), id=new_mem.id, rules=rules)
+						formatted_text = cust_welcome.format(first=escape_html(first_name),
+											  last=escape_html(new_mem.last_name or first_name),
+											  fullname=escape_html(fullname), username=username, mention=mention,
+											  count=count, chatname=escape_html(chat.title), id=new_mem.id, rules=rules)
 					else:
 						formatted_text = ""
 					# Build keyboard
@@ -225,19 +228,19 @@ def new_member(update, context):
 						else:
 							fullname = first_name
 						count = chat.get_members_count()
-						mention = mention_markdown(new_mem.id, first_name)
+						mention = mention_html(new_mem.id, first_name)
 						if new_mem.username:
-							username = "@" + escape_markdown(new_mem.username)
+							username = "@" + escape_html(new_mem.username)
 						else:
 							username = mention
 						rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 						valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
 						if valid_format:
-							res = valid_format.format(first=escape_markdown(first_name),
-												  last=escape_markdown(new_mem.last_name or first_name),
-												  fullname=escape_markdown(fullname), username=username, mention=mention,
-												  count=count, chatname=escape_markdown(chat.title), id=new_mem.id, rules=rules)
+							res = valid_format.format(first=escape_html(first_name),
+												  last=escape_html(new_mem.last_name or first_name),
+												  fullname=escape_html(fullname), username=username, mention=mention,
+												  count=count, chatname=escape_html(chat.title), id=new_mem.id, rules=rules)
 						else:
 							res = ""
 						buttons = sql.get_welc_buttons(chat.id)
@@ -417,14 +420,14 @@ def check_bot_button(update, context):
 		else:
 			fullname = first_name
 		count = chat.get_members_count()
-		mention = mention_markdown(query.from_user.id, first_name)
+		mention = mention_html(query.from_user.id, first_name)
 		if query.from_user.username:
-			username = "@" + escape_markdown(query.from_user.username)
+			username = "@" + escape_html(query.from_user.username)
 		else:
 			username = mention
 		rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
-		formatted_text = cust_welcome.format(first=escape_markdown(first_name),
+		formatted_text = cust_welcome.format(first=escape_html(first_name),
 											 last=escape_markdown(query.from_user.last_name or first_name),
 											 fullname=escape_markdown(fullname), username=username, mention=mention,
 											 count=count, chatname=escape_markdown(chat.title), id=query.from_user.id, rules=rules)
@@ -449,18 +452,18 @@ def check_bot_button(update, context):
 		else:
 			fullname = first_name
 		count = chat.get_members_count()
-		mention = mention_markdown(query.from_user.id, first_name)
+		mention = mention_html(query.from_user.id, first_name)
 		if query.from_user.username:
-			username = "@" + escape_markdown(query.from_user.username)
+			username = "@" + escape_html(query.from_user.username)
 		else:
 			username = mention
 		rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 		valid_format = escape_invalid_curly_brackets(cust_welcome, VALID_WELCOME_FORMATTERS)
-		res = valid_format.format(first=escape_markdown(first_name),
-								  last=escape_markdown(query.from_user.last_name or first_name),
-								  fullname=escape_markdown(fullname), username=username, mention=mention,
-								  count=count, chatname=escape_markdown(chat.title), id=query.from_user.id, rules=rules)
+		res = valid_format.format(first=escape_html(first_name),
+								  last=escape_html(query.from_user.last_name or first_name),
+								  fullname=escape_html(fullname), username=username, mention=mention,
+								  count=count, chatname=escape_html(chat.title), id=query.from_user.id, rules=rules)
 		buttons = sql.get_welc_buttons(chat.id)
 		keyb = build_keyboard_parser(context.bot, chat.id, buttons)
 	else:
@@ -506,18 +509,18 @@ def left_member(update, context):
 				else:
 					fullname = first_name
 				count = chat.get_members_count()
-				mention = mention_markdown(left_mem.id, first_name)
+				mention = mention_html(left_mem.id, first_name)
 				if left_mem.username:
-					username = "@" + escape_markdown(left_mem.username)
+					username = "@" + escape_html(left_mem.username)
 				else:
 					username = mention
 				rules = "https://t.me/" + context.bot.username + "?start=" + str(chat.id)
 
 				if cust_goodbye:
-					formatted_text = cust_goodbye.format(first=escape_markdown(first_name),
-											  last=escape_markdown(left_mem.last_name or first_name),
-											  fullname=escape_markdown(fullname), username=username, mention=mention,
-											  count=count, chatname=escape_markdown(chat.title), id=left_mem.id, rules=rules)
+					formatted_text = cust_goodbye.format(first=escape_html(first_name),
+											  last=escape_html(left_mem.last_name or first_name),
+											  fullname=escape_html(fullname), username=username, mention=mention,
+											  count=count, chatname=escape_html(chat.title), id=left_mem.id, rules=rules)
 				else:
 					formatted_text = ""
 				# Build keyboard
@@ -538,18 +541,18 @@ def left_member(update, context):
 				else:
 					fullname = first_name
 				count = chat.get_members_count()
-				mention = mention_markdown(left_mem.id, first_name)
+				mention = mention_html(left_mem.id, first_name)
 				if left_mem.username:
-					username = "@" + escape_markdown(left_mem.username)
+					username = "@" + escape_html(left_mem.username)
 				else:
 					username = mention
 
 				valid_format = escape_invalid_curly_brackets(cust_goodbye, VALID_WELCOME_FORMATTERS)
 				if valid_format:
-					res = valid_format.format(first=escape_markdown(first_name),
-										  last=escape_markdown(left_mem.last_name or first_name),
-										  fullname=escape_markdown(fullname), username=username, mention=mention,
-										  count=count, chatname=escape_markdown(chat.title), id=left_mem.id)
+					res = valid_format.format(first=escape_html(first_name),
+										  last=escape_html(left_mem.last_name or first_name),
+										  fullname=escape_html(fullname), username=username, mention=mention,
+										  count=count, chatname=escape_html(chat.title), id=left_mem.id)
 				else:
 					res = ""
 				buttons = sql.get_gdbye_buttons(chat.id)
@@ -710,7 +713,7 @@ def welcome(update, context):
 		text += tl(update.effective_message, "Tombol welcomemute akan mengatakan: `{}`\n").format(cust_text)
 		text += tl(update.effective_message, "\n*Pesan selamat datang (tidak mengisi {{}}) adalah:*")
 		send_message(update.effective_message, text,
-			parse_mode=ParseMode.MARKDOWN)
+			parse_mode=ParseMode.HTML)
 
 		buttons = sql.get_welc_buttons(chat.id)
 		if welcome_type == sql.Types.BUTTON_TEXT or welcome_type == sql.Types.TEXT:
@@ -766,7 +769,7 @@ def goodbye(update, context):
 		send_message(update.effective_message, 
 			tl(update.effective_message, "Obrolan ini memiliki setelan selamat tinggal yang disetel ke: `{}`.\n*Pesan selamat tinggal "
 			"(tidak mengisi {{}}) adalah:*").format(pref),
-			parse_mode=ParseMode.MARKDOWN)
+			parse_mode=ParseMode.HTML)
 
 		buttons = sql.get_gdbye_buttons(chat.id)
 		if goodbye_type == sql.Types.TEXT or goodbye_type == sql.Types.BUTTON_TEXT:
