@@ -370,6 +370,7 @@ def check_bot_button(update, context):
 			return
 		# Unmute user
 		context.bot.restrict_chat_member(chat.id, user.id, permissions=ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True))
+		bot.deleteMessage(chat.id, message.message_id)
 		# sql.rm_from_userlist(chat.id, user.id)
 		sql.add_to_userlist(chat.id, user.id, True)
 	else:
