@@ -3,7 +3,7 @@ __lang__ = "🇺🇸 English"
 
 en = {
 # Global default
-	"Anda bisa lakukan command ini pada grup, bukan pada PM": "You can do this command in groups, not PM",
+	"Anda bisa lakukan command ini pada grup, bukan pada PM": "You can run this command in groups, not PM",
 	"Anda sepertinya tidak mengacu pada pengguna.": "You don't seem to be referring to a user.",
 
 # chat_status
@@ -19,29 +19,29 @@ en = {
 	"Bahasa telah di ubah ke {}!": "Language changed to {}!",
 	"Bahasa di *{}* saat ini adalah:\n{}.\n\nPilih bahasa:": "Current language in *{}* is:\n{}.\n\nSelect language:",
 	"obrolan saat ini": "current in this chat",
-	"language_help": """Not every group speaks indonesian; some groups would rather have Emilia respond in their own language.
+	"language_help": """Not every group understands indonesian; some groups would rather have Emilia respond in their own language.
 
-This is where translations come in; you can change most of Emilia's replies to be in the language of your choice!
+This is where translations comes in; you can change most of Emilia's replies to be in the language of your choice!
 
 Available languages are:
-- 🇮🇩 Indonesia
+- 🇮🇩 Indonesian
 - 🇺🇸 English
 
 Available commands are:
  - /setlang: set your prefered language.""",
 
 # __main__
-	"Ada yang bisa saya bantu? 😊": "Is there anything I can help? 😊",
+	"Ada yang bisa saya bantu? 😊": "Is there anything I can help with? 😊",
 	"start_text": """
 Hi {}, my name is {}! I am a group manager managed by [my master](tg://user?id={}).
-To get this bot status info and update, you can join our channel [Ayra's Bot News](https://t.me/AyraBotNews)
-
-Any issue or need more help?
-Join our group [Emilia Official Support](https://t.me/EmiliaOfficial)!
+To get this bot status info and updates, you can join our channel [Ayra's Bot News](https://t.me/AyraBotNews)
 
 You can find the list of available commands with /help.
 
-If you're enjoying using me, and/or would like to help me survive in the wild, hit /donate to help fund/upgrade my VPS!
+Having issues? need help?
+Reach out to us at [Emilia Official Support](https://t.me/EmiliaOfficial)!
+
+If you're enjoying my assistance and would like to help me survive the wild hit /donate to help fund/upgrade my VPS!
 """,
 	"help_text": """
 Hey there! My name is *Emilia*.
@@ -49,25 +49,24 @@ I'm a modular group management bot with a few fun extras! Have a look at the fol
 the things I can help you with.
 
 *Main* commands available:
- - /start: start the bot
- - /help: PM's you this message.
- - /help <module name>: PM's you info about that module.
- - /donate: information about how to donate!
+ - /start: Start the bot
+ - /help: PM's you this message
+ - /help <module name>: PM's you info about that module
+ - /donate: Information about how to donate!
  - /settings:
-   - in PM: will send you your settings for all supported modules.
-   - in a group: will redirect you to pm, with all that chat's settings.
+   - in PM: will send you your settings for all supported modules
+   - in a group: will redirect you to pm, with all that chat's settings
 
-
-All commands can either be used with / or !.
+All commands can either be used with `/` or `!`
 
 And the following:
 """,
-	"donate_text": """Hello, glad to hear you want to donate!
-Need a lot of work for [my creator](tg://user?id=388576209) to take me to my place now, and \
-every donation helps and motivates him to make me better.
+	"donate_text": """Hello, Glad to hear you want to donate!
+It takes a lot of effort for [my creator](tg://user?id=388576209) to take me to where I am now, and \
+every donation helps by motivating him to make me better.
 
-All donated money will be given to a better VPS to host me, and or some food. \
-He is just an ordinary person, so it will really help him!
+All funds will be used improve my hosting server, and or some food. \
+He is, afterall, just an ordinary person, so it will really help him!
 
 If you really are interested in donating, please visit ayrahikari.github.io/donations.html, Thank you 😁""",
 	"Kembali": "Back",
@@ -104,7 +103,7 @@ If you really are interested in donating, please visit ayrahikari.github.io/dona
 	"Saya sudah pin pesan dalam grup {}": "I have pinned messages in the group {}",
 	"Saya sudah unpin pesan dalam grup {}": "I have unpin the message in the group {}",
 	"Saya tidak memiliki akses ke tautan undangan, coba ubah izin saya!": "I don't have access to the invite link, try changing my permissions!",
-	"Saya hanya dapat memberi Anda tautan undangan untuk supergroup dan saluran, maaf!": "I can only give you invite links for supergroups and channels, sorry!",
+	"Saya hanya dapat memberi Anda tautan undangan untuk supergroup dan saluran, maaf!": "I can only give you invite links for supergroups and channels, Sorry!",
 	"Admin di *{}*:": "Admin in *{}*:",
 	"chat ini": "current chat",
 	"☠ Akun Terhapus": "☠ Deleted Account",
@@ -120,13 +119,13 @@ If you really are interested in donating, please visit ayrahikari.github.io/dona
 	"admin_help": """
  - /adminlist | /admins: list of admins in the chat
 *Admin only:*
- - /pin: silently pins the message replied to - add 'loud' or 'notify' to give notifs to users.
- - /unpin: unpins the currently pinned message
- - /permapin <teks>: Pin a custom messages via bots. This message can contain markdown, and can be used in replies to the media include additional buttons and text.
+ - /pin: Silently pins the message replied to - add 'loud' or 'notify' to give notifs to users.
+ - /unpin: Unpins the currently pinned message
+ - /permapin <teks>: Pins a custom messages via bot. This message can contain markdown, and can be used in replies to the media include additional buttons and text.
  - /permanentpin: Set a permanent pin for supergroup chat, when an admin or telegram channel change pinned message, bot will change pinned message immediatelly
- - /invitelink: gets invitelink
- - /promote: promotes the user replied to
- - /demote: demotes the user replied to
+ - /invitelink: Generates invitelink (revokes existing link if already generated)
+ - /promote: Promotes the user replied to an admin
+ - /demote: Demotes the user from admin status
 """,
 
 # AFK
@@ -135,8 +134,8 @@ If you really are interested in donating, please visit ayrahikari.github.io/dona
 	"{} sedang AFK!": "{} is AFK!",
 	"{} sedang AFK!\nKarena : {}": "{} is AFK! says its because of: {}",
 	"afk_help": """
- - /afk <reason>: mark yourself as AFK.
- - brb <reason>: same as the afk command - but not a command.
+ - /afk <reason>: Mark yourself as AFK
+ - brb <reason>: Same as the afk command - but not a command
 
 When marked as AFK, any mentions will be replied to with a message to say you're not available!
 """,
@@ -148,7 +147,7 @@ When marked as AFK, any mentions will be replied to with a message to say you're
 	"Sekarang kamu diam selama {}!": "Now you shutup for {}!",
 	"Saya tidak suka orang yang mengirim pesan beruntun. Tapi kamu hanya membuat saya kecewa. {}": "I like to leave the flooding to natural disasters. But you, you were just a disappointment. {}",
 	"Saya tidak bisa menendang orang di sini, beri saya izin terlebih dahulu! Sampai saat itu, saya akan menonaktifkan antiflood.": "I can't kick people here, give me permissions first! Until then, I'll disable antiflood.",
-	"Tidak memiliki izin kick, jadi secara otomatis menonaktifkan antiflood.": "Don't have kick permissions, so automatically disabled antiflood.",
+	"Tidak memiliki izin kick, jadi secara otomatis menonaktifkan antiflood.": "Don't have kick permissions, Disabled antiflood.",
 	"Antiflood telah dinonaktifkan di *{}*.": "Antiflood has been disabled in *{}*.",
 	"Antiflood telah dinonaktifkan.": "Antiflood has been disabled.",
 	"Antiflood harus baik 0 (dinonaktifkan), atau nomor lebih besar dari 3!": "Antiflood has to be either 0 (disabled), or a number bigger than 3!",
@@ -167,7 +166,7 @@ When marked as AFK, any mentions will be replied to with a message to say you're
 
 Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""": """It looks like you are trying to set a temporary value for antiflood, but has not determined the time; use `/setfloodmode tban <timevalue>`.
 
-Examples of time values: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 week.""",
+*Examples of time values:* `4m` = 4 minutes, `3h` = 3 hours, `6d` = 6 days, `5w` = 5 week.""",
 	"blokir sementara selama {}": "temp banned for {}",
 	"bisukan sementara selama {}": "temp mute for {}",
 	"Saya hanya mengerti ban/kick/mute/tban/tmute!": "I only understand ban/kick/mute/tban/tmute!",
@@ -181,10 +180,10 @@ Examples of time values: 4m = 4 minutes, 3h = 3 hours, 6d = 6 days, 5w = 5 week.
  - /flood: Get the current flood control setting
 
 *Admin only:*
- - /setflood <int/'no'/'off'>: enables or disables flood control
- - /setfloodmode <ban/kick/mute/tban/tmute> <value>: select the action perform when warnings have been exceeded. ban/kick/mute/tmute/tban
+ - /setflood <int/'no'/'off'>: Enables or disables flood control
+ - /setfloodmode <ban/kick/mute/tban/tmute> <value>: Select the action perform when warnings have been exceeded. ban/kick/mute/tmute/tban
 
- Note:
+ *Note:*
  - Value must be filled for tban and tmute, Can be:
 	`4m` = 4 minutes
 	`3h` = 4 hours
