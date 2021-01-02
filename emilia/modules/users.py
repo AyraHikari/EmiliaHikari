@@ -9,7 +9,7 @@ from telegram.ext import MessageHandler, Filters, CommandHandler
 from telegram.ext.dispatcher import run_async
 
 import emilia.modules.sql.users_sql as sql
-from emilia import dispatcher, OWNER_ID, LOGGER
+from emilia import dispatcher, OWNER_ID, LOGGER, SUDO_USERS
 from emilia.modules.helper_funcs.filters import CustomFilters
 
 import emilia.modules.sql.feds_sql as fedsql
@@ -139,7 +139,7 @@ __mod_name__ = "Users"
 
 BROADCAST_HANDLER = CommandHandler("broadcast", broadcast, filters=Filters.user(OWNER_ID))
 USER_HANDLER = MessageHandler(Filters.all & Filters.group, log_user)
-CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=CustomFilters.sudo_filter)
+CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=Filters.user(SUDO_USERS))
 
 dispatcher.add_handler(USER_HANDLER, USERS_GROUP)
 dispatcher.add_handler(BROADCAST_HANDLER)
