@@ -14,7 +14,6 @@ from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import is_user_admin, bot_admin, user_admin_no_reply, user_admin, \
     can_restrict, is_user_ban_protected
 from emilia.modules.helper_funcs.extraction import extract_text, extract_user_and_text, extract_user
-from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.helper_funcs.misc import split_message
 from emilia.modules.helper_funcs.string_handling import split_quotes
 from emilia.modules.log_channel import loggable
@@ -865,7 +864,7 @@ MYWARNS_HANDLER = DisableAbleCommandHandler("warns", warns, pass_args=True)#, fi
 ADD_WARN_HANDLER = CommandHandler("addwarn", add_warn_filter)#, filters=Filters.group)
 RM_WARN_HANDLER = CommandHandler(["nowarn", "stopwarn"], remove_warn_filter)#, filters=Filters.group)
 LIST_WARN_HANDLER = DisableAbleCommandHandler(["warnlist", "warnfilters"], list_warn_filters)#, filters=Filters.group, admin_ok=True)
-WARN_FILTER_HANDLER = MessageHandler(CustomFilters.has_text & Filters.group, reply_filter)
+WARN_FILTER_HANDLER = MessageHandler(Filters.text & Filters.group, reply_filter)
 WARN_LIMIT_HANDLER = CommandHandler("warnlimit", set_warn_limit, pass_args=True)#, filters=Filters.group)
 WARN_STRENGTH_HANDLER = CommandHandler("strongwarn", set_warn_strength, pass_args=True)#, filters=Filters.group)
 WARN_MODE_HANDLER = CommandHandler("warnmode", set_warn_mode, pass_args=True)
