@@ -10,7 +10,6 @@ from telegram.ext.dispatcher import run_async
 
 import emilia.modules.sql.users_sql as sql
 from emilia import dispatcher, OWNER_ID, LOGGER, SUDO_USERS
-from emilia.modules.helper_funcs.filters import CustomFilters
 
 import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules import languages
