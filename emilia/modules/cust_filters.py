@@ -12,7 +12,6 @@ from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.extraction import extract_text
-from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.helper_funcs.misc import build_keyboard_parser
 from emilia.modules.helper_funcs.msg_types import get_filter_type
 from emilia.modules.helper_funcs.string_handling import split_quotes, button_markdown_parser, escape_invalid_curly_brackets
@@ -359,7 +358,7 @@ __mod_name__ = "Filters"
 FILTER_HANDLER = CommandHandler("filter", filters)
 STOP_HANDLER = CommandHandler("stop", stop_filter)
 LIST_HANDLER = DisableAbleCommandHandler("filters", list_handlers, admin_ok=True)
-CUST_FILTER_HANDLER = MessageHandler(CustomFilters.has_text & ~Filters.update.edited_message, reply_filter)
+CUST_FILTER_HANDLER = MessageHandler(Filters.text & ~Filters.update.edited_message, reply_filter)
 
 dispatcher.add_handler(FILTER_HANDLER)
 dispatcher.add_handler(STOP_HANDLER)
