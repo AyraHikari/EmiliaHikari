@@ -11,7 +11,6 @@ import emilia.modules.sql.global_bans_sql as sql
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN, spamcheck
 from emilia.modules.helper_funcs.chat_status import user_admin, is_user_admin
 from emilia.modules.helper_funcs.extraction import extract_user, extract_user_and_text
-from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.helper_funcs.misc import send_to_list
 from emilia.modules.sql.users_sql import get_all_chats
 
@@ -332,11 +331,11 @@ __help__ = "globalbans_help"
 __mod_name__ = "Global Bans"
 
 GBAN_HANDLER = CommandHandler("gban", gban, pass_args=True,
-                              filters=CustomFilters.sudo_filter | CustomFilters.support_filter)
+                              filters=Filters.user(SUDO_USERS + SUPPORT_USERS))
 UNGBAN_HANDLER = CommandHandler("ungban", ungban, pass_args=True,
-                                filters=CustomFilters.sudo_filter | CustomFilters.support_filter)
+                                filters=Filters.user(SUDO_USERS + SUPPORT_USERS))
 GBAN_LIST = CommandHandler("gbanlist", gbanlist,
-                           filters=CustomFilters.sudo_filter | CustomFilters.support_filter)
+                           filters=Filters.user(SUDO_USERS + SUPPORT_USERS))
 
 GBAN_STATUS = CommandHandler("gbanstat", gbanstat, pass_args=True, filters=Filters.group)
 
