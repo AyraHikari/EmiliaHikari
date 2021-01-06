@@ -22,7 +22,6 @@ from emilia.modules.helper_funcs.chat_status import (
     bot_can_delete,
     is_bot_admin,
 )
-from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import users_sql
 from emilia.modules.warns import warn
