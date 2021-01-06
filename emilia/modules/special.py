@@ -29,7 +29,6 @@ from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_US
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
-from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.sql import languages_sql as langsql
 
 from emilia.modules.languages import tl
