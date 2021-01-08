@@ -2,7 +2,7 @@ future
 emoji
 requests
 sqlalchemy
-python-telegram-bot
+python-telegram-bot>=13.0
 psycopg2-binary
 feedparser
 pyowm==2.10.0
