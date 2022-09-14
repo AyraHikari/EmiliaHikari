@@ -3,23 +3,23 @@ A modular telegram Python bot running on python3 with an sqlalchemy database.
 
 Based on [marie bot](https://github.com/PaulSonOfLars/tgbot)
 
-### [Read indonesia README](https://github.com/AyraHikari/EmiliaHikari/blob/master/README.id.md)
+### [Read Indonesian Version](https://github.com/AyraHikari/EmiliaHikari/blob/master/README.id.md)
 
 **If you want to translate this bot**, [please go here](https://github.com/AyraHikari/EmiliaHikari/blob/master/TRANSLATION.md)
 
-Can be found as [Emilia](https://t.me/EmiliaHikariBot).
+Can be found on Telegram as [Emilia](https://t.me/EmiliaHikariBot).
 
 
-For questions regarding creating your own bot, please head to [support group](https://t.me/EmiliaOfficial) where you'll find a
+For questions regarding creating your own bot, please head to [Support group](https://t.me/EmiliaOfficial) where you'll find a
 group of volunteers to help. We'll also help when a database schema changes, and some table column needs to be
 modified/added (this info can also be found in the commit messages)
 
-Join the [news channel](https://t.me/AyraBotNews) if you just want to stay in the loop about new features or
+Join the [News channel](https://t.me/AyraBotNews) if you just want to stay in the loop about new features or
 announcements.
 
-Or [ask me in telegram](https://t.me/AyraHikari)! (Save all support questions in the support chat, where more people can help you.)
+Or [ask me on telegram](https://t.me/AyraHikari)! (Save all support questions in the support chat, where more people can help you.)
 
-Note to maintainers that all schema changes will be found in the commit messages, and its their responsibility to read any new commits.
+Note to maintainers that all schema changes will be found in the commit messages, and it's their responsibility to read any new commits.
 
 
 ## Starting the bot.
@@ -38,7 +38,7 @@ This is because markdown parsing is done by iterating through a dict, which are 
 There are two possible ways of configuring your bot: a config.py file, or ENV variables.
 
 The prefered version is to use a `config.py` file, as it makes it easier to see all your settings grouped together.
-This file should be placed in your `tg_bot` folder, alongside the `__main__.py` file . 
+This file should be placed in your `tg_bot` folder, alongside the `__main__.py` file. 
 This is where your bot token will be loaded from, as well as your database URI (if you're using a database), and most of 
 your other settings.
 
@@ -88,10 +88,10 @@ The following env variables are supported:
  - `DEL_CMDS`: Whether to delete commands from users which don't have rights to use that command
  - `STRICT_GBAN`: Enforce gbans across new groups as well as old groups. When a gbanned user talks, he will be banned.
  - `WORKERS`: Number of threads to use. 8 is the recommended (and default) amount, but your experience may vary.
- __Note__ that going crazy with more threads wont necessarily speed up your bot, given the large amount of sql data 
+ __Note__ that going crazy with more threads won't necessarily speed up your bot, given the large amount of sql data 
  accesses, and the way python asynchronous calls work.
  - `BAN_STICKER`: Which sticker to use when banning people.
- - `ALLOW_EXCL`: Whether to allow using exclamation marks ! for commands as well as /.
+ - `ALLOW_EXCL`: Whether to allow using exclamation marks ! For commands as well as /.
 
 ### Python dependencies
 
@@ -106,9 +106,9 @@ This will install all necessary python packages.
 If you wish to use a database-dependent module (eg: locks, notes, userinfo, users, filters, welcomes),
 you'll need to have a database installed on your system. I use postgres, so I recommend using it for optimal compatibility.
 
-In the case of postgres, this is how you would set up a the database on a debian/ubuntu system. Other distributions may vary.
+In the case of postgres, this is how you would set up the database on a debian/ubuntu system. Other distributions may vary.
 
-- install postgresql:
+- Install postgresql:
 
 `sudo apt-get update && sudo apt-get install postgresql`
 
@@ -120,15 +120,15 @@ In the case of postgres, this is how you would set up a the database on a debian
 
 `createuser -P -s -e YOUR_USER`
 
-This will be followed by you needing to input your password.
+This will be followed by inserting your password.
 
-- create a new database table:
+- Create a new database table:
 
 `createdb -O YOUR_USER YOUR_DB_NAME`
 
 Change YOUR_USER and YOUR_DB_NAME appropriately.
 
-- finally:
+- Finally, followed by:
 
 `psql YOUR_DB_NAME -h YOUR_HOST YOUR_USER`
 
@@ -139,7 +139,7 @@ You should now be able to build your database URI. This will be:
 
 `sqldbtype://username:pw@hostname:port/db_name`
 
-Replace sqldbtype with whichever db youre using (eg postgres, mysql, sqllite, etc)
+Replace sqldbtype with whichever db you are using (eg postgres, mysql, sqllite, etc)
 repeat for your username, password, hostname (localhost?), port (5432?), and db name.
 
 ## Modules
@@ -170,8 +170,7 @@ You can then add commands using the usual
 
 Assigning the `__help__` variable to a string describing this modules' available
 commands will allow the bot to load it and add the documentation for
-your module to the `/help` command. Setting the `__mod_name__` variable will also allow you to use a nicer, user
-friendly name for a module.
+your module to the `/help` command. Setting the `__mod_name__` variable will also allow you to use a nicer, user-friendly name for a module.
 
 The `__migrate__()` function is used for migrating chats - when a chat is upgraded to a supergroup, the ID changes, so 
 it is necessary to migrate it in the db.
