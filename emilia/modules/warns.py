@@ -105,10 +105,10 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
         if conn:
             send_message_raw(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
         else:
-            send_message_raw(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML)
-        #send_message(update.effective_message, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            message.reply_text(reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
+        
     except BadRequest as excp:
-        if excp.message == "Reply message not found":
+        if excp.message == "Replied message not found":
             # Do not reply
             if conn:
                 message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
@@ -116,8 +116,8 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
                 try:
                     message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
                 except BadRequest:
-                    message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
-            #send_message(update.effective_message, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
+                    message.bot.sendMessage(message.chat_id, text=reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
+            
         else:
             raise
     return log_reason
