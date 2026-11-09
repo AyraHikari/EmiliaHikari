@@ -976,7 +976,7 @@ def export_data(update, context):
 
 
 	all_backups = json.dumps(backup, indent=4, cls=SetEncoder)
-	f = open("{}-Emilia.backup".format(chat_id), "w")
+	f = open("{}-Emilia.backup".format(chat_id), "w", encoding="utf-8")
 	f.write(str(all_backups))
 	f.close()
 	context.bot.sendChatAction(current_chat_id, "upload_document")
